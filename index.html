@@ -1,0 +1,1233 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>GhettoPay — Le Portefeuille Gabonais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --black:#050a06;
+  --black2:#0b1410;
+  --black3:#101c14;
+  --forest:#0d3d1f;
+  --green:#1a7a3c;
+  --green2:#22c55e;
+  --green3:#4ade80;
+  --gold:#d4a017;
+  --gold2:#f0c040;
+  --gold3:#fde68a;
+  --white:#f8faf8;
+  --white2:#e8f0e8;
+  --gray:#6b7c6b;
+  --gray2:#3a4a3a;
+  --font:'Syne',sans-serif;
+  --display:'Playfair Display',serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--black);color:var(--white);overflow-x:hidden;cursor:none}
+
+/* CURSOR */
+#cur{position:fixed;width:6px;height:6px;background:var(--gold2);border-radius:50%;pointer-events:none;z-index:9999;top:0;left:0;transition:width .2s,height .2s,background .2s}
+#curR{position:fixed;width:28px;height:28px;border:1px solid rgba(212,160,23,.5);border-radius:50%;pointer-events:none;z-index:9998;top:0;left:0;transition:transform .15s ease}
+body:has(a:hover) #curR,body:has(button:hover) #curR{transform:scale(2) !important;border-color:var(--gold2)}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:300;
+  height:64px;padding:0 5%;
+  display:flex;align-items:center;justify-content:space-between;
+  transition:all .4s;
+}
+nav.scrolled{
+  background:rgba(5,10,6,.94);
+  backdrop-filter:blur(24px);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.logo{display:flex;align-items:center;gap:.65rem;text-decoration:none}
+.logo-mark{
+  width:34px;height:34px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  border-radius:9px;display:flex;align-items:center;justify-content:center;
+}
+.logo-mark svg{width:18px;height:18px;stroke:var(--black);stroke-width:2.5;fill:none}
+.logo-text{font-size:1rem;font-weight:800;color:var(--white);letter-spacing:.08em;text-transform:uppercase}
+.nav-links{display:flex;gap:2.5rem}
+.nav-links a{font-size:.78rem;font-weight:600;color:rgba(255,255,255,.4);text-decoration:none;transition:.2s;letter-spacing:.04em;text-transform:uppercase}
+.nav-links a:hover{color:var(--gold2)}
+.nav-cta{
+  display:flex;align-items:center;gap:.5rem;
+  padding:.5rem 1.3rem;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  border-radius:8px;font-size:.76rem;font-weight:800;
+  color:var(--black);text-decoration:none;letter-spacing:.04em;
+  transition:all .25s;box-shadow:0 4px 16px rgba(212,160,23,.3);
+}
+.nav-cta svg{width:13px;height:13px;stroke:var(--black);stroke-width:2.5;fill:none}
+.nav-cta:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(212,160,23,.5)}
+
+/* ======= HERO ======= */
+.hero{
+  min-height:100vh;
+  background:var(--black);
+  display:flex;align-items:center;
+  padding:7rem 5% 6rem;
+  position:relative;overflow:hidden;
+}
+
+/* Grille architecturale */
+.hero-grid-bg{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse at 60% 40%,black 30%,transparent 80%);
+}
+
+/* Cercle soleil */
+.hero-orb{
+  position:absolute;
+  width:700px;height:700px;
+  right:-150px;top:-100px;
+  border-radius:50%;
+  background:radial-gradient(circle at center,rgba(212,160,23,.14) 0%,rgba(212,160,23,.04) 40%,transparent 70%);
+  animation:orbpulse 8s ease-in-out infinite;
+}
+.hero-orb::before{
+  content:'';position:absolute;inset:100px;border-radius:50%;
+  border:1px solid rgba(212,160,23,.08);
+  animation:spin 30s linear infinite;
+}
+.hero-orb::after{
+  content:'';position:absolute;inset:180px;border-radius:50%;
+  border:1px solid rgba(34,197,94,.06);
+  animation:spin 20s linear infinite reverse;
+}
+@keyframes orbpulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.05)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Lignes diagonales forêt */
+.hero-diag{
+  position:absolute;inset:0;
+  background-image:
+    repeating-linear-gradient(
+      -55deg,
+      transparent 0,transparent 80px,
+      rgba(34,197,94,.015) 80px,rgba(34,197,94,.015) 81px
+    );
+}
+
+.hero-inner{
+  max-width:1280px;margin:0 auto;width:100%;
+  display:grid;grid-template-columns:1.1fr .9fr;gap:4rem;align-items:center;
+  position:relative;z-index:2;
+}
+
+.hero-label{
+  display:inline-flex;align-items:center;gap:.7rem;
+  border:1px solid rgba(212,160,23,.2);border-radius:4px;
+  padding:.3rem .9rem;margin-bottom:2rem;
+  font-family:var(--mono);font-size:.62rem;color:var(--gold2);
+  letter-spacing:.16em;text-transform:uppercase;
+  background:rgba(212,160,23,.06);
+  animation:fadeUp .5s ease both;
+}
+.label-dot{width:5px;height:5px;background:var(--gold2);border-radius:50%;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+.hero-title{
+  font-family:var(--display);
+  font-size:clamp(3rem,6vw,5.5rem);
+  font-weight:900;line-height:.92;letter-spacing:-.04em;
+  color:var(--white);margin-bottom:1.6rem;
+  animation:fadeUp .6s .08s ease both;
+}
+.hero-title em{font-style:italic;color:var(--gold2);display:block}
+.hero-title .outline{
+  -webkit-text-stroke:1px rgba(255,255,255,.3);
+  color:transparent;
+}
+
+.hero-desc{
+  font-size:.95rem;color:rgba(255,255,255,.5);
+  line-height:1.9;max-width:460px;margin-bottom:2.2rem;
+  font-weight:400;
+  animation:fadeUp .6s .16s ease both;
+}
+.hero-desc b{color:var(--white);font-weight:700}
+
+.hero-btns{
+  display:flex;gap:.8rem;margin-bottom:3rem;
+  animation:fadeUp .6s .24s ease both;
+}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:.55rem;
+  padding:.85rem 2rem;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  border-radius:10px;font-size:.85rem;font-weight:800;
+  color:var(--black);text-decoration:none;
+  box-shadow:0 4px 24px rgba(212,160,23,.4);
+  transition:all .25s;letter-spacing:.03em;
+}
+.btn-primary svg{width:14px;height:14px;stroke:var(--black);stroke-width:2.5;fill:none}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 10px 36px rgba(212,160,23,.55)}
+.btn-sec{
+  display:inline-flex;align-items:center;gap:.55rem;
+  padding:.85rem 1.8rem;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:10px;font-size:.85rem;font-weight:700;
+  color:var(--white);text-decoration:none;transition:all .25s;
+}
+.btn-sec svg{width:14px;height:14px;stroke:var(--white);stroke-width:2;fill:none}
+.btn-sec:hover{background:rgba(255,255,255,.1);border-color:rgba(212,160,23,.3)}
+
+/* METRICS STRIP */
+.metrics{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden;
+  animation:fadeUp .6s .32s ease both;
+}
+.m{
+  padding:1.1rem .8rem;text-align:center;
+  border-right:1px solid rgba(255,255,255,.07);
+  transition:.2s;
+}
+.m:last-child{border-right:none}
+.m:hover{background:rgba(255,255,255,.03)}
+.m-val{font-family:var(--display);font-size:1.5rem;font-weight:900;color:var(--gold2);line-height:1}
+.m-lbl{font-family:var(--mono);font-size:.58rem;color:rgba(255,255,255,.3);margin-top:.3rem;letter-spacing:.06em;text-transform:uppercase}
+
+/* ======= PHONE ======= */
+.hero-visual{display:flex;justify-content:center;position:relative;animation:fadeUp .7s .1s ease both}
+
+.phone{
+  width:285px;
+  background:#080c08;
+  border-radius:46px;padding:10px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.07),
+    0 40px 100px rgba(0,0,0,.9),
+    0 0 60px rgba(34,197,94,.04);
+  position:relative;z-index:2;
+}
+.phone-screen{
+  background:#f0f4f0;border-radius:37px;
+  height:600px;overflow:hidden;
+  display:flex;flex-direction:column;position:relative;
+}
+.notch{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:80px;height:22px;background:#080c08;
+  border-radius:0 0 14px 14px;z-index:10;
+}
+
+/* APP HEADER */
+.app-hdr{
+  background:linear-gradient(160deg,var(--black) 0%,var(--forest) 100%);
+  padding:28px 16px 18px;flex-shrink:0;
+  position:relative;overflow:hidden;
+}
+.app-hdr::before{
+  content:'';position:absolute;
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(212,160,23,.12),transparent 70%);
+  top:-60px;right:-40px;
+}
+.app-hdr-row{display:flex;align-items:center;justify-content:space-between}
+.app-greet{font-size:.52rem;font-weight:600;color:rgba(255,255,255,.4);font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em}
+.app-user{font-size:.82rem;font-weight:800;color:var(--white);margin-top:.1rem}
+.hdr-icon{
+  width:28px;height:28px;border-radius:8px;
+  background:rgba(255,255,255,.1);
+  display:flex;align-items:center;justify-content:center;
+}
+.hdr-icon svg{width:13px;height:13px;stroke:rgba(255,255,255,.7);stroke-width:2;fill:none}
+
+/* BALANCE */
+.balance{
+  margin:12px 12px 0;
+  background:linear-gradient(135deg,var(--gold) 0%,var(--gold2) 50%,#fde68a 100%);
+  border-radius:18px;padding:14px;
+  position:relative;overflow:hidden;
+  box-shadow:0 6px 24px rgba(212,160,23,.3);
+}
+.balance::after{
+  content:'';position:absolute;
+  width:90px;height:90px;border-radius:50%;
+  background:rgba(255,255,255,.15);
+  bottom:-30px;right:-20px;
+}
+.bal-lbl{font-size:.5rem;font-weight:700;color:rgba(0,0,0,.5);letter-spacing:.1em;text-transform:uppercase}
+.bal-amount{font-family:var(--display);font-size:1.5rem;font-weight:900;color:var(--black);line-height:1;margin:.15rem 0}
+.bal-sub{font-size:.5rem;color:rgba(0,0,0,.45);font-family:var(--mono)}
+
+/* QUICK ACTIONS */
+.q-actions{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:6px;
+  padding:10px 12px 0;
+}
+.qa{
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  background:white;border-radius:12px;padding:10px 4px 8px;
+  box-shadow:0 1px 4px rgba(0,0,0,.06);cursor:pointer;
+  transition:.2s;border:1px solid rgba(0,0,0,.04);
+}
+.qa:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.qa-ic{
+  width:28px;height:28px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+}
+.qa-ic svg{width:14px;height:14px;stroke-width:2;fill:none}
+.qa-lbl{font-size:.44rem;font-weight:800;color:#1a2a1a;text-align:center;line-height:1.2;font-family:var(--font)}
+
+/* COFFRE MINI */
+.coffre-mini{
+  margin:8px 12px 0;
+  background:linear-gradient(135deg,var(--black),var(--forest));
+  border-radius:12px;padding:10px 12px;
+  display:flex;align-items:center;gap:8px;
+  border:1px solid rgba(212,160,23,.15);
+}
+.coffre-mini-ic{
+  width:26px;height:26px;border-radius:7px;
+  background:rgba(212,160,23,.15);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.coffre-mini-ic svg{width:13px;height:13px;stroke:var(--gold2);stroke-width:2;fill:none}
+.cm-title{font-size:.52rem;font-weight:800;color:var(--gold2)}
+.cm-sub{font-size:.46rem;color:rgba(255,255,255,.4)}
+.cm-val{margin-left:auto;font-size:.6rem;font-weight:900;color:var(--gold2);font-family:var(--display)}
+
+/* TX LIST */
+.tx-list{padding:0 12px 8px;flex:1;overflow:hidden}
+.tx-hdr{font-size:.48rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.08em;margin:8px 0 6px}
+.tx{display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,.05)}
+.tx:last-child{border-bottom:none}
+.tx-av{
+  width:24px;height:24px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.tx-av svg{width:11px;height:11px;stroke:white;stroke-width:2;fill:none}
+.tx-name{font-size:.52rem;font-weight:700;color:#1a2a1a}
+.tx-cat{font-size:.46rem;color:#888}
+.tx-val{margin-left:auto;font-size:.55rem;font-weight:800}
+.tx-val.c{color:#16a34a}
+.tx-val.d{color:#dc2626}
+
+/* FLOAT BADGES */
+.fb{
+  position:absolute;
+  background:rgba(8,12,8,.92);
+  border:1px solid rgba(212,160,23,.15);
+  border-radius:14px;padding:.55rem .85rem;
+  box-shadow:0 8px 32px rgba(0,0,0,.6);
+  backdrop-filter:blur(20px);
+  display:flex;align-items:center;gap:.6rem;
+  z-index:5;
+}
+.fb-ic{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.fb-ic svg{width:12px;height:12px;stroke-width:2;fill:none}
+.fb-title{font-size:.62rem;font-weight:800;color:var(--gold2);display:block;line-height:1}
+.fb-sub{font-size:.52rem;color:rgba(255,255,255,.4)}
+.fb.b1{top:10px;left:-72px;animation:flt1 5s ease-in-out infinite}
+.fb.b2{bottom:90px;right:-65px;animation:flt2 4.5s ease-in-out infinite}
+.fb.b3{top:48%;left:-68px;animation:flt1 6s ease-in-out infinite .4s}
+@keyframes flt1{0%,100%{transform:translateY(0) rotate(-1.5deg)}50%{transform:translateY(-9px) rotate(.5deg)}}
+@keyframes flt2{0%,100%{transform:translateY(0) rotate(1.5deg)}50%{transform:translateY(9px) rotate(-.5deg)}}
+
+/* ======= DIVIDER ======= */
+.divider{height:1px;background:linear-gradient(90deg,transparent,rgba(212,160,23,.3),rgba(34,197,94,.2),rgba(212,160,23,.3),transparent)}
+
+/* ======= SECTIONS ======= */
+section{padding:7rem 5%}
+.inner{max-width:1280px;margin:0 auto}
+.eyebrow{
+  font-family:var(--mono);font-size:.65rem;font-weight:500;
+  color:var(--gold);letter-spacing:.18em;text-transform:uppercase;
+  display:flex;align-items:center;gap:.6rem;margin-bottom:.8rem;
+}
+.eyebrow::before{content:'';width:20px;height:1px;background:var(--gold);display:block}
+.sec-title{
+  font-family:var(--display);
+  font-size:clamp(2rem,3.5vw,3rem);
+  font-weight:900;letter-spacing:-.04em;line-height:1.05;
+  color:var(--white);margin-bottom:1rem;
+}
+.sec-title em{font-style:italic;color:var(--gold2)}
+.sec-title .gr{color:var(--green2)}
+.sec-sub{font-size:.9rem;color:rgba(255,255,255,.4);max-width:460px;line-height:1.9;font-weight:400}
+
+/* ======= FEATURES ======= */
+.features-section{background:var(--black2)}
+.feat-intro{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:end;margin-bottom:4rem}
+
+.feats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.06);border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,.06)}
+.feat{
+  background:var(--black2);padding:2rem 1.8rem;
+  transition:all .3s;position:relative;overflow:hidden;cursor:default;
+}
+.feat::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--gold),var(--green2));
+  transform:scaleX(0);transform-origin:left;transition:.35s;
+}
+.feat:hover{background:var(--black3)}
+.feat:hover::before{transform:scaleX(1)}
+.feat-icon{
+  width:44px;height:44px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:1.3rem;
+}
+.feat-icon svg{width:20px;height:20px;stroke-width:1.8;fill:none}
+.feat h3{font-size:.88rem;font-weight:800;color:var(--white);margin-bottom:.5rem;letter-spacing:.01em}
+.feat p{font-size:.76rem;color:rgba(255,255,255,.38);line-height:1.8}
+.feat-badge{
+  display:inline-block;margin-top:.9rem;
+  font-family:var(--mono);font-size:.55rem;
+  padding:.2rem .6rem;border-radius:4px;font-weight:600;letter-spacing:.06em;
+}
+
+/* ======= COFFRE ======= */
+.coffre-section{background:var(--black)}
+.coffre-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center}
+.coffre-card{
+  background:var(--black2);
+  border:1px solid rgba(255,255,255,.07);border-radius:24px;padding:2.5rem;
+  position:relative;overflow:hidden;
+}
+.coffre-card::before{
+  content:'';position:absolute;
+  width:300px;height:300px;border-radius:50%;
+  background:radial-gradient(circle,rgba(212,160,23,.07),transparent 70%);
+  top:-80px;right:-80px;
+}
+.coffre-big-icon{
+  width:56px;height:56px;border-radius:16px;
+  background:linear-gradient(135deg,rgba(212,160,23,.15),rgba(212,160,23,.05));
+  border:1px solid rgba(212,160,23,.2);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:1.5rem;
+}
+.coffre-big-icon svg{width:26px;height:26px;stroke:var(--gold2);stroke-width:1.8;fill:none}
+.coffre-card h3{font-family:var(--display);font-size:1.6rem;font-weight:900;font-style:italic;color:var(--white);margin-bottom:.6rem}
+.coffre-card p{font-size:.83rem;color:rgba(255,255,255,.4);line-height:1.85;margin-bottom:1.8rem}
+.coffre-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem}
+.cs{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:1.1rem .8rem;text-align:center}
+.cs-n{font-family:var(--display);font-size:1.4rem;font-weight:900;color:var(--gold2)}
+.cs-l{font-family:var(--mono);font-size:.56rem;color:rgba(255,255,255,.3);margin-top:.3rem;text-transform:uppercase;letter-spacing:.05em}
+.coffre-features{display:flex;flex-direction:column;gap:1rem}
+.cf{
+  display:flex;align-items:flex-start;gap:1rem;
+  padding:1.2rem;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);
+  border-radius:14px;transition:.25s;
+}
+.cf:hover{border-color:rgba(212,160,23,.2);background:rgba(212,160,23,.04)}
+.cf-icon{width:36px;height:36px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.cf-icon svg{width:16px;height:16px;stroke-width:2;fill:none}
+.cf-title{font-size:.82rem;font-weight:800;color:var(--white);margin-bottom:.2rem}
+.cf-desc{font-size:.73rem;color:rgba(255,255,255,.38);line-height:1.7}
+
+/* ======= COMPARE ======= */
+.compare-section{background:var(--black2)}
+.ctable{margin-top:3rem;border:1px solid rgba(255,255,255,.07);border-radius:20px;overflow:hidden}
+.chead{
+  display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;
+  background:rgba(255,255,255,.04);
+  padding:.9rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.06);
+}
+.chead-lbl{font-family:var(--mono);font-size:.62rem;font-weight:600;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.08em}
+.chead-us{font-family:var(--mono);font-size:.62rem;font-weight:800;color:var(--gold2);text-align:center;letter-spacing:.04em;text-transform:uppercase}
+.chead-oth{font-family:var(--mono);font-size:.62rem;font-weight:500;color:rgba(255,255,255,.25);text-align:center;text-transform:uppercase}
+.crow{
+  display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;
+  padding:.9rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.05);
+  transition:.15s;
+}
+.crow:last-child{border-bottom:none}
+.crow:hover{background:rgba(255,255,255,.02)}
+.crow-feat{font-size:.8rem;font-weight:600;color:rgba(255,255,255,.65)}
+.crow-feat small{display:block;font-size:.65rem;color:rgba(255,255,255,.25);font-weight:400;margin-top:.1rem}
+.cv{text-align:center;font-size:.78rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:.35rem}
+.cv svg{width:12px;height:12px;stroke-width:2.5;fill:none}
+.cv.yes{color:var(--green2)}
+.cv.no{color:rgba(255,255,255,.2)}
+.cv.us{color:var(--gold2);font-weight:900}
+
+/* ======= QR ======= */
+.qr-section{background:var(--black)}
+.qr-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center}
+.qr-steps{display:flex;flex-direction:column;gap:1.2rem;margin-top:2rem}
+.step{display:flex;align-items:flex-start;gap:1rem}
+.step-n{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:.7rem;font-weight:700;color:var(--black);
+}
+.step-title{font-size:.85rem;font-weight:800;color:var(--white);margin-bottom:.2rem}
+.step-desc{font-size:.75rem;color:rgba(255,255,255,.38);line-height:1.7}
+.qr-card{
+  background:var(--black2);border:1px solid rgba(255,255,255,.07);
+  border-radius:24px;padding:2rem;
+}
+.qr-demo{
+  width:140px;height:140px;margin:0 auto 1.2rem;
+  background:var(--white);border-radius:12px;padding:10px;
+}
+.qr-svg{width:100%;height:100%}
+.qr-merchant{text-align:center;margin-bottom:1.2rem}
+.qr-m-name{font-size:.9rem;font-weight:800;color:var(--white)}
+.qr-m-phone{font-family:var(--mono);font-size:.65rem;color:rgba(255,255,255,.35);margin-top:.2rem}
+.qr-amount{
+  background:rgba(255,255,255,.05);border:1px solid rgba(212,160,23,.15);
+  border-radius:10px;padding:.8rem 1rem;text-align:center;margin-bottom:.8rem;
+}
+.qr-amount-val{font-family:var(--display);font-size:1.4rem;font-weight:900;color:var(--gold2)}
+.qr-amount-lbl{font-family:var(--mono);font-size:.55rem;color:rgba(255,255,255,.3);text-transform:uppercase}
+.qr-btn{
+  width:100%;padding:.85rem;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  border-radius:10px;font-size:.82rem;font-weight:800;
+  color:var(--black);border:none;cursor:pointer;
+  transition:.25s;display:flex;align-items:center;justify-content:center;gap:.5rem;
+  font-family:var(--font);
+}
+.qr-btn svg{width:14px;height:14px;stroke:var(--black);stroke-width:2.5;fill:none}
+.qr-btn:hover{transform:scale(1.02);box-shadow:0 6px 24px rgba(212,160,23,.4)}
+
+/* ======= AMBASSADOR ======= */
+.amb-section{background:var(--black2)}
+.amb-card{
+  background:linear-gradient(135deg,var(--black3),var(--forest));
+  border:1px solid rgba(212,160,23,.12);border-radius:24px;padding:3.5rem;
+  display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;
+  position:relative;overflow:hidden;
+}
+.amb-card::before{
+  content:'';position:absolute;
+  width:400px;height:400px;border-radius:50%;
+  background:radial-gradient(circle,rgba(212,160,23,.06),transparent 70%);
+  top:-100px;right:-100px;
+}
+.amb-title{font-family:var(--display);font-size:2rem;font-weight:900;font-style:italic;color:var(--white);margin-bottom:.7rem;line-height:1.1}
+.amb-title span{color:var(--gold2)}
+.amb-desc{font-size:.85rem;color:rgba(255,255,255,.45);line-height:1.85;margin-bottom:2rem}
+.amb-steps{display:flex;flex-direction:column;gap:.9rem}
+.as{display:flex;align-items:center;gap:.9rem}
+.as-n{width:26px;height:26px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:900;color:var(--black)}
+.as-title{font-size:.8rem;font-weight:700;color:var(--white)}
+.as-desc{font-size:.68rem;color:rgba(255,255,255,.35)}
+.amb-reward{
+  background:rgba(212,160,23,.07);border:1px solid rgba(212,160,23,.12);
+  border-radius:18px;padding:2.5rem;text-align:center;
+}
+.amb-big{font-family:var(--display);font-size:3rem;font-weight:900;color:var(--gold2);line-height:1;display:block;margin-bottom:.5rem}
+.amb-desc2{font-size:.8rem;color:rgba(255,255,255,.4);line-height:1.7}
+
+/* ======= CTA ======= */
+.cta-section{
+  background:var(--black);
+  text-align:center;position:relative;overflow:hidden;
+  padding:9rem 5%;
+}
+.cta-section::before{
+  content:'';position:absolute;
+  width:800px;height:800px;border-radius:50%;
+  background:radial-gradient(circle,rgba(212,160,23,.08) 0%,transparent 65%);
+  top:-200px;left:50%;transform:translateX(-50%);
+}
+/* Forest silhouette top & bottom */
+.cta-forest-top,.cta-forest-bot{position:absolute;left:0;right:0;height:100px;z-index:1;background:var(--black2)}
+.cta-forest-top{top:0;clip-path:polygon(0 0,100% 0,100% 40%,80% 100%,60% 60%,50% 80%,40% 50%,20% 90%,0 40%)}
+.cta-forest-bot{bottom:0;clip-path:polygon(0 60%,20% 10%,40% 50%,50% 20%,60% 40%,80% 0,100% 60%,100% 100%,0 100%)}
+.cta-inner{max-width:640px;margin:0 auto;position:relative;z-index:2}
+.cta-title{font-family:var(--display);font-size:clamp(2.2rem,5vw,3.8rem);font-weight:900;color:var(--white);margin-bottom:1rem;letter-spacing:-.04em;line-height:1.05}
+.cta-title em{font-style:italic;color:var(--gold2)}
+.cta-sub{font-size:.92rem;color:rgba(255,255,255,.4);margin-bottom:2.5rem;line-height:1.9}
+.cta-btns{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+.stores{display:flex;gap:.8rem;justify-content:center;margin-top:1.2rem}
+.store{
+  display:inline-flex;align-items:center;gap:.65rem;
+  padding:.65rem 1.4rem;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:10px;font-size:.78rem;font-weight:600;color:var(--white);
+  text-decoration:none;transition:.2s;
+}
+.store svg{width:16px;height:16px;stroke:rgba(255,255,255,.6);stroke-width:1.5;fill:none}
+.store:hover{border-color:rgba(212,160,23,.3);background:rgba(255,255,255,.08)}
+.store-lbl small{display:block;font-size:.56rem;color:rgba(255,255,255,.35);font-weight:400}
+.legal{font-family:var(--mono);font-size:.6rem;color:rgba(255,255,255,.2);margin-top:1.5rem}
+
+/* FOOTER */
+footer{background:#030806;padding:2rem 5%;border-top:1px solid rgba(255,255,255,.05)}
+.foot-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.foot-brand{font-family:var(--display);font-style:italic;font-size:1rem;font-weight:900;color:var(--gold2)}
+.foot-links{display:flex;gap:1.5rem}
+.foot-links a{font-size:.72rem;color:rgba(255,255,255,.25);text-decoration:none;transition:.15s}
+.foot-links a:hover{color:var(--gold2)}
+.foot-copy{font-family:var(--mono);font-size:.6rem;color:rgba(255,255,255,.18)}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s,transform .7s}
+.reveal.in{opacity:1;transform:translateY(0)}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}.d5{transition-delay:.5s}
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+  .hero-inner,.coffre-grid,.qr-grid,.amb-card{grid-template-columns:1fr}
+  .hero-visual{display:none}
+  .feat-intro{grid-template-columns:1fr}
+  .feats{grid-template-columns:1fr 1fr}
+}
+@media(max-width:640px){
+  nav{padding:0 4%}.nav-links{display:none}
+  section{padding:5rem 4%}
+  .feats{grid-template-columns:1fr}
+  .metrics{grid-template-columns:repeat(2,1fr)}
+  .chead,.crow{grid-template-columns:1.5fr 1fr 1fr}
+  .chead>*:last-child,.crow>*:last-child{display:none}
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="curR"></div>
+
+<!-- SVG DEFS -->
+<svg style="display:none">
+  <defs>
+    <!-- send -->
+    <symbol id="ic-send" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></symbol>
+    <!-- receive -->
+    <symbol id="ic-receive" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+    <!-- qr -->
+    <symbol id="ic-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="5"/><rect x="16" y="3" width="5" height="5"/><rect x="3" y="16" width="5" height="5"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><line x1="21" y1="21" x2="21" y2="21"/><path d="M3 8V7M8 3H7"/><path d="M3 16V15M8 21H7"/><path d="M21 8V7M16 3H17"/><line x1="14" y1="8" x2="14" y2="14"/><line x1="14" y1="14" x2="20" y2="14"/></symbol>
+    <!-- pay -->
+    <symbol id="ic-pay" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></symbol>
+    <!-- lock -->
+    <symbol id="ic-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+    <!-- bell -->
+    <symbol id="ic-bell" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></symbol>
+    <!-- target -->
+    <symbol id="ic-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+    <!-- clock -->
+    <symbol id="ic-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+    <!-- trending -->
+    <symbol id="ic-trend" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></symbol>
+    <!-- users -->
+    <symbol id="ic-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <!-- shield -->
+    <symbol id="ic-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></symbol>
+    <!-- zap -->
+    <symbol id="ic-zap" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+    <!-- globe -->
+    <symbol id="ic-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></symbol>
+    <!-- bar-chart -->
+    <symbol id="ic-chart" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
+    <!-- smartphone -->
+    <symbol id="ic-phone" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></symbol>
+    <!-- check -->
+    <symbol id="ic-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+    <!-- x -->
+    <symbol id="ic-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+    <!-- arrow-right -->
+    <symbol id="ic-arrow" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></symbol>
+    <!-- home -->
+    <symbol id="ic-home" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+    <!-- gift -->
+    <symbol id="ic-gift" viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></symbol>
+    <!-- wallet -->
+    <symbol id="ic-wallet" viewBox="0 0 24 24"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></symbol>
+  </defs>
+</svg>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24" stroke="var(--black)" stroke-width="2.5" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    </div>
+    <span class="logo-text">GhettoPay</span>
+  </a>
+  <nav class="nav-links">
+    <a href="#fonctionnalites">Fonctionnalités</a>
+    <a href="#coffre">Le Coffre</a>
+    <a href="#comparer">Comparer</a>
+    <a href="ghettopay-app.html">Application</a>
+  </nav>
+  <a href="ghettopay-app.html" class="nav-cta">
+    <svg><use href="#ic-arrow"/></svg>
+    Ouvrir l'App
+  </a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-orb"></div>
+  <div class="hero-diag"></div>
+
+  <div class="hero-inner">
+    <div>
+      <div class="hero-label"><span class="label-dot"></span> Portefeuille mobile · Made in Gabon</div>
+
+      <h1 class="hero-title">
+        Ton argent,<br/>
+        <em>libre comme</em><br/>
+        <span class="outline">la forêt.</span>
+      </h1>
+
+      <p class="hero-desc">
+        <b>GhettoPay</b> c'est ton portefeuille complet. Envoyer, recevoir, payer, épargner — tout dans une seule app. <b>Sans codes compliqués, sans frais cachés.</b> Purement gabonais.
+      </p>
+
+      <div class="hero-btns">
+        <a href="ghettopay-app.html" class="btn-primary">
+          <svg><use href="#ic-arrow"/></svg>
+          Ouvrir l'Application
+        </a>
+        <a href="#fonctionnalites" class="btn-sec">
+          <svg><use href="#ic-zap"/></svg>
+          Voir les fonctionnalités
+        </a>
+      </div>
+
+      <div class="metrics">
+        <div class="m"><div class="m-val">0%</div><div class="m-lbl">Frais cachés</div></div>
+        <div class="m"><div class="m-val">3s</div><div class="m-lbl">Transfert</div></div>
+        <div class="m"><div class="m-val">100%</div><div class="m-lbl">Gabonais</div></div>
+        <div class="m"><div class="m-val">256-bit</div><div class="m-lbl">Chiffrement</div></div>
+      </div>
+    </div>
+
+    <!-- PHONE MOCKUP -->
+    <div class="hero-visual">
+      <!-- Float badges -->
+      <div class="fb b1">
+        <div class="fb-ic" style="background:rgba(34,197,94,.15)">
+          <svg style="stroke:var(--green2);width:12px;height:12px;stroke-width:2;fill:none"><use href="#ic-check"/></svg>
+        </div>
+        <div><span class="fb-title">+25 000 FCFA</span><span class="fb-sub">Reçu · Amina N.</span></div>
+      </div>
+      <div class="fb b2">
+        <div class="fb-ic" style="background:rgba(212,160,23,.15)">
+          <svg style="stroke:var(--gold2);width:12px;height:12px;stroke-width:2;fill:none"><use href="#ic-lock"/></svg>
+        </div>
+        <div><span class="fb-title">Coffre actif</span><span class="fb-sub">245 000 FCFA</span></div>
+      </div>
+      <div class="fb b3">
+        <div class="fb-ic" style="background:rgba(255,255,255,.08)">
+          <svg style="stroke:rgba(255,255,255,.7);width:12px;height:12px;stroke-width:2;fill:none"><use href="#ic-qr"/></svg>
+        </div>
+        <div><span class="fb-title">QR Scanné</span><span class="fb-sub">Market Mbolo</span></div>
+      </div>
+
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="notch"></div>
+          <div class="app-hdr">
+            <div class="app-hdr-row">
+              <div>
+                <div class="app-greet">Bonjour</div>
+                <div class="app-user">Rostand M.</div>
+              </div>
+              <div class="hdr-icon">
+                <svg><use href="#ic-bell"/></svg>
+              </div>
+            </div>
+          </div>
+          <div class="balance">
+            <div class="bal-lbl">Solde disponible</div>
+            <div class="bal-amount">680 000 FCFA</div>
+            <div class="bal-sub">+ Coffre : 245 000 FCFA</div>
+          </div>
+          <div class="q-actions">
+            <div class="qa">
+              <div class="qa-ic" style="background:rgba(212,160,23,.12)">
+                <svg style="stroke:var(--gold);stroke-width:2;fill:none"><use href="#ic-send"/></svg>
+              </div>
+              <div class="qa-lbl">Envoyer</div>
+            </div>
+            <div class="qa">
+              <div class="qa-ic" style="background:rgba(34,197,94,.12)">
+                <svg style="stroke:#16a34a;stroke-width:2;fill:none"><use href="#ic-receive"/></svg>
+              </div>
+              <div class="qa-lbl">Recevoir</div>
+            </div>
+            <div class="qa">
+              <div class="qa-ic" style="background:rgba(99,102,241,.12)">
+                <svg style="stroke:#6366f1;stroke-width:2;fill:none"><use href="#ic-qr"/></svg>
+              </div>
+              <div class="qa-lbl">Scanner</div>
+            </div>
+            <div class="qa">
+              <div class="qa-ic" style="background:rgba(59,130,246,.12)">
+                <svg style="stroke:#3b82f6;stroke-width:2;fill:none"><use href="#ic-pay"/></svg>
+              </div>
+              <div class="qa-lbl">Payer</div>
+            </div>
+          </div>
+          <div class="coffre-mini">
+            <div class="coffre-mini-ic">
+              <svg><use href="#ic-lock"/></svg>
+            </div>
+            <div>
+              <div class="cm-title">Mon Coffre</div>
+              <div class="cm-sub">Épargne sécurisée</div>
+            </div>
+            <div class="cm-val">245K</div>
+          </div>
+          <div class="tx-list">
+            <div class="tx-hdr">Activité récente</div>
+            <div class="tx">
+              <div class="tx-av" style="background:linear-gradient(135deg,var(--gold),#0d3d1f)">
+                <svg style="stroke:white;stroke-width:2;fill:none;width:10px;height:10px"><use href="#ic-users"/></svg>
+              </div>
+              <div><div class="tx-name">Amina Nzamba</div><div class="tx-cat">Transfer · 2h</div></div>
+              <div class="tx-val c">+25 000</div>
+            </div>
+            <div class="tx">
+              <div class="tx-av" style="background:linear-gradient(135deg,#4f46e5,#818cf8)">
+                <svg style="stroke:white;stroke-width:2;fill:none;width:10px;height:10px"><use href="#ic-pay"/></svg>
+              </div>
+              <div><div class="tx-name">Market Mbolo</div><div class="tx-cat">QR Pay · auj.</div></div>
+              <div class="tx-val d">-12 000</div>
+            </div>
+            <div class="tx">
+              <div class="tx-av" style="background:linear-gradient(135deg,#dc2626,#f59e0b)">
+                <svg style="stroke:white;stroke-width:2;fill:none;width:10px;height:10px"><use href="#ic-phone"/></svg>
+              </div>
+              <div><div class="tx-name">Airtel Recharge</div><div class="tx-cat">Mobile · hier</div></div>
+              <div class="tx-val d">-5 000</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FEATURES -->
+<section id="fonctionnalites" class="features-section">
+  <div class="inner">
+    <div class="feat-intro reveal">
+      <div>
+        <div class="eyebrow">01 — Fonctionnalités</div>
+        <h2 class="sec-title">Un portefeuille<br/><em>vraiment complet</em></h2>
+      </div>
+      <p class="sec-sub">Tout ce qu'il faut pour maîtriser ton argent au quotidien. Conçu pour le Gabon, pensé pour toi.</p>
+    </div>
+    <div class="feats">
+
+      <div class="feat reveal d1">
+        <div class="feat-icon" style="background:rgba(212,160,23,.1);border:1px solid rgba(212,160,23,.15)">
+          <svg style="stroke:var(--gold2)"><use href="#ic-send"/></svg>
+        </div>
+        <h3>Transferts instantanés</h3>
+        <p>Envoie de l'argent à n'importe qui en 3 secondes. Par nom, numéro ou contact — aucun code USSD.</p>
+        <span class="feat-badge" style="background:rgba(212,160,23,.08);color:var(--gold2);border:1px solid rgba(212,160,23,.15)">Frais quasi nuls</span>
+      </div>
+
+      <div class="feat reveal d2">
+        <div class="feat-icon" style="background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.15)">
+          <svg style="stroke:#818cf8"><use href="#ic-qr"/></svg>
+        </div>
+        <h3>Paiement QR Code</h3>
+        <p>Scanne, confirme avec ton empreinte, c'est payé. Au marché, en boutique, partout au Gabon.</p>
+        <span class="feat-badge" style="background:rgba(99,102,241,.08);color:#818cf8;border:1px solid rgba(99,102,241,.15)">2 secondes chrono</span>
+      </div>
+
+      <div class="feat reveal d3">
+        <div class="feat-icon" style="background:rgba(212,160,23,.1);border:1px solid rgba(212,160,23,.15)">
+          <svg style="stroke:var(--gold2)"><use href="#ic-lock"/></svg>
+        </div>
+        <h3>Le Coffre</h3>
+        <p>Bloque ton épargne avec une durée et un objectif. Ton argent pousse comme les arbres de la forêt.</p>
+        <span class="feat-badge" style="background:rgba(212,160,23,.08);color:var(--gold2);border:1px solid rgba(212,160,23,.15)">5.5% rendement annuel</span>
+      </div>
+
+      <div class="feat reveal d1">
+        <div class="feat-icon" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.15)">
+          <svg style="stroke:var(--green2)"><use href="#ic-phone"/></svg>
+        </div>
+        <h3>Recharge airtime & data</h3>
+        <p>Recharge crédit et internet directement depuis l'app. Airtel, Moov — tous les opérateurs.</p>
+        <span class="feat-badge" style="background:rgba(34,197,94,.08);color:var(--green2);border:1px solid rgba(34,197,94,.15)">Instantané</span>
+      </div>
+
+      <div class="feat reveal d2">
+        <div class="feat-icon" style="background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.15)">
+          <svg style="stroke:#60a5fa"><use href="#ic-home"/></svg>
+        </div>
+        <h3>Paiement factures</h3>
+        <p>Eau, électricité, internet, loyer — règle tout depuis GhettoPay. Fini la queue, fini le stress.</p>
+        <span class="feat-badge" style="background:rgba(59,130,246,.08);color:#60a5fa;border:1px solid rgba(59,130,246,.15)">Tout en un</span>
+      </div>
+
+      <div class="feat reveal d3">
+        <div class="feat-icon" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.15)">
+          <svg style="stroke:var(--green2)"><use href="#ic-users"/></svg>
+        </div>
+        <h3>Tontine digitale</h3>
+        <p>Crée ou rejoins une tontine. Collecte automatique, transparence totale. La tradition modernisée.</p>
+        <span class="feat-badge" style="background:rgba(34,197,94,.08);color:var(--green2);border:1px solid rgba(34,197,94,.15)">Communautaire</span>
+      </div>
+
+      <div class="feat reveal d1">
+        <div class="feat-icon" style="background:rgba(212,160,23,.1);border:1px solid rgba(212,160,23,.15)">
+          <svg style="stroke:var(--gold2)"><use href="#ic-chart"/></svg>
+        </div>
+        <h3>Budget & Analyses</h3>
+        <p>Graphiques clairs, catégories auto, alertes budget. Vois exactement où va chaque franc.</p>
+        <span class="feat-badge" style="background:rgba(212,160,23,.08);color:var(--gold2);border:1px solid rgba(212,160,23,.15)">IA intégrée</span>
+      </div>
+
+      <div class="feat reveal d2">
+        <div class="feat-icon" style="background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.15)">
+          <svg style="stroke:#fb923c"><use href="#ic-trend"/></svg>
+        </div>
+        <h3>Cashback Gabon Vert</h3>
+        <p>Chaque paiement chez un partenaire te rapporte du cashback. L'argent qui revient vers toi.</p>
+        <span class="feat-badge" style="background:rgba(251,146,60,.08);color:#fb923c;border:1px solid rgba(251,146,60,.15)">Jusqu'à 5% cash</span>
+      </div>
+
+      <div class="feat reveal d3">
+        <div class="feat-icon" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.15)">
+          <svg style="stroke:var(--green2)"><use href="#ic-shield"/></svg>
+        </div>
+        <h3>Sécurité militaire</h3>
+        <p>Empreinte digitale, Face ID, PIN 6 chiffres, chiffrement 256-bit. Blindé comme un coffre-fort.</p>
+        <span class="feat-badge" style="background:rgba(34,197,94,.08);color:var(--green2);border:1px solid rgba(34,197,94,.15)">Certifié CEMAC</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- COFFRE -->
+<section id="coffre" class="coffre-section">
+  <div class="inner">
+    <div class="coffre-grid">
+      <div class="coffre-card reveal">
+        <div class="coffre-big-icon">
+          <svg><use href="#ic-lock"/></svg>
+        </div>
+        <h3>Le Coffre Forêt</h3>
+        <p>Ton épargne protégée qui grandit en silence — comme les arbres centenaires de la forêt équatoriale gabonaise. Tu bloques, tu attends, tu récoltes.</p>
+        <div class="coffre-stats">
+          <div class="cs"><div class="cs-n">5.5%</div><div class="cs-l">Rendement/an</div></div>
+          <div class="cs"><div class="cs-n">6 mois</div><div class="cs-l">Min. bloqués</div></div>
+          <div class="cs"><div class="cs-n">100%</div><div class="cs-l">Sécurisé</div></div>
+        </div>
+      </div>
+      <div class="coffre-features reveal d2">
+        <div class="eyebrow">02 — Le Coffre</div>
+        <h2 class="sec-title" style="margin-bottom:1.5rem">Épargne comme<br/><em>jamais avant</em></h2>
+        <div class="coffre-features">
+          <div class="cf">
+            <div class="cf-icon" style="background:rgba(212,160,23,.1);border:1px solid rgba(212,160,23,.15)">
+              <svg style="stroke:var(--gold2)"><use href="#ic-target"/></svg>
+            </div>
+            <div>
+              <div class="cf-title">Objectif d'épargne</div>
+              <div class="cf-desc">Définis un objectif (voyage, voiture, school) et GhettoPay suit ta progression.</div>
+            </div>
+          </div>
+          <div class="cf">
+            <div class="cf-icon" style="background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.15)">
+              <svg style="stroke:#818cf8"><use href="#ic-clock"/></svg>
+            </div>
+            <div>
+              <div class="cf-title">Épargne programmée</div>
+              <div class="cf-desc">Automatise tes virements vers le Coffre semaine, mois, comme tu veux. C'est toi qui CHOISIS</div>
+            </div>
+          </div>
+          <div class="cf">
+            <div class="cf-icon" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.15)">
+              <svg style="stroke:var(--green2)"><use href="#ic-trend"/></svg>
+            </div>
+            <div>
+              <div class="cf-title">Rendement Coffre Forêt</div>
+              <div class="cf-desc">Bloque 6 mois ou plus et ton argent rapporte des intérêts. L'épargne qui travaille pour toi.</div>
+            </div>
+          </div>
+          <div class="cf">
+            <div class="cf-icon" style="background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.15)">
+              <svg style="stroke:#fb923c"><use href="#ic-shield"/></svg>
+            </div>
+            <div>
+              <div class="cf-title">Protection anti-impulsion</div>
+              <div class="cf-desc">Tu ne peux pas retirer avant la date. Le meilleur protecteur contre toi-même.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- COMPARE -->
+<section id="comparer" class="compare-section">
+  <div class="inner">
+    <div class="reveal">
+      <div class="eyebrow">03 — Comparer</div>
+      <h2 class="sec-title">La vérité<br/><em>sans filtre</em></h2>
+      <p class="sec-sub">Voilà pourquoi les Gabonais choisissent GhettoPay.</p>
+    </div>
+    <div class="ctable reveal d2">
+      <div class="chead">
+        <div class="chead-lbl">Fonctionnalité</div>
+        <div class="chead-us">GhettoPay</div>
+        <div class="chead-oth">Airtel Money</div>
+        <div class="chead-oth">Moov Money</div>
+      </div>
+      <div class="crow">
+        <div class="crow-feat">Frais transfert<small>Pour 10 000 FCFA</small></div>
+        <div class="cv us">~150 FCFA</div>
+        <div class="cv no">~400 FCFA</div>
+        <div class="cv no">~350 FCFA</div>
+      </div>
+      <div class="crow">
+        <div class="crow-feat">Paiement QR Code<small>Scan & pay</small></div>
+        <div class="cv yes"><svg><use href="#ic-check"/></svg> Oui</div>
+        <div class="cv no"><svg><use href="#ic-x"/></svg> Non</div>
+        <div class="cv no"><svg><use href="#ic-x"/></svg> Non</div>
+      </div>
+      <div class="crow">
+        <div class="crow-feat">Coffre épargne<small>Épargne bloquée</small></div>
+        <div class="cv yes"><svg><use href="#ic-check"/></svg> Oui</div>
+        <div class="cv no"><svg><use href="#ic-x"/></svg> Non</div>
+        <div class="cv no"><svg><use href="#ic-x"/></svg> Non</div>
+      </div>
+      <div class="crow">
+        <div class="crow-feat">Tontine digitale<small>Collecte communautaire</small></div>
+        <div class="cv yes"><svg><use href="#ic-check"/></svg> Oui</div>
+        <div class="cv no"><svg><use href="#ic-x"/></svg> Non</div>
+        <div class="cv no"><svg><use href="#ic-x"/></svg> Non</div>
+      </div>
+      <div class="crow">
+        <div class="crow-feat">Budget & analyses<small>IA intégrée</small></div>
+        <div class="cv yes"><svg><use href="#ic-check"/></svg> Oui</div>
+        <div class="cv no"><svg><use href="#ic-x"/></svg> Non</div>
+        <div class="cv no"><svg><use href="#ic-x"/></svg> Non</div>
+      </div>
+      <div class="crow">
+        <div class="crow-feat">Codes USSD compliqués<small>*127#...</small></div>
+        <div class="cv yes">Jamais</div>
+        <div class="cv no">Toujours</div>
+        <div class="cv no">Toujours</div>
+      </div>
+      <div class="crow">
+        <div class="crow-feat">Cashback partenaires<small>Argent qui revient</small></div>
+        <div class="cv yes"><svg><use href="#ic-check"/></svg> Oui</div>
+        <div class="cv no"><svg><use href="#ic-x"/></svg> Non</div>
+        <div class="cv no"><svg><use href="#ic-x"/></svg> Non</div>
+      </div>
+      <div class="crow">
+        <div class="crow-feat">Design & expérience<small>App moderne</small></div>
+        <div class="cv us">Premium</div>
+        <div class="cv no">Basique</div>
+        <div class="cv no">Basique</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- QR PAY -->
+<section id="qr" class="qr-section">
+  <div class="inner">
+    <div class="qr-grid">
+      <div class="reveal">
+        <div class="eyebrow">04 — Scan & Pay</div>
+        <h2 class="sec-title">Scanne.<br/><em>Paye.</em><br/><span class="gr">3 secondes.</span></h2>
+        <p class="sec-sub" style="margin-bottom:2rem">Fini chercher la monnaie. GhettoPay QR fonctionne partout — marchés, boutiques, maquis, restaurants.</p>
+        <div class="qr-steps">
+          <div class="step">
+            <div class="step-n">1</div>
+            <div>
+              <div class="step-title">Ouvre GhettoPay</div>
+              <div class="step-desc">Tape sur "Scanner QR" — la caméra s'ouvre instantanément</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-n">2</div>
+            <div>
+              <div class="step-title">Pointe vers le QR</div>
+              <div class="step-desc">Le QR du commerçant est reconnu automatiquement</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-n">3</div>
+            <div>
+              <div class="step-title">Confirme avec ton empreinte</div>
+              <div class="step-desc">Ton pouce, c'est ta signature. Et c'est payé.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="qr-card reveal d2">
+        <div style="text-align:center;margin-bottom:1rem">
+          <div style="font-family:var(--mono);font-size:.6rem;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.8rem">Scanner pour payer</div>
+          <div class="qr-demo">
+            <svg class="qr-svg" viewBox="0 0 7 7" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+              <!-- QR pattern simplified -->
+              <rect width="7" height="7" fill="white"/>
+              <!-- top-left finder -->
+              <rect x="0" y="0" width="3" height="3" fill="#050a06"/><rect x="1" y="1" width="1" height="1" fill="white"/>
+              <!-- top-right finder -->
+              <rect x="4" y="0" width="3" height="3" fill="#050a06"/><rect x="5" y="1" width="1" height="1" fill="white"/>
+              <!-- bottom-left finder -->
+              <rect x="0" y="4" width="3" height="3" fill="#050a06"/><rect x="1" y="5" width="1" height="1" fill="white"/>
+              <!-- data modules -->
+              <rect x="3" y="0" width="1" height="1" fill="#050a06"/>
+              <rect x="4" y="3" width="1" height="1" fill="#050a06"/>
+              <rect x="6" y="3" width="1" height="1" fill="#050a06"/>
+              <rect x="3" y="4" width="1" height="1" fill="#050a06"/>
+              <rect x="5" y="4" width="1" height="1" fill="#050a06"/>
+              <rect x="3" y="6" width="1" height="1" fill="#050a06"/>
+              <rect x="5" y="6" width="1" height="1" fill="#050a06"/>
+              <rect x="6" y="5" width="1" height="1" fill="#050a06"/>
+            </svg>
+          </div>
+        </div>
+        <div class="qr-merchant">
+          <div class="qr-m-name">Boulangerie du Soleil</div>
+          <div class="qr-m-phone">+241 06 XX XX XX · Libreville</div>
+        </div>
+        <div class="qr-amount">
+          <div style="font-family:var(--mono);font-size:.52rem;color:rgba(255,255,255,.3);text-transform:uppercase;margin-bottom:.2rem">Montant</div>
+          <div class="qr-amount-val">3 500 FCFA</div>
+        </div>
+        <button class="qr-btn" id="payBtn" onclick="
+          this.innerHTML='<svg style=\'stroke:var(--black);width:14px;height:14px;stroke-width:2.5;fill:none\'><use href=\'#ic-check\'/></svg> Payé — Merci !';
+          this.style.background='linear-gradient(135deg,var(--green),var(--green2))';
+          setTimeout(()=>{
+            this.innerHTML='<svg style=\'stroke:var(--black);width:14px;height:14px;stroke-width:2.5;fill:none\'><use href=\'#ic-shield\'/></svg> Confirmer avec empreinte';
+            this.style.background='';
+          },2500)
+        ">
+          <svg><use href="#ic-shield"/></svg>
+          Confirmer avec empreinte
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- AMBASSADOR -->
+<section class="amb-section">
+  <div class="inner">
+    <div class="amb-card reveal">
+      <div>
+        <h3 class="amb-title">Deviens <span>Ambassadeur</span><br/>GhettoPay</h3>
+        <p class="amb-desc">Invite ton quartier, ta famille, tes amis. Chaque invitation réussie te rapporte du cash directement sur ton compte.</p>
+        <div class="amb-steps">
+          <div class="as">
+            <div class="as-n">1</div>
+            <div><div class="as-title">Partage ton code unique</div><div class="as-desc">Chaque compte a son code personnel</div></div>
+          </div>
+          <div class="as">
+            <div class="as-n">2</div>
+            <div><div class="as-title">Ton ami s'inscrit</div><div class="as-desc">Il entre ton code à la création du compte</div></div>
+          </div>
+          <div class="as">
+            <div class="as-n">3</div>
+            <div><div class="as-title">Tu reçois le cash</div><div class="as-desc">1 000 FCFA virés automatiquement</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="amb-reward">
+        <span class="amb-big">1 000<br/>FCFA</span>
+        <p class="amb-desc2">par ami invité · illimité<br/><br/>Plus tu invites,<br/>plus tu gagnes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-forest-top"></div>
+  <div class="cta-inner reveal">
+    <h2 class="cta-title">Prêt à maîtriser<br/><em>ton argent ?</em></h2>
+    <p class="cta-sub">Rejoins les Gabonais qui ont choisi la liberté financière. Inscription gratuite, en 2 minutes.</p>
+    <div class="cta-btns">
+      <a href="ghettopay-app.html" class="btn-primary" style="font-size:.9rem;padding:1rem 2.4rem">
+        <svg><use href="#ic-arrow"/></svg>
+        Ouvrir l'Application
+      </a>
+    </div>
+    <div class="stores">
+      <a href="#" class="store">
+        <svg viewBox="0 0 24 24" style="stroke:rgba(255,255,255,.6);stroke-width:1.5;fill:none"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83"/><path d="M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        <div class="store-lbl"><small>Télécharger sur</small>App Store</div>
+      </a>
+      <a href="#" class="store">
+        <svg viewBox="0 0 24 24" style="stroke:rgba(255,255,255,.6);stroke-width:1.5;fill:none"><path d="M3 20.5v-17l17.5 8.5z"/></svg>
+        <div class="store-lbl"><small>Disponible sur</small>Google Play</div>
+      </a>
+    </div>
+    <p class="legal">Sécurisé · Made in Gabon · Régulé CEMAC · Chiffrement 256-bit</p>
+  </div>
+  <div class="cta-forest-bot"></div>
+</section>
+
+<footer>
+  <div class="foot-inner">
+    <span class="foot-brand">GhettoPay</span>
+    <div class="foot-links">
+      <a href="#">À propos</a>
+      <a href="#">Conditions</a>
+      <a href="#">Confidentialité</a>
+      <a href="#">Contact</a>
+    </div>
+    <span class="foot-copy">© 2026 GhettoPay · Libreville, Gabon</span>
+  </div>
+</footer>
+
+<script>
+// Cursor
+const cur=document.getElementById('cur'),curR=document.getElementById('curR');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY});
+(function anim(){
+  rx+=(mx-rx)*.16;ry+=(my-ry)*.16;
+  cur.style.transform=`translate(${mx-3}px,${my-3}px)`;
+  curR.style.transform=`translate(${rx-14}px,${ry-14}px)`;
+  requestAnimationFrame(anim);
+})();
+
+// Nav scroll
+window.addEventListener('scroll',()=>{
+  document.getElementById('nav').classList.toggle('scrolled',scrollY>50);
+});
+
+// Reveal
+const obs=new IntersectionObserver(e=>e.forEach(x=>{
+  if(x.isIntersecting)x.target.classList.add('in');
+}),{threshold:.1});
+document.querySelectorAll('.reveal').forEach(e=>obs.observe(e));
+</script>
+</body>
+</html>
