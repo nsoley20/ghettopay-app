@@ -1,22 +1,10 @@
-# Task: Improve responsiveness, colors, button layout in index.html
+# Task: Réduire taille boutons spécifiques (envoyer, recevoir, scanner, payer, tontine) de 35%
 
-## Plan
-**Goal**: Enhance mobile/tablet/desktop UX.
+## Progress Steps (Approved Plan)
+- [x] Step 1: Update TODO.md avec plan boutons réduit
+- [x] Step 2: Editer CSS .qa-row / .qa / .qa-promo / .qa-ic (35% smaller)
+- [ ] Step 3: Test responsive et interactions (padding/icons/fonts verified)
+- [ ] Step 4: Complete task & preview
 
-**Changes**:
-1. **Responsivity**: Add tablet/desktop media queries using --bp vars; adjust --fs-*/--sp-* clamps.
-2. **Colors**: Improve contrast (WCAG AA), add hover variants, subtle gradients.
-3. **Buttons**: Better spacing (gap utility), hover/active states, size variants.
-
-**Files**: index.html (CSS sections).
-
-**Follow-up**: Test on different viewport sizes.
-
-Approved - proceeding.
-
-Steps:
-- [ ] Step 1: Create TODO.md ✓
-- [ ] Step 2: Update CSS vars/media queries
-- [ ] Step 3: Fix button layouts (nav, pad, qa-row)
-- [ ] Step 4: Test & complete
+**Next:** Step 3 - Test layout on refresh/mobile view.
 
