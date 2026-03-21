@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -12,57 +13,41 @@
 <title>GhettoPay</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
-/* ─── RESET & VARS ─────────────────────────────── */
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{\n  /* Colors */\n  --bg:#060d08; --surface:#0e1a10; --forest:#0d3d1f; --forest2:#145228;\n  --green:#16a34a; --green2:#22c55e; --green3:#86efac;\n  --gold:#c8960e; --gold2:#e8b020; --gold3:#fcd34d;\n  --white:#f0f7f0; --muted:rgba(240,247,240,.38); --muted2:rgba(240,247,240,.18);\n  --app:#f2f5f2; --app2:#e8ede8; --app3:#dde5dd;\n  --apptext:#0a130b; --appsub:#6b7c6d; --appsub2:#9aaa9c;\n  --card:#ffffff; --border:rgba(0,0,0,.07); --border2:rgba(255,255,255,.07);\n\n  /* Typography - Responsive */\n  --fs-xs: clamp(0.5rem, 1.5vw, 0.625rem);\n  --fs-sm: clamp(0.625rem, 2vw, 0.75rem);\n  --fs-base: clamp(0.75rem, 2.5vw, 0.875rem);\n  --fs-lg: clamp(0.875rem, 3vw, 1rem);\n  --fs-xl: clamp(1rem, 4vw, 1.25rem);\n  --fs-xxl: clamp(1.25rem, 5vw, 1.5rem);\n  --fs-hdr: clamp(1.5rem, 6vw, 2rem);\n  --fs-display: clamp(2rem, 8vw, 3rem);\n\n  /* Spacing - Responsive */\n  --sp-xs: clamp(4px, 1vw, 8px);\n  --sp-sm: clamp(8px, 2vw, 12px);\n  --sp: clamp(12px, 3vw, 16px);\n  --sp-lg: clamp(16px, 4vw, 20px);\n  --sp-xl: clamp(20px, 5vw, 24px);\n  --sp-2xl: clamp(24px, 6vw, 32px);\n\n  /* Breakpoints */\n  --bp-tablet: 768px;\n  --bp-desktop: 1024px;\n\n  /* Layout */\n  --f:'Syne',sans-serif; --fd:'Playfair Display',serif; --fm:'JetBrains Mono',monospace;\n  --safe-top:env(safe-area-inset-top,0px); --safe-bot:env(safe-area-inset-bottom,0px);\n  --r: clamp(12px, 3vw, 20px); --r2: clamp(10px, 2.5vw, 14px);\n\n  /* Phone frame sizes */\n  --phone-w: 390px; --phone-h: 844px;\n  --tablet-w: 428px; --tablet-h: 926px;\n}
+:root{
+  --bg:#060d08; --surface:#0e1a10; --forest:#0d3d1f; --forest2:#145228;
+  --green:#16a34a; --green2:#22c55e; --green3:#86efac;
+  --gold:#c8960e; --gold2:#e8b020; --gold3:#fcd34d;
+  --white:#f0f7f0; --muted:rgba(240,247,240,.38); --muted2:rgba(240,247,240,.18);
+  --app:#f2f5f2; --app2:#e8ede8; --app3:#dde5dd;
+  --apptext:#0a130b; --appsub:#6b7c6d; --appsub2:#9aaa9c;
+  --card:#ffffff; --border:rgba(0,0,0,.07); --border2:rgba(255,255,255,.07);
+  --f:'Syne',sans-serif; --fd:'Playfair Display',serif; --fm:'JetBrains Mono',monospace;
+  --safe-top:env(safe-area-inset-top,0px); --safe-bot:env(safe-area-inset-bottom,0px);
+  --r:16px; --r2:12px;
+}
 html{height:100%;-webkit-text-size-adjust:100%}
-body{\n  font-family:var(--f); font-size:var(--fs-base);\n  background:var(--bg);\n  height:100%; max-height:100%;\n  display:flex; align-items:center; justify-content:center;\n  overflow:hidden;\n  line-height:1.5;\n}
+body{font-family:var(--f);background:var(--bg);height:100%;max-height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden}
 
-/* ─── APP SHELL ─────────────────────────────────── */
-/* Desktop: show phone frame */
-.app-shell{\n  width:100%; max-width:var(--phone-w);\n  height:min(100vh, var(--phone-h));\n  aspect-ratio: 390 / 844;\n  background:#05090a;\n  border-radius:clamp(32px, 8vw, 52px); padding:var(--sp-sm);\n  box-shadow:0 0 0 1px rgba(255,255,255,.08),0 60px 140px rgba(0,0,0,.9);\n  position:relative; flex-shrink:0;\n  margin:0 auto;\n}
-.app-inner{
-  width:100%; height:100%;
-  background:var(--app); border-radius:40px;
-  overflow:hidden; position:relative;
-  display:flex; flex-direction:column;
-}
-.island{
-  position:absolute; top:12px; left:50%; transform:translateX(-50%);
-  width:120px; height:34px; background:#05090a;
-  border-radius:100px; z-index:100;
-}
-
-/* Mobile: full screen */
+/* APP SHELL */
+.app-shell{width:100%;max-width:390px;height:min(100vh,844px);background:#05090a;border-radius:52px;padding:11px;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 60px 140px rgba(0,0,0,.9);position:relative;flex-shrink:0;margin:0 auto}
+.app-inner{width:100%;height:100%;background:var(--app);border-radius:40px;overflow:hidden;position:relative;display:flex;flex-direction:column}
+.island{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:120px;height:34px;background:#05090a;border-radius:100px;z-index:100}
 @media(max-width:430px),(max-height:860px){
   body{align-items:stretch;justify-content:stretch}
-  .app-shell{
-    width:100%; height:100%; border-radius:0; padding:0;
-    box-shadow:none;
-  }
+  .app-shell{width:100%;height:100%;border-radius:0;padding:0;box-shadow:none}
   .app-inner{border-radius:0}
   .island{display:none}
 }
 
-/* ─── SCREENS ───────────────────────────────────── */
-.screen{
-  position:absolute; inset:0;
-  display:flex; flex-direction:column;
-  background:var(--app); border-radius:inherit;
-  overflow:hidden;
-  transition:transform .36s cubic-bezier(.32,.72,0,1),opacity .28s;
-  transform:translateX(100%); opacity:0; pointer-events:none; z-index:1;
-}
+/* SCREENS */
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--app);border-radius:inherit;overflow:hidden;transition:transform .36s cubic-bezier(.32,.72,0,1),opacity .28s;transform:translateX(100%);opacity:0;pointer-events:none;z-index:1}
 .screen.active{transform:translateX(0);opacity:1;pointer-events:all;z-index:10}
 .screen.leaving{transform:translateX(-20%);opacity:0;z-index:2}
 .screen-dark{background:var(--bg)}
 
-/* ─── STATUS BAR ────────────────────────────────── */
-.sb{
-  padding:calc(var(--safe-top) + 10px) 20px 6px;
-  display:flex; align-items:center; justify-content:space-between;
-  flex-shrink:0;
-}
+/* STATUS BAR */
+.sb{padding:calc(var(--safe-top) + 10px) 20px 6px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .sb.dark{padding-top:calc(var(--safe-top) + 14px)}
 .sb .clock{font-family:var(--fm);font-size:.68rem;font-weight:600;color:var(--apptext)}
 .sb.dark .clock{color:var(--white)}
@@ -70,71 +55,48 @@ body{\n  font-family:var(--f); font-size:var(--fs-base);\n  background:var(--bg)
 .sb-right svg{fill:var(--apptext)}
 .sb.dark .sb-right svg{fill:rgba(255,255,255,.7)}
 
-/* ─── NAV BAR ───────────────────────────────────── */
-.bnav{
-  flex-shrink:0; display:flex; align-items:center; justify-content:space-around;
-  background:var(--card); padding:8px 4px calc(8px + var(--safe-bot));
-  border-top:1px solid var(--border); z-index:20;
-}
-.bnt{
-  display:flex;flex-direction:column;align-items:center;gap:3px;
-  cursor:pointer;padding:5px 10px;border-radius:12px;transition:.15s;min-width:50px;
-}
+/* NAV BAR */
+.bnav{flex-shrink:0;display:flex;align-items:center;justify-content:space-around;background:var(--card);padding:8px 4px calc(8px + var(--safe-bot));border-top:1px solid var(--border);z-index:20}
+.bnt{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:5px 10px;border-radius:12px;transition:.15s;min-width:50px}
 .bnt.on{background:rgba(13,61,31,.08)}
 .bnt svg{width:22px;height:22px;stroke-width:1.8;fill:none;transition:.15s}
-.bnt.on svg{stroke:var(--forest2)} .bnt:not(.on) svg{stroke:var(--appsub2)}
+.bnt.on svg{stroke:var(--forest2)}
+.bnt:not(.on) svg{stroke:var(--appsub2)}
 .bnt-lbl{font-size:.5rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
-.bnt.on .bnt-lbl{color:var(--forest2)} .bnt:not(.on) .bnt-lbl{color:var(--appsub2)}
-.bnt-qr{
-  width:52px;height:52px;border-radius:50%;margin-top:-20px;flex-shrink:0;
-  background:linear-gradient(135deg,var(--gold),var(--gold3));
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 20px rgba(200,150,14,.5);cursor:pointer;transition:.18s;
-}
+.bnt.on .bnt-lbl{color:var(--forest2)}
+.bnt:not(.on) .bnt-lbl{color:var(--appsub2)}
+.bnt-qr{width:52px;height:52px;border-radius:50%;margin-top:-20px;flex-shrink:0;background:linear-gradient(135deg,var(--gold),var(--gold3));display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(200,150,14,.5);cursor:pointer;transition:.18s}
 .bnt-qr:active{transform:scale(.92)}
 .bnt-qr svg{width:24px;height:24px;stroke:var(--bg);stroke-width:2.2;fill:none}
 
-/* ─── SCROLL BODY ───────────────────────────────── */
+/* SCROLL */
 .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .scroll::-webkit-scrollbar{display:none}
-.pad{padding:var(--sp-lg)}
-.gap8{display:flex;flex-direction:column;gap:var(--sp-xs)}
-.gap12{display:flex;flex-direction:column;gap:var(--sp)}
-.gap16{display:flex;flex-direction:column;gap:var(--sp-lg)}
-.sec-label{font-size:var(--fs-xs);font-weight:800;color:var(--appsub);text-transform:uppercase;letter-spacing:.12em}
+.pad{padding:14px 16px}
+.gap8{display:flex;flex-direction:column;gap:8px}
+.gap12{display:flex;flex-direction:column;gap:12px}
+.gap16{display:flex;flex-direction:column;gap:16px}
+.sec-label{font-size:.58rem;font-weight:800;color:var(--appsub);text-transform:uppercase;letter-spacing:.12em}
 
-/* ─── SCREEN NAV ────────────────────────────────── */
-.snav{
-  display:flex;align-items:center;gap:12px;
-  padding:10px 16px 12px;background:var(--card);
-  border-bottom:1px solid var(--border);flex-shrink:0;
-}
+/* SCREEN NAV */
+.snav{display:flex;align-items:center;gap:12px;padding:10px 16px 12px;background:var(--card);border-bottom:1px solid var(--border);flex-shrink:0}
 .snav.dark{background:transparent;border-color:var(--border2)}
-.snav-title{font-size:var(--fs-lg);font-weight:800;color:var(--apptext)}
+.snav-title{font-size:.9rem;font-weight:800;color:var(--apptext)}
 .snav.dark .snav-title{color:var(--white)}
-.snav-action{margin-left:auto;font-size:var(--fs-base);font-weight:700;color:var(--forest2);cursor:pointer}
+.snav-action{margin-left:auto;font-size:.72rem;font-weight:700;color:var(--forest2);cursor:pointer}
 .snav.dark .snav-action{color:var(--gold3)}
-.btn-back{
-  width:36px;height:36px;border-radius:50%;background:var(--app2);
-  border:none;display:flex;align-items:center;justify-content:center;
-  cursor:pointer;flex-shrink:0;transition:.12s;
-}
+.btn-back{width:36px;height:36px;border-radius:50%;background:var(--app2);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:.12s}
 .btn-back:active{transform:scale(.9)}
 .btn-back svg{width:16px;height:16px;stroke:var(--apptext);stroke-width:2.2;fill:none}
 .btn-back.dark{background:rgba(255,255,255,.1)}
 .btn-back.dark svg{stroke:var(--white)}
 
-/* ─── CARDS ─────────────────────────────────────── */
+/* CARDS */
 .card{background:var(--card);border-radius:var(--r);border:1px solid var(--border);overflow:hidden}
 .card-p{padding:14px 16px}
 
-/* ─── BUTTONS ───────────────────────────────────── */
-.btn{
-  width:100%;padding:15px;border:none;border-radius:14px;
-  font-family:var(--f);font-size:.88rem;font-weight:800;
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  cursor:pointer;transition:.18s;
-}
+/* BUTTONS */
+.btn{width:100%;padding:15px;border:none;border-radius:14px;font-family:var(--f);font-size:.88rem;font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:.18s}
 .btn:active{transform:scale(.97)}
 .btn svg{width:16px;height:16px;stroke-width:2.5;fill:none}
 .btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold3));color:var(--bg);box-shadow:0 4px 20px rgba(200,150,14,.35)}
@@ -148,13 +110,8 @@ body{\n  font-family:var(--f); font-size:var(--fs-base);\n  background:var(--bg)
 .btn-danger svg{stroke:#dc2626}
 .btn-sm{padding:10px 16px;border-radius:10px;font-size:.78rem;width:auto}
 
-/* ─── INPUTS ────────────────────────────────────── */
-.input{
-  width:100%;padding:13px 14px;
-  background:var(--app2);border:1.5px solid transparent;border-radius:12px;
-  font-family:var(--f);font-size:.84rem;color:var(--apptext);
-  outline:none;transition:.2s;
-}
+/* INPUTS */
+.input{width:100%;padding:13px 14px;background:var(--app2);border:1.5px solid transparent;border-radius:12px;font-family:var(--f);font-size:.84rem;color:var(--apptext);outline:none;transition:.2s}
 .input:focus{border-color:rgba(13,61,31,.25);background:var(--app)}
 .input::placeholder{color:var(--appsub2)}
 .search-wrap{display:flex;align-items:center;gap:10px;background:var(--app2);border-radius:12px;padding:12px 14px;border:1.5px solid transparent;transition:.2s}
@@ -164,12 +121,11 @@ body{\n  font-family:var(--f); font-size:var(--fs-base);\n  background:var(--bg)
 .search-wrap input::placeholder{color:var(--appsub2)}
 textarea.input{resize:none;height:60px}
 
-/* ─── TX ITEMS ──────────────────────────────────── */
+/* TX ITEMS */
 .tx-item{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid rgba(0,0,0,.04);cursor:pointer;transition:.1s}
 .tx-item:last-child{border-bottom:none}
 .tx-item:active{background:rgba(0,0,0,.03)}
 .tx-av{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center}
-.tx-av-ltr{font-family:var(--fd);font-size:.9rem;font-weight:900;color:var(--white)}
 .tx-info{flex:1;min-width:0}
 .tx-name{font-size:.78rem;font-weight:700;color:var(--apptext);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tx-meta{font-size:.6rem;color:var(--appsub);margin-top:2px;font-family:var(--fm)}
@@ -179,87 +135,39 @@ textarea.input{resize:none;height:60px}
 .tx-amount.debit{color:#dc2626}
 .tx-cat{font-size:.54rem;color:var(--appsub2);margin-top:2px;font-family:var(--fm)}
 
-/* ══════════════════════════════════════════════════
-   SCREEN: PIN
-══════════════════════════════════════════════════ */
+/* PIN */
 #sc-pin{background:var(--bg)}
-.pin-wrap{
-  flex:1;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;padding:32px 24px;gap:32px;
-}
-.pin-logo{
-  width:64px;height:64px;border-radius:20px;
-  background:linear-gradient(135deg,var(--gold),var(--gold3));
-  display:flex;align-items:center;justify-content:center;
-}
+.pin-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:32px}
+.pin-logo{width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,var(--gold),var(--gold3));display:flex;align-items:center;justify-content:center}
 .pin-logo svg{width:32px;height:32px;stroke:var(--bg);stroke-width:2.5;fill:none}
 .pin-title{font-family:var(--fd);font-size:1.4rem;font-weight:900;color:var(--white);text-align:center}
 .pin-sub{font-size:.78rem;color:var(--muted);text-align:center;margin-top:-20px;font-family:var(--fm)}
 .pin-dots{display:flex;gap:18px}
-.pin-dot{
-  width:16px;height:16px;border-radius:50%;
-  border:2px solid rgba(255,255,255,.25);background:transparent;
-  transition:.18s;
-}
+.pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.25);background:transparent;transition:.18s}
 .pin-dot.filled{background:var(--gold3);border-color:var(--gold3)}
 .pin-dot.error{background:#ef4444;border-color:#ef4444;animation:shake .4s}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 .pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
-.pin-key{
-  height:64px;border-radius:16px;border:none;
-  background:rgba(255,255,255,.07);
-  font-family:var(--f);font-size:1.3rem;font-weight:700;color:var(--white);
-  cursor:pointer;transition:.12s;display:flex;align-items:center;justify-content:center;
-}
+.pin-key{height:64px;border-radius:16px;border:none;background:rgba(255,255,255,.07);font-family:var(--f);font-size:1.3rem;font-weight:700;color:var(--white);cursor:pointer;transition:.12s;display:flex;align-items:center;justify-content:center}
 .pin-key:active{background:rgba(255,255,255,.15);transform:scale(.94)}
-.pin-key.del{font-size:.9rem;color:rgba(255,255,255,.5)}
 .pin-key.del svg{width:20px;height:20px;stroke:rgba(255,255,255,.5);stroke-width:2;fill:none}
 .pin-skip{font-size:.72rem;color:rgba(255,255,255,.3);cursor:pointer;font-family:var(--fm);text-align:center}
 
-/* ══════════════════════════════════════════════════
-   SCREEN: HOME
-══════════════════════════════════════════════════ */
-.home-hdr{
-  background:linear-gradient(160deg,var(--bg) 0%,var(--forest) 75%,var(--forest2) 100%);
-  flex-shrink:0;padding:0 20px 18px;position:relative;overflow:hidden;
-}
-.home-hdr::after{
-  content:'';position:absolute;width:280px;height:280px;border-radius:50%;
-  background:radial-gradient(circle,rgba(200,150,14,.1),transparent 70%);
-  right:-50px;top:-80px;pointer-events:none;
-}
+/* HOME */
+.home-hdr{background:linear-gradient(160deg,var(--bg) 0%,var(--forest) 75%,var(--forest2) 100%);flex-shrink:0;padding:0 20px 18px;position:relative;overflow:hidden}
+.home-hdr::after{content:'';position:absolute;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(200,150,14,.1),transparent 70%);right:-50px;top:-80px;pointer-events:none}
 .home-topbar{display:flex;align-items:center;justify-content:space-between;padding:6px 0 14px}
 .home-greet{font-size:.54rem;font-weight:600;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.1em;font-family:var(--fm)}
 .home-name{font-size:.92rem;font-weight:800;color:var(--white);margin-top:2px}
 .home-right{display:flex;gap:8px;align-items:center}
-.icon-btn{
-  width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.1);
-  display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;
-  position:relative;transition:.15s;
-}
+.icon-btn{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;position:relative;transition:.15s}
 .icon-btn:active{transform:scale(.92)}
 .icon-btn svg{width:18px;height:18px;stroke:rgba(255,255,255,.75);stroke-width:2;fill:none}
-.notif-badge{
-  position:absolute;top:4px;right:4px;
-  width:18px;height:18px;border-radius:50%;
-  background:#ef4444;border:2px solid var(--forest);
-  display:flex;align-items:center;justify-content:center;
-  font-size:.45rem;font-weight:800;color:white;font-family:var(--fm);
-}
-.home-av{
-  width:40px;height:40px;border-radius:50%;
-  background:linear-gradient(135deg,var(--gold),var(--forest2));
-  display:flex;align-items:center;justify-content:center;
-  font-family:var(--fd);font-size:.95rem;font-weight:900;color:var(--white);
-  border:2px solid rgba(255,255,255,.12);cursor:pointer;
-}
+.notif-badge{position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;background:#ef4444;border:2px solid var(--forest);display:flex;align-items:center;justify-content:center;font-size:.45rem;font-weight:800;color:white;font-family:var(--fm)}
+.home-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--forest2));display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:.95rem;font-weight:900;color:var(--white);border:2px solid rgba(255,255,255,.12);cursor:pointer}
 
 /* BALANCE CARD */
-.bal-card{
-  background:linear-gradient(135deg,var(--gold) 0%,var(--gold2) 50%,var(--gold3) 100%);
-  border-radius:20px;padding:16px 18px;position:relative;overflow:hidden;
-  box-shadow:0 8px 32px rgba(200,150,14,.3);
-}
+.bal-card{background:linear-gradient(135deg,var(--gold) 0%,var(--gold2) 50%,var(--gold3) 100%);border-radius:20px;padding:16px 18px;position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(200,150,14,.3)}
 .bal-card::before{content:'';position:absolute;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.12);bottom:-40px;right:-20px}
 .bal-card::after{content:'';position:absolute;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.08);top:-25px;right:70px}
 .bal-top{display:flex;align-items:flex-start;justify-content:space-between}
@@ -269,30 +177,18 @@ textarea.input{resize:none;height:60px}
 .bal-amount{font-family:var(--fd);font-size:1.85rem;font-weight:900;color:var(--bg);line-height:1;margin:6px 0 3px;letter-spacing:-.02em}
 .bal-amount .bc{font-size:.95rem;font-weight:600;opacity:.65}
 .bal-sub{font-size:.56rem;color:rgba(0,0,0,.4);font-family:var(--fm)}
-.bal-tag{
-  display:inline-flex;align-items:center;gap:4px;margin-top:10px;
-  padding:3px 8px;background:rgba(0,0,0,.08);border-radius:6px;
-  font-family:var(--fm);font-size:.54rem;color:rgba(0,0,0,.5);
-}
+.bal-tag{display:inline-flex;align-items:center;gap:4px;margin-top:10px;padding:3px 8px;background:rgba(0,0,0,.08);border-radius:6px;font-family:var(--fm);font-size:.54rem;color:rgba(0,0,0,.5)}
 .bal-tag svg{width:10px;height:10px;stroke:rgba(0,70,0,.7);stroke-width:2.5;fill:none}
 
 /* QUICK ACTIONS */
-.qa-row{
-  display:grid;grid-template-columns:repeat(5,1fr);
-  background:var(--card);padding:12px 6px;gap:2px;
-  border-bottom:1px solid rgba(0,0,0,.05);flex-shrink:0;
-}
+.qa-row{display:grid;grid-template-columns:repeat(5,1fr);background:var(--card);padding:12px 6px;gap:2px;border-bottom:1px solid rgba(0,0,0,.05);flex-shrink:0}
 .qa{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;padding:3px;border-radius:10px;transition:.12s}
 .qa:active{transform:scale(.88)}
 .qa-ic{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center}
 .qa-lbl{font-size:.5rem;font-weight:800;color:var(--apptext);text-align:center;text-transform:uppercase;letter-spacing:.02em}
 
 /* COFFRE STRIP */
-.cs{
-  margin:10px 16px;background:linear-gradient(135deg,var(--bg),var(--forest));
-  border-radius:16px;padding:13px 16px;display:flex;align-items:center;gap:12px;
-  border:1px solid rgba(200,150,14,.15);cursor:pointer;transition:.18s;flex-shrink:0;
-}
+.cs{margin:10px 16px;background:linear-gradient(135deg,var(--bg),var(--forest));border-radius:16px;padding:13px 16px;display:flex;align-items:center;gap:12px;border:1px solid rgba(200,150,14,.15);cursor:pointer;transition:.18s;flex-shrink:0}
 .cs:active{transform:scale(.98)}
 .cs-ic{width:36px;height:36px;border-radius:11px;background:rgba(200,150,14,.14);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .cs-ic svg{width:16px;height:16px;stroke:var(--gold3);stroke-width:2;fill:none}
@@ -304,26 +200,16 @@ textarea.input{resize:none;height:60px}
 .row-hdr-title{font-size:.6rem;font-weight:800;color:var(--apptext);text-transform:uppercase;letter-spacing:.1em}
 .row-hdr-link{font-size:.62rem;font-weight:700;color:var(--forest2);cursor:pointer}
 
-/* ══════════════════════════════════════════════════
-   SCREEN: SEND
-══════════════════════════════════════════════════ */
+/* SEND */
 .contact-scroll{display:flex;gap:10px;overflow-x:auto;padding:2px 0 10px}
 .contact-scroll::-webkit-scrollbar{display:none}
 .contact-chip{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;min-width:54px;transition:.14s;flex-shrink:0}
 .contact-chip:active{transform:scale(.88)}
-.contact-av{
-  width:48px;height:48px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-family:var(--fd);font-size:.95rem;font-weight:900;color:var(--white);
-  border:2.5px solid transparent;transition:.18s;position:relative;
-}
+.contact-av{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:.95rem;font-weight:900;color:var(--white);border:2.5px solid transparent;transition:.18s;position:relative}
 .contact-av.selected{border-color:var(--green2)}
 .contact-av.selected::after{content:'';position:absolute;bottom:0;right:0;width:14px;height:14px;border-radius:50%;background:var(--green2);border:2px solid var(--card)}
 .contact-name{font-size:.52rem;font-weight:700;color:var(--apptext);text-align:center}
-.rec-row{
-  display:flex;align-items:center;gap:12px;padding:12px 14px;
-  background:rgba(21,128,61,.06);border-radius:14px;border:1.5px solid rgba(21,128,61,.18);
-}
+.rec-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(21,128,61,.06);border-radius:14px;border:1.5px solid rgba(21,128,61,.18)}
 .rec-av{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:.9rem;font-weight:900;color:var(--white)}
 .rec-name{font-size:.82rem;font-weight:800;color:var(--apptext)}
 .rec-phone{font-size:.62rem;color:var(--appsub);font-family:var(--fm);margin-top:1px}
@@ -336,39 +222,21 @@ textarea.input{resize:none;height:60px}
 .amt-fee{display:inline-flex;align-items:center;gap:4px;margin-top:8px;padding:4px 10px;background:rgba(21,128,61,.08);border-radius:6px;font-family:var(--fm);font-size:.55rem;color:#15803d}
 .amt-fee svg{width:10px;height:10px;stroke:#15803d;stroke-width:2.5;fill:none}
 .numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.nk{
-  height:58px;border-radius:14px;border:none;background:var(--app2);
-  font-family:var(--f);font-size:1.15rem;font-weight:700;color:var(--apptext);
-  cursor:pointer;transition:.1s;display:flex;align-items:center;justify-content:center;
-}
+.nk{height:58px;border-radius:14px;border:none;background:var(--app2);font-family:var(--f);font-size:1.15rem;font-weight:700;color:var(--apptext);cursor:pointer;transition:.1s;display:flex;align-items:center;justify-content:center}
 .nk:active{transform:scale(.92);background:var(--app3)}
 .nk.del{background:rgba(220,38,38,.07);color:#dc2626}
 .nk.del svg{width:19px;height:19px;stroke:#dc2626;stroke-width:2;fill:none}
 
-/* ══════════════════════════════════════════════════
-   SCREEN: QR
-══════════════════════════════════════════════════ */
+/* QR */
 #sc-qr{background:var(--bg)}
-.qr-scanner-area{
-  flex:0 0 auto;display:flex;flex-direction:column;align-items:center;
-  padding:20px 20px 14px;gap:14px;
-}
-.qr-viewfinder{
-  width:210px;height:210px;border-radius:22px;
-  background:rgba(255,255,255,.04);
-  display:flex;align-items:center;justify-content:center;
-  position:relative;overflow:hidden;
-}
+.qr-scanner-area{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;padding:20px 20px 14px;gap:14px}
+.qr-viewfinder{width:210px;height:210px;border-radius:22px;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
 .qr-corner{position:absolute;width:30px;height:30px;border-color:var(--green2);border-style:solid}
 .qr-corner.tl{top:10px;left:10px;border-width:3px 0 0 3px;border-radius:4px 0 0 0}
 .qr-corner.tr{top:10px;right:10px;border-width:3px 3px 0 0;border-radius:0 4px 0 0}
 .qr-corner.bl{bottom:10px;left:10px;border-width:0 0 3px 3px;border-radius:0 0 0 4px}
 .qr-corner.br{bottom:10px;right:10px;border-width:0 3px 3px 0;border-radius:0 0 4px 0}
-.qr-scanline{
-  position:absolute;left:14px;right:14px;height:2px;
-  background:linear-gradient(90deg,transparent,var(--green2),transparent);
-  animation:scan 2.5s ease-in-out infinite;
-}
+.qr-scanline{position:absolute;left:14px;right:14px;height:2px;background:linear-gradient(90deg,transparent,var(--green2),transparent);animation:scan 2.5s ease-in-out infinite}
 @keyframes scan{0%{top:20px;opacity:.7}50%{top:190px;opacity:1}100%{top:20px;opacity:.7}}
 .qr-inner-grid{opacity:.08}
 .qr-hint{font-family:var(--fm);font-size:.62rem;color:rgba(255,255,255,.4);text-align:center}
@@ -376,7 +244,6 @@ textarea.input{resize:none;height:60px}
 .qr-simulate-form label{font-size:.58rem;color:rgba(255,255,255,.4);font-family:var(--fm);text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:5px;margin-top:10px}
 .qr-simulate-form label:first-child{margin-top:0}
 .qr-simulate-form .input{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.1);color:var(--white)}
-.qr-simulate-form .input:focus{border-color:rgba(200,150,14,.4)}
 .qr-simulate-form .input::placeholder{color:rgba(255,255,255,.25)}
 .qr-divider{display:flex;align-items:center;gap:10px;padding:0 20px;flex-shrink:0}
 .qr-divider-line{flex:1;height:1px;background:rgba(0,0,0,.08)}
@@ -386,19 +253,11 @@ textarea.input{resize:none;height:60px}
 .qr-mycard-img svg{width:100%;height:100%}
 .qr-mycard-name{font-size:.85rem;font-weight:800;color:var(--apptext)}
 .qr-mycard-phone{font-family:var(--fm);font-size:.6rem;color:var(--appsub);margin-top:2px}
-.qr-share-btn{
-  margin-left:auto;width:38px;height:38px;border-radius:11px;
-  background:rgba(13,61,31,.1);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
-}
+.qr-share-btn{margin-left:auto;width:38px;height:38px;border-radius:11px;background:rgba(13,61,31,.1);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 .qr-share-btn svg{width:15px;height:15px;stroke:var(--forest2);stroke-width:2;fill:none}
 
-/* ══════════════════════════════════════════════════
-   SCREEN: COFFRE
-══════════════════════════════════════════════════ */
-.coffre-hdr{
-  background:linear-gradient(160deg,var(--bg),var(--forest));
-  flex-shrink:0;padding:0 20px 20px;position:relative;overflow:hidden;
-}
+/* COFFRE */
+.coffre-hdr{background:linear-gradient(160deg,var(--bg),var(--forest));flex-shrink:0;padding:0 20px 20px;position:relative;overflow:hidden}
 .coffre-hdr::after{content:'';position:absolute;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(200,150,14,.1),transparent 70%);right:-50px;top:-70px;pointer-events:none}
 .coffre-hdr-top{display:flex;align-items:center;justify-content:space-between;padding:8px 0 16px}
 .coffre-title-txt{font-family:var(--fd);font-size:.95rem;font-style:italic;font-weight:700;color:var(--gold3)}
@@ -427,13 +286,8 @@ textarea.input{resize:none;height:60px}
 .coffre-new span{font-size:.75rem;font-weight:700;color:var(--appsub)}
 
 /* COFFRE DETAIL */
-.cd-hero{
-  background:linear-gradient(160deg,var(--bg),var(--forest));
-  flex-shrink:0;padding:0 20px 20px;
-}
+.cd-hero{background:linear-gradient(160deg,var(--bg),var(--forest));flex-shrink:0;padding:0 20px 20px}
 .cd-hero-top{display:flex;align-items:center;justify-content:space-between;padding:8px 0 16px}
-.cd-name{font-family:var(--fd);font-size:1.1rem;font-style:italic;font-weight:700;color:var(--white)}
-.cd-saved-label{font-size:.54rem;color:rgba(255,255,255,.4);font-family:var(--fm);text-transform:uppercase;letter-spacing:.1em}
 .cd-saved{font-family:var(--fd);font-size:2rem;font-weight:900;color:var(--white);letter-spacing:-.02em;margin:4px 0 2px}
 .cd-bar-wrap{background:rgba(255,255,255,.12);border-radius:100px;height:8px;overflow:hidden;margin-top:12px}
 .cd-bar{height:100%;border-radius:100px}
@@ -446,9 +300,7 @@ textarea.input{resize:none;height:60px}
 .cd-input-wrap{display:flex;gap:8px;align-items:center}
 .cd-input-wrap .input{flex:1}
 
-/* ══════════════════════════════════════════════════
-   SCREEN: BUDGET
-══════════════════════════════════════════════════ */
+/* BUDGET */
 .bud-summary{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .bud-sum-card{border-radius:14px;padding:14px;display:flex;align-items:center;justify-content:space-between}
 .bud-sum-label{font-size:.56rem;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.08em;font-family:var(--fm)}
@@ -467,9 +319,7 @@ textarea.input{resize:none;height:60px}
 .cat-val{font-size:.76rem;font-weight:800;color:var(--apptext);font-family:var(--fd)}
 .cat-pct{font-size:.54rem;color:var(--appsub2);font-family:var(--fm);margin-top:1px}
 
-/* ══════════════════════════════════════════════════
-   SCREEN: TONTINE
-══════════════════════════════════════════════════ */
+/* TONTINE */
 .tontine-item{background:var(--card);border-radius:var(--r);border:1px solid var(--border);padding:14px 16px}
 .tnt-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .tnt-av{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:.88rem;font-weight:900;color:var(--white)}
@@ -486,9 +336,7 @@ textarea.input{resize:none;height:60px}
 .tnt-btn{width:100%;padding:11px;border:none;border-radius:12px;background:rgba(13,61,31,.08);border:1px solid rgba(13,61,31,.15);font-family:var(--f);font-size:.78rem;font-weight:800;color:var(--forest2);cursor:pointer;transition:.15s}
 .tnt-btn:active{transform:scale(.97)}
 
-/* ══════════════════════════════════════════════════
-   SCREEN: FACTURES
-══════════════════════════════════════════════════ */
+/* FACTURES */
 .bill-item{display:flex;align-items:center;gap:12px;padding:13px 16px;background:var(--card);border-radius:14px;border:1px solid var(--border)}
 .bill-item.paid{opacity:.55}
 .bill-ic{width:42px;height:42px;border-radius:13px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
@@ -498,39 +346,23 @@ textarea.input{resize:none;height:60px}
 .bill-val{font-family:var(--fd);font-size:.88rem;font-weight:900;color:var(--apptext)}
 .bill-due{font-size:.56rem;font-family:var(--fm);margin-top:2px;font-weight:600;color:#dc2626}
 .bill-due.ok{color:#15803d}
-.bill-pay-btn{
-  margin-left:8px;flex-shrink:0;
-  padding:8px 14px;border:none;border-radius:9px;
-  background:linear-gradient(135deg,var(--gold),var(--gold3));
-  font-family:var(--f);font-size:.7rem;font-weight:800;color:var(--bg);cursor:pointer;transition:.15s;
-}
+.bill-pay-btn{margin-left:8px;flex-shrink:0;padding:8px 14px;border:none;border-radius:9px;background:linear-gradient(135deg,var(--gold),var(--gold3));font-family:var(--f);font-size:.7rem;font-weight:800;color:var(--bg);cursor:pointer;transition:.15s}
 .bill-pay-btn:active{transform:scale(.94)}
 .bills-empty{text-align:center;padding:20px;color:var(--appsub);font-size:.78rem}
 
-/* ══════════════════════════════════════════════════
-   SCREEN: RECHARGE
-══════════════════════════════════════════════════ */
+/* RECHARGE */
 .op-selector{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.op-btn{
-  padding:14px;border:2px solid var(--border);border-radius:14px;
-  background:var(--card);cursor:pointer;text-align:center;transition:.15s;
-}
+.op-btn{padding:14px;border:2px solid var(--border);border-radius:14px;background:var(--card);cursor:pointer;text-align:center;transition:.15s}
 .op-btn:active{transform:scale(.96)}
 .op-btn.on{border-color:var(--green2);background:rgba(34,197,94,.05)}
 .op-name{font-size:.8rem;font-weight:800;color:var(--apptext)}
 .op-sub{font-size:.6rem;color:var(--appsub);margin-top:2px}
 .amount-pills{display:flex;gap:6px;flex-wrap:wrap}
-.amount-pill{
-  padding:8px 14px;border-radius:10px;
-  border:1.5px solid var(--border);background:var(--card);
-  font-size:.78rem;font-weight:700;color:var(--apptext);cursor:pointer;transition:.14s;
-}
+.amount-pill{padding:8px 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--card);font-size:.78rem;font-weight:700;color:var(--apptext);cursor:pointer;transition:.14px}
 .amount-pill:active{transform:scale(.94)}
 .amount-pill.on{border-color:var(--gold2);background:rgba(200,150,14,.07);color:var(--gold2)}
 
-/* ══════════════════════════════════════════════════
-   SCREEN: NOTIFS
-══════════════════════════════════════════════════ */
+/* NOTIFS */
 .notif-item{display:flex;align-items:flex-start;gap:12px;padding:13px 16px;border-bottom:1px solid rgba(0,0,0,.04);position:relative;cursor:pointer;transition:.1s}
 .notif-item:last-child{border-bottom:none}
 .notif-item:active{background:rgba(0,0,0,.03)}
@@ -540,9 +372,7 @@ textarea.input{resize:none;height:60px}
 .notif-desc{font-size:.64rem;color:var(--appsub);margin-top:2px;line-height:1.5}
 .notif-time{font-family:var(--fm);font-size:.54rem;color:var(--appsub2);margin-top:4px}
 
-/* ══════════════════════════════════════════════════
-   SCREEN: PROFIL
-══════════════════════════════════════════════════ */
+/* PROFIL */
 .profil-hdr{background:linear-gradient(160deg,var(--bg),var(--forest));flex-shrink:0;padding:0 20px 22px;text-align:center;position:relative;overflow:hidden}
 .profil-hdr::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 70% 30%,rgba(200,150,14,.08),transparent 60%);pointer-events:none}
 .profil-av{width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--forest2));display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:1.8rem;font-weight:900;color:var(--white);margin:0 auto 10px;border:3px solid rgba(255,255,255,.12)}
@@ -569,41 +399,18 @@ textarea.input{resize:none;height:60px}
 .mi-tag.gold{background:rgba(200,150,14,.1);color:var(--gold2)}
 .mi-tag.red{background:rgba(220,38,38,.1);color:#dc2626}
 
-/* ══════════════════════════════════════════════════
-   MODALS
-══════════════════════════════════════════════════ */
-.modal{
-  position:absolute;inset:0;border-radius:inherit;
-  background:rgba(6,13,8,.7);backdrop-filter:blur(6px);
-  display:flex;align-items:flex-end;justify-content:center;
-  z-index:500;opacity:0;pointer-events:none;transition:opacity .25s;
-}
+/* MODALS */
+.modal{position:absolute;inset:0;border-radius:inherit;background:rgba(6,13,8,.7);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;z-index:500;opacity:0;pointer-events:none;transition:opacity .25s}
 .modal.on{opacity:1;pointer-events:all}
-.modal-box{
-  background:var(--card);border-radius:22px 22px 0 0;
-  padding:20px 20px calc(20px + var(--safe-bot));width:100%;
-  transform:translateY(40px);transition:transform .28s cubic-bezier(.32,.72,0,1);
-  display:flex;flex-direction:column;gap:12px;
-}
+.modal-box{background:var(--card);border-radius:22px 22px 0 0;padding:20px 20px calc(20px + var(--safe-bot));width:100%;transform:translateY(40px);transition:transform .28s cubic-bezier(.32,.72,0,1);display:flex;flex-direction:column;gap:12px}
 .modal.on .modal-box{transform:translateY(0)}
 .modal-handle{width:40px;height:4px;background:rgba(0,0,0,.12);border-radius:100px;margin:0 auto 4px}
 .modal-title{font-size:.9rem;font-weight:800;color:var(--apptext);text-align:center}
 
-/* ── OVERLAY ─────────────────────────────────────── */
-.overlay{
-  position:absolute;inset:0;border-radius:inherit;
-  background:rgba(6,13,8,.96);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:14px;z-index:300;opacity:0;pointer-events:none;transition:opacity .2s;
-}
+/* OVERLAY */
+.overlay{position:absolute;inset:0;border-radius:inherit;background:rgba(6,13,8,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:300;opacity:0;pointer-events:none;transition:opacity .2s}
 .overlay.on{opacity:1;pointer-events:all}
-.ov-circle{
-  width:80px;height:80px;border-radius:50%;
-  background:linear-gradient(135deg,var(--green),var(--green2));
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 0 50px rgba(34,197,94,.35);
-  animation:popIn .4s cubic-bezier(.32,.72,0,1) both;
-}
+.ov-circle{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--green2));display:flex;align-items:center;justify-content:center;box-shadow:0 0 50px rgba(34,197,94,.35);animation:popIn .4s cubic-bezier(.32,.72,0,1) both}
 .ov-circle svg{width:36px;height:36px;stroke:white;stroke-width:2.5;fill:none}
 @keyframes popIn{from{transform:scale(0)}to{transform:scale(1)}}
 .ov-title{font-family:var(--fd);font-size:1.3rem;font-weight:900;color:var(--white);text-align:center}
@@ -611,26 +418,14 @@ textarea.input{resize:none;height:60px}
 .ov-btn{padding:13px 36px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--gold),var(--gold3));font-family:var(--f);font-size:.88rem;font-weight:800;color:var(--bg);cursor:pointer;transition:.15s;margin-top:4px}
 .ov-btn:active{transform:scale(.95)}
 
-/* ── TOAST ───────────────────────────────────────── */
-.toast{
-  position:absolute;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);
-  background:var(--apptext);color:var(--white);padding:10px 18px;border-radius:10px;
-  font-size:.76rem;font-weight:700;white-space:nowrap;
-  opacity:0;transition:opacity .22s,transform .22s;pointer-events:none;z-index:1000;
-  font-family:var(--fm);letter-spacing:.02em;
-}
+/* TOAST */
+.toast{position:absolute;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--apptext);color:var(--white);padding:10px 18px;border-radius:10px;font-size:.76rem;font-weight:700;white-space:nowrap;opacity:0;transition:opacity .22s,transform .22s;pointer-events:none;z-index:1000;font-family:var(--fm);letter-spacing:.02em}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast.error{background:#dc2626}
 .toast.info{background:var(--forest2)}
 
-/* ── INSTALL BANNER ──────────────────────────────── */
-.install-banner{
-  position:absolute;top:0;left:0;right:0;
-  background:linear-gradient(135deg,var(--forest),var(--forest2));
-  padding:12px 16px calc(12px + var(--safe-top));
-  display:flex;align-items:center;gap:10px;
-  z-index:400;transform:translateY(-100%);transition:transform .3s;
-}
+/* INSTALL BANNER */
+.install-banner{position:absolute;top:0;left:0;right:0;background:linear-gradient(135deg,var(--forest),var(--forest2));padding:12px 16px calc(12px + var(--safe-top));display:flex;align-items:center;gap:10px;z-index:400;transform:translateY(-100%);transition:transform .3s}
 .install-banner.show{transform:translateY(0)}
 .install-text{flex:1;font-size:.72rem;color:rgba(255,255,255,.8);line-height:1.5}
 .install-text strong{color:var(--white);display:block;font-size:.78rem}
@@ -645,49 +440,48 @@ textarea.input{resize:none;height:60px}
  <div class="island"></div>
  <div class="app-inner" id="appRoot">
 
-  <!-- ══ SVG ICONS ════════════════════════════════ -->
   <svg style="display:none"><defs>
-  <symbol id="i-zap"     viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
-  <symbol id="i-send"    viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></symbol>
-  <symbol id="i-recv"    viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
-  <symbol id="i-qr"      viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="5" rx="1"/><rect x="16" y="3" width="5" height="5" rx="1"/><rect x="3" y="16" width="5" height="5" rx="1"/><path d="M16 16h2v2h-2zM18 18h2v2h-2zM14 14h2v2h-2zM14 18h2v2h-2zM18 14h2v2h-2z"/></symbol>
-  <symbol id="i-pay"     viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></symbol>
-  <symbol id="i-lock"    viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
-  <symbol id="i-bell"    viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></symbol>
-  <symbol id="i-home"    viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
-  <symbol id="i-chart"   viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
-  <symbol id="i-user"    viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
-  <symbol id="i-check"   viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
-  <symbol id="i-arr-r"   viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></symbol>
-  <symbol id="i-arr-l"   viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></symbol>
-  <symbol id="i-eye"     viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-zap" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></symbol>
+  <symbol id="i-recv" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+  <symbol id="i-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="5" rx="1"/><rect x="16" y="3" width="5" height="5" rx="1"/><rect x="3" y="16" width="5" height="5" rx="1"/><path d="M16 16h2v2h-2zM18 18h2v2h-2zM14 14h2v2h-2zM14 18h2v2h-2zM18 14h2v2h-2z"/></symbol>
+  <symbol id="i-pay" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+  <symbol id="i-arr-r" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></symbol>
+  <symbol id="i-arr-l" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
   <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></symbol>
-  <symbol id="i-search"  viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
-  <symbol id="i-share"   viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></symbol>
-  <symbol id="i-trend"   viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></symbol>
-  <symbol id="i-users"   viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
-  <symbol id="i-shield"  viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
-  <symbol id="i-plus"    viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
-  <symbol id="i-phone"   viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></symbol>
+  <symbol id="i-trend" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></symbol>
   <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
-  <symbol id="i-help"    viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
-  <symbol id="i-logout"  viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></symbol>
-  <symbol id="i-gift"    viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></symbol>
-  <symbol id="i-del"     viewBox="0 0 24 24"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></symbol>
-  <symbol id="i-target"  viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
-  <symbol id="i-drop"    viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></symbol>
-  <symbol id="i-wifi"    viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 16 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></symbol>
-  <symbol id="i-star"    viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
-  <symbol id="i-edit"    viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+  <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></symbol>
+  <symbol id="i-gift" viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></symbol>
+  <symbol id="i-del" viewBox="0 0 24 24"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></symbol>
+  <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 16 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></symbol>
   </defs></svg>
 
-  <!-- ══ PIN SCREEN ════════════════════════════════ -->
+  <!-- PIN -->
   <div class="screen screen-dark active" id="sc-pin">
     <div class="pin-wrap">
       <div class="pin-logo"><svg><use href="#i-zap"/></svg></div>
       <div>
         <div class="pin-title">GhettoPay</div>
-        <div class="pin-sub" style="margin-top:6px">Saisis ton code PIN · <strong style="color:var(--gold3)">1234</strong></div>
+        <div class="pin-sub" style="margin-top:6px">Saisis ton PIN · <strong style="color:var(--gold3)">1234</strong></div>
       </div>
       <div class="pin-dots" id="pin-dots">
         <div class="pin-dot"></div><div class="pin-dot"></div>
@@ -710,7 +504,7 @@ textarea.input{resize:none;height:60px}
     </div>
   </div>
 
-  <!-- ══ HOME SCREEN ══════════════════════════════ -->
+  <!-- HOME -->
   <div class="screen" id="sc-home">
     <div class="home-hdr">
       <div class="sb dark">
@@ -740,42 +534,21 @@ textarea.input{resize:none;height:60px}
         <div class="bal-tag"><svg><use href="#i-trend"/></svg>+12.4% ce mois · Gabon Vert</div>
       </div>
     </div>
-
     <div class="qa-row">
-      <div class="qa" onclick="Router.go('send')">
-        <div class="qa-ic" style="background:rgba(200,150,14,.12)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold2)" stroke-width="1.9"><use href="#i-send"/></svg></div>
-        <div class="qa-lbl">Envoyer</div>
-      </div>
-      <div class="qa" onclick="App.success('Ton QR est prêt','Partage-le pour recevoir de l\'argent')">
-        <div class="qa-ic" style="background:rgba(34,197,94,.1)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="1.9"><use href="#i-recv"/></svg></div>
-        <div class="qa-lbl">Recevoir</div>
-      </div>
-      <div class="qa" onclick="Router.go('qr')">
-        <div class="qa-ic" style="background:rgba(99,102,241,.1)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.9"><use href="#i-qr"/></svg></div>
-        <div class="qa-lbl">Scanner</div>
-      </div>
-      <div class="qa" onclick="Router.go('factures')">
-        <div class="qa-ic" style="background:rgba(59,130,246,.1)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.9"><use href="#i-pay"/></svg></div>
-        <div class="qa-lbl">Payer</div>
-      </div>
-      <div class="qa" onclick="Router.go('tontine')">
-        <div class="qa-ic" style="background:rgba(168,85,247,.1)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="1.9"><use href="#i-users"/></svg></div>
-        <div class="qa-lbl">Tontine</div>
-      </div>
+      <div class="qa" onclick="Router.go('send')"><div class="qa-ic" style="background:rgba(200,150,14,.12)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold2)" stroke-width="1.9"><use href="#i-send"/></svg></div><div class="qa-lbl">Envoyer</div></div>
+      <div class="qa" onclick="App.success('Ton QR est prêt','Partage-le pour recevoir')"><div class="qa-ic" style="background:rgba(34,197,94,.1)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="1.9"><use href="#i-recv"/></svg></div><div class="qa-lbl">Recevoir</div></div>
+      <div class="qa" onclick="Router.go('qr')"><div class="qa-ic" style="background:rgba(99,102,241,.1)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.9"><use href="#i-qr"/></svg></div><div class="qa-lbl">Scanner</div></div>
+      <div class="qa" onclick="Router.go('factures')"><div class="qa-ic" style="background:rgba(59,130,246,.1)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.9"><use href="#i-pay"/></svg></div><div class="qa-lbl">Payer</div></div>
+      <div class="qa" onclick="Router.go('tontine')"><div class="qa-ic" style="background:rgba(168,85,247,.1)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="1.9"><use href="#i-users"/></svg></div><div class="qa-lbl">Tontine</div></div>
     </div>
-
     <div class="cs" onclick="Router.go('coffre')">
       <div class="cs-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold3)" stroke-width="2"><use href="#i-lock"/></svg></div>
       <div><div class="cs-title">Mon Coffre Forêt</div><div class="cs-sub">Épargne sécurisée · 5.5%/an</div></div>
       <div class="cs-val" id="cs-val">245 000</div>
       <div class="cs-arr"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2"><use href="#i-arr-r"/></svg></div>
     </div>
-
     <div class="row-hdr"><div class="row-hdr-title">Activité récente</div><div class="row-hdr-link" onclick="Router.go('budget')">Tout voir</div></div>
-    <div class="scroll">
-      <div class="card" style="margin:0 16px 80px;overflow:hidden" id="tx-list"></div>
-    </div>
-
+    <div class="scroll"><div class="card" style="margin:0 16px 80px;overflow:hidden" id="tx-list"></div></div>
     <div class="bnav">
       <div class="bnt on" onclick="Router.go('home')"><svg><use href="#i-home"/></svg><span class="bnt-lbl">Accueil</span></div>
       <div class="bnt" onclick="Router.go('budget')"><svg><use href="#i-chart"/></svg><span class="bnt-lbl">Budget</span></div>
@@ -785,7 +558,7 @@ textarea.input{resize:none;height:60px}
     </div>
   </div>
 
-  <!-- ══ SEND SCREEN ══════════════════════════════ -->
+  <!-- SEND -->
   <div class="screen" id="sc-send">
     <div style="background:var(--card);flex-shrink:0">
       <div class="sb"><span class="clock">09:41</span></div>
@@ -794,7 +567,7 @@ textarea.input{resize:none;height:60px}
         <span class="snav-title">Envoyer de l'argent</span>
       </div>
       <div class="pad gap12" style="padding-bottom:14px">
-        <div class="search-wrap"><svg><use href="#i-search"/></svg><input type="text" placeholder="Nom ou numéro de téléphone..."/></div>
+        <div class="search-wrap"><svg><use href="#i-search"/></svg><input type="text" placeholder="Nom ou numéro..."/></div>
         <div class="sec-label">Contacts récents</div>
         <div class="contact-scroll" id="contact-grid"></div>
         <div class="rec-row" id="send-rec-row" style="display:none">
@@ -818,14 +591,14 @@ textarea.input{resize:none;height:60px}
           <button class="nk" onclick="App.kp('000')">000</button><button class="nk" onclick="App.kp('0')">0</button>
           <button class="nk del" onclick="App.kp('del')"><svg><use href="#i-del"/></svg></button>
         </div>
-        <textarea class="input" id="send-note" placeholder="Ajouter une note (optionnel)..."></textarea>
+        <textarea class="input" id="send-note" placeholder="Note (optionnel)..."></textarea>
         <button class="btn btn-gold" onclick="App.doSend()"><svg><use href="#i-send"/></svg>Envoyer maintenant</button>
         <button class="btn btn-ghost" onclick="Router.back()">Annuler</button>
       </div>
     </div>
   </div>
 
-  <!-- ══ QR SCREEN ════════════════════════════════ -->
+  <!-- QR -->
   <div class="screen screen-dark" id="sc-qr">
     <div class="sb dark"><span class="clock">09:41</span></div>
     <div class="snav dark">
@@ -844,9 +617,6 @@ textarea.input{resize:none;height:60px}
             <rect x="8" y="50" width="22" height="22" fill="white" rx="2"/><rect x="10" y="52" width="6" height="6" fill="#060d08"/>
             <rect x="34" y="8" width="6" height="6" fill="white"/><rect x="42" y="18" width="6" height="6" fill="white"/>
             <rect x="34" y="34" width="10" height="10" fill="white"/><rect x="46" y="34" width="6" height="6" fill="white"/>
-            <rect x="56" y="42" width="6" height="10" fill="white"/><rect x="34" y="46" width="6" height="6" fill="white"/>
-            <rect x="42" y="56" width="6" height="6" fill="white"/><rect x="50" y="54" width="6" height="6" fill="white"/>
-            <rect x="60" y="56" width="6" height="6" fill="white"/><rect x="60" y="64" width="6" height="6" fill="white"/>
           </svg>
         </div>
         <div class="qr-hint">Pointe vers le QR du commerçant</div>
@@ -856,11 +626,8 @@ textarea.input{resize:none;height:60px}
           <label>Montant (FCFA)</label>
           <input id="qr-amount-input" class="input" type="number" placeholder="Ex: 5000"/>
         </div>
-        <button class="btn btn-gold" style="width:100%" onclick="App.doQRPay()">
-          <svg><use href="#i-shield"/></svg>Confirmer le paiement QR
-        </button>
+        <button class="btn btn-gold" style="width:100%" onclick="App.doQRPay()"><svg><use href="#i-shield"/></svg>Confirmer le paiement QR</button>
       </div>
-
       <div class="qr-divider"><div class="qr-divider-line"></div><span class="qr-divider-txt">Mon QR Code</span><div class="qr-divider-line"></div></div>
       <div class="pad gap12" style="padding-top:12px">
         <div class="qr-mycard">
@@ -889,7 +656,7 @@ textarea.input{resize:none;height:60px}
     </div>
   </div>
 
-  <!-- ══ COFFRE SCREEN ════════════════════════════ -->
+  <!-- COFFRE -->
   <div class="screen" id="sc-coffre">
     <div class="coffre-hdr">
       <div class="sb dark"><span class="clock">09:41</span></div>
@@ -910,7 +677,7 @@ textarea.input{resize:none;height:60px}
     </div>
   </div>
 
-  <!-- ══ COFFRE DETAIL SCREEN ═════════════════════ -->
+  <!-- COFFRE DETAIL -->
   <div class="screen" id="sc-coffre-detail">
     <div class="cd-hero">
       <div class="sb dark"><span class="clock">09:41</span></div>
@@ -951,7 +718,7 @@ textarea.input{resize:none;height:60px}
     </div>
   </div>
 
-  <!-- ══ BUDGET SCREEN ════════════════════════════ -->
+  <!-- BUDGET -->
   <div class="screen" id="sc-budget">
     <div style="background:var(--card);flex-shrink:0;padding:0 0 12px">
       <div class="sb"><span class="clock">09:41</span></div>
@@ -995,7 +762,7 @@ textarea.input{resize:none;height:60px}
     </div>
   </div>
 
-  <!-- ══ TONTINE SCREEN ═══════════════════════════ -->
+  <!-- TONTINE -->
   <div class="screen" id="sc-tontine">
     <div class="sb"><span class="clock">09:41</span></div>
     <div class="snav">
@@ -1003,12 +770,10 @@ textarea.input{resize:none;height:60px}
       <span class="snav-title">Tontines</span>
       <span class="snav-action" onclick="App.success('Tontine créée','Partage le code à tes amis')">+ Nouvelle</span>
     </div>
-    <div class="scroll">
-      <div class="pad gap12" id="tontine-list"></div>
-    </div>
+    <div class="scroll"><div class="pad gap12" id="tontine-list"></div></div>
   </div>
 
-  <!-- ══ FACTURES SCREEN ══════════════════════════ -->
+  <!-- FACTURES -->
   <div class="screen" id="sc-factures">
     <div class="sb"><span class="clock">09:41</span></div>
     <div class="snav">
@@ -1035,7 +800,7 @@ textarea.input{resize:none;height:60px}
     </div>
   </div>
 
-  <!-- ══ RECHARGE SCREEN ══════════════════════════ -->
+  <!-- RECHARGE -->
   <div class="screen" id="sc-recharge">
     <div class="sb"><span class="clock">09:41</span></div>
     <div class="snav">
@@ -1046,12 +811,8 @@ textarea.input{resize:none;height:60px}
       <div class="pad gap12">
         <div class="sec-label">Opérateur</div>
         <div class="op-selector">
-          <div class="op-btn on" id="op-airtel" onclick="selectOp('Airtel','op-airtel','op-moov')">
-            <div class="op-name">Airtel</div><div class="op-sub">+241 06/07 XX</div>
-          </div>
-          <div class="op-btn" id="op-moov" onclick="selectOp('Moov','op-moov','op-airtel')">
-            <div class="op-name">Moov</div><div class="op-sub">+241 07 XX</div>
-          </div>
+          <div class="op-btn on" id="op-airtel" onclick="selectOp('Airtel','op-airtel','op-moov')"><div class="op-name">Airtel</div><div class="op-sub">+241 06/07 XX</div></div>
+          <div class="op-btn" id="op-moov" onclick="selectOp('Moov','op-moov','op-airtel')"><div class="op-name">Moov</div><div class="op-sub">+241 07 XX</div></div>
         </div>
         <input id="rch-op" type="hidden" value="Airtel"/>
         <div class="sec-label">Numéro à recharger</div>
@@ -1065,13 +826,13 @@ textarea.input{resize:none;height:60px}
           <div class="amount-pill" onclick="selectAmount(this,25000)">25 000</div>
         </div>
         <input id="rch-amount" type="hidden" value="1000"/>
-        <input class="input" type="number" placeholder="Ou saisir un montant personnalisé..." oninput="document.getElementById('rch-amount').value=this.value"/>
+        <input class="input" type="number" placeholder="Montant personnalisé..." oninput="document.getElementById('rch-amount').value=this.value"/>
         <button class="btn btn-gold" onclick="App.doRecharge()"><svg><use href="#i-phone"/></svg>Recharger maintenant</button>
       </div>
     </div>
   </div>
 
-  <!-- ══ NOTIFICATIONS SCREEN ══════════════════════ -->
+  <!-- NOTIFICATIONS -->
   <div class="screen" id="sc-notifications">
     <div class="sb"><span class="clock">09:41</span></div>
     <div class="snav">
@@ -1079,12 +840,10 @@ textarea.input{resize:none;height:60px}
       <span class="snav-title">Notifications</span>
       <span class="snav-action" onclick="App.markAllRead()">Tout lire</span>
     </div>
-    <div class="scroll">
-      <div class="card" style="margin:16px;overflow:hidden" id="notif-list"></div>
-    </div>
+    <div class="scroll"><div class="card" style="margin:16px;overflow:hidden" id="notif-list"></div></div>
   </div>
 
-  <!-- ══ PROFIL SCREEN ════════════════════════════ -->
+  <!-- PROFIL -->
   <div class="screen" id="sc-profil">
     <div class="profil-hdr">
       <div class="sb dark"><span class="clock">09:41</span></div>
@@ -1119,7 +878,7 @@ textarea.input{resize:none;height:60px}
           <div class="mi" onclick="App.toast('Sécurité : Empreinte · PIN · Face ID','info')"><div class="mi-ic" style="background:rgba(0,0,0,.05)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--appsub)" stroke-width="1.9"><use href="#i-settings"/></svg></div><div class="mi-text"><div class="mi-title">Sécurité & PIN</div><div class="mi-sub">Empreinte, Face ID, 2FA</div></div><div class="mi-right"><div class="mi-arr"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--appsub2)" stroke-width="2"><use href="#i-arr-r"/></svg></div></div></div>
           <div class="mi" onclick="App.toast('Support GhettoPay · 24h/24','info')"><div class="mi-ic" style="background:rgba(0,0,0,.05)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--appsub)" stroke-width="1.9"><use href="#i-help"/></svg></div><div class="mi-text"><div class="mi-title">Aide & Support</div><div class="mi-sub">24h/24 · 7j/7 en français</div></div><div class="mi-right"><div class="mi-arr"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--appsub2)" stroke-width="2"><use href="#i-arr-r"/></svg></div></div></div>
         </div>
-        <button class="btn btn-danger" onclick="App.toast('Déconnexion · PIN requis au prochain lancement','info');setTimeout(()=>Router.go(\'pin\'),1500)"><svg><use href="#i-logout"/></svg>Se déconnecter</button>
+        <button class="btn btn-danger" onclick="App.toast('Déconnexion · PIN requis au prochain lancement','info');setTimeout(()=>Router.go('pin'),1500)"><svg><use href="#i-logout"/></svg>Se déconnecter</button>
         <div style="text-align:center;font-family:var(--fm);font-size:.54rem;color:var(--appsub2);padding-bottom:4px">GhettoPay v2.0 · Libreville, Gabon · Régulé CEMAC</div>
       </div>
     </div>
@@ -1132,8 +891,7 @@ textarea.input{resize:none;height:60px}
     </div>
   </div>
 
-  <!-- ══ MODALS ════════════════════════════════════ -->
-  <!-- New Coffre -->
+  <!-- MODAL: NEW COFFRE -->
   <div class="modal" id="new-coffre-modal" onclick="if(event.target===this)App.closeNewCoffre()">
     <div class="modal-box">
       <div class="modal-handle"></div>
@@ -1155,7 +913,7 @@ textarea.input{resize:none;height:60px}
     </div>
   </div>
 
-  <!-- Edit Profile -->
+  <!-- MODAL: EDIT PROFILE -->
   <div class="modal" id="edit-profile-modal" onclick="if(event.target===this)App.closeEditProfile()">
     <div class="modal-box">
       <div class="modal-handle"></div>
@@ -1168,7 +926,7 @@ textarea.input{resize:none;height:60px}
     </div>
   </div>
 
-  <!-- ══ OVERLAY ══════════════════════════════════ -->
+  <!-- OVERLAY -->
   <div class="overlay" id="overlay">
     <div class="ov-circle"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><use href="#i-check"/></svg></div>
     <div class="ov-title" id="ov-title">Succès !</div>
@@ -1176,10 +934,10 @@ textarea.input{resize:none;height:60px}
     <button class="ov-btn" onclick="App.closeOverlay()">Super !</button>
   </div>
 
-  <!-- ══ TOAST ════════════════════════════════════ -->
+  <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
-  <!-- ══ INSTALL BANNER ═══════════════════════════ -->
+  <!-- INSTALL BANNER -->
   <div class="install-banner" id="install-banner">
     <div class="install-text"><strong>Installer GhettoPay</strong>Ajoute l'app sur ton téléphone pour l'utiliser hors ligne</div>
     <button class="install-btn" id="install-btn">Installer</button>
@@ -1188,65 +946,63 @@ textarea.input{resize:none;height:60px}
     </button>
   </div>
 
- </div><!-- /app-inner -->
-</div><!-- /app-shell -->
+ </div>
+</div>
 
+<!-- ══ app.js EN PREMIER ══ -->
+<script src="./app.js"></script>
+
+<!-- ══ PUIS LE SCRIPT INLINE ══ -->
 <script>
-/* ─── HELPERS ─────────────── */
 function setTab(btn){btn.closest('.bud-tabs').querySelectorAll('.btab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');App.render('budget')}
 function selectOp(name,onId,offId){document.getElementById('rch-op').value=name;document.getElementById(onId).classList.add('on');document.getElementById(offId).classList.remove('on')}
 function selectAmount(el,val){document.querySelectorAll('.amount-pill').forEach(p=>p.classList.remove('on'));el.classList.add('on');document.getElementById('rch-amount').value=val}
 function selectDuration(el,months){document.querySelectorAll('#new-coffre-modal .amount-pill').forEach(p=>p.classList.remove('on'));el.classList.add('on');document.getElementById('nc-months').value=months}
 
-/* ─── INIT ROUTER ─────────── */
-Router.go = function(screen, data){
-  const scrId = 'sc-' + screen.replace(/-/g,'_').replace('coffre_detail','coffre-detail');
-  // map screen names to DOM ids
-  const idMap = {'coffre-detail':'sc-coffre-detail','notifications':'sc-notifications'};
-  const domId = idMap[screen] || 'sc-' + screen;
-  const prev = document.getElementById('sc-' + this.current);
-  const next = document.getElementById(domId);
-  if(!next || screen === this.current) return;
+Router.go = function(screen,data){
+  const idMap={'coffre-detail':'sc-coffre-detail','notifications':'sc-notifications'};
+  const domId=idMap[screen]||'sc-'+screen;
+  const prev=document.getElementById('sc-'+this.current);
+  const next=document.getElementById(domId);
+  if(!next||screen===this.current)return;
   prev?.classList.add('leaving');
   next.classList.add('active');
-  setTimeout(()=>{ prev?.classList.remove('leaving','active'); },400);
-  this.history.push({screen:this.current, data:App.pageData});
-  this.current = screen;
-  App.pageData = data || {};
+  setTimeout(()=>{prev?.classList.remove('leaving','active');},400);
+  this.history.push({screen:this.current,data:App.pageData});
+  this.current=screen;
+  App.pageData=data||{};
   App.render(screen);
 };
 
-Router.back = function(){
-  if(!this.history.length) return;
-  const {screen, data} = this.history.pop();
-  const idMap = {'coffre-detail':'sc-coffre-detail','notifications':'sc-notifications'};
-  const leavingId = idMap[this.current] || 'sc-' + this.current;
-  const arrivingId = idMap[screen] || 'sc-' + screen;
-  const leaving = document.getElementById(leavingId);
-  const arriving = document.getElementById(arrivingId);
-  if(!leaving||!arriving) return;
+Router.back=function(){
+  if(!this.history.length)return;
+  const{screen,data}=this.history.pop();
+  const idMap={'coffre-detail':'sc-coffre-detail','notifications':'sc-notifications'};
+  const leavingId=idMap[this.current]||'sc-'+this.current;
+  const arrivingId=idMap[screen]||'sc-'+screen;
+  const leaving=document.getElementById(leavingId);
+  const arriving=document.getElementById(arrivingId);
+  if(!leaving||!arriving)return;
   leaving.style.cssText='transition:transform .32s cubic-bezier(.32,.72,0,1),opacity .28s;transform:translateX(100%);opacity:0;';
   arriving.classList.add('active');
   arriving.style.cssText='transition:transform .32s cubic-bezier(.32,.72,0,1),opacity .28s;transform:translateX(-8%);opacity:0;';
   requestAnimationFrame(()=>requestAnimationFrame(()=>{arriving.style.transform='translateX(0)';arriving.style.opacity='1'}));
   setTimeout(()=>{leaving.classList.remove('active');leaving.style.cssText='';arriving.style.cssText='';},370);
-  this.current = screen;
-  App.pageData = data||{};
+  this.current=screen;
+  App.pageData=data||{};
   App.render(screen);
 };
 
-/* ─── PWA INSTALL ─────────── */
 let deferredPrompt;
-window.addEventListener('beforeinstallprompt', e => {
+window.addEventListener('beforeinstallprompt',e=>{
   e.preventDefault();
-  deferredPrompt = e;
-  setTimeout(()=>document.getElementById('install-banner').classList.add('show'), 3000);
+  deferredPrompt=e;
+  setTimeout(()=>document.getElementById('install-banner').classList.add('show'),3000);
 });
-document.getElementById('install-btn').addEventListener('click', async()=>{
+document.getElementById('install-btn').addEventListener('click',async()=>{
   document.getElementById('install-banner').classList.remove('show');
-  if(deferredPrompt){ deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; }
+  if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;}
 });
 </script>
-<script src="./app.js"></script>
 </body>
 </html>
