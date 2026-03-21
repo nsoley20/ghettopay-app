@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -9,11 +8,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="theme-color" content="#0A4A2E"/>
 <title>GhettoPay</title>
-<link rel="icon" type="image/svg+xml" href="ghettopay-icon.svg"/><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
-  /* Core */
   --ink:      #0D0D0D;
   --ink2:     #1A1A1A;
   --forest:   #0A4A2E;
@@ -24,7 +22,6 @@
   --gold:     #D4A017;
   --gold2:    #F0C040;
   --gold3:    #FDE68A;
-  /* App surfaces */
   --bg:       #FAF7F0;
   --bg2:      #F2EDE3;
   --bg3:      #E8E0D0;
@@ -33,11 +30,9 @@
   --txt2:     #4A5240;
   --txt3:     #8A9280;
   --border:   rgba(0,0,0,.07);
-  /* Fonts */
-  --f:  'Outfit',sans-serif;
-  --fd: 'Playfair Display',serif;
-  --fm: 'DM Mono',monospace;
-  /* Safe areas */
+  --f: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  --fd: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  --fm: 'SF Mono', Monaco, 'Roboto Mono', Consolas, monospace;
   --sat: env(safe-area-inset-top,0px);
   --sab: env(safe-area-inset-bottom,0px);
 }
@@ -47,7 +42,6 @@ body{
   display:flex;align-items:center;justify-content:center;
 }
 
-/* ── SHELL ──────────────────────────── */
 .shell{
   width:min(390px,100vw);
   height:min(844px,100vh);
@@ -73,7 +67,6 @@ body{
   .island{display:none}
 }
 
-/* ── SCREENS ────────────────────────── */
 .sc{
   position:absolute;inset:0;
   display:flex;flex-direction:column;
@@ -86,7 +79,6 @@ body{
 .sc.out{transform:translateX(-18%);opacity:0;z-index:2}
 .sc-dark{background:var(--forest)}
 
-/* ── STATUS BAR ─────────────────────── */
 .sbar{
   padding:calc(var(--sat) + 12px) 20px 6px;
   display:flex;align-items:center;justify-content:space-between;
@@ -96,7 +88,6 @@ body{
 .sbar.dk .sbar-t{color:rgba(255,255,255,.8)}
 .sbar-r{display:flex;gap:5px;align-items:center}
 
-/* ── BOTTOM NAV ─────────────────────── */
 .bnav{
   flex-shrink:0;display:flex;align-items:center;justify-content:space-around;
   background:var(--card);padding:10px 6px calc(12px + var(--sab));
@@ -122,7 +113,6 @@ body{
 .bt-qr:active{transform:scale(.92)}
 .bt-qr svg{width:24px;height:24px;stroke:var(--forest);stroke-width:2.2;fill:none}
 
-/* ── SHARED ─────────────────────────── */
 .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .scroll::-webkit-scrollbar{display:none}
 .p16{padding:16px}
@@ -155,7 +145,6 @@ body{
 .back-btn.dk{background:rgba(255,255,255,.15)}
 .back-btn.dk svg{stroke:#fff}
 
-/* Buttons */
 .btn{
   width:100%;padding:16px 20px;border:none;border-radius:16px;
   font-family:var(--f);font-size:.95rem;font-weight:800;
@@ -181,7 +170,6 @@ body{
 .btn-danger svg{stroke:#dc2626}
 .btn-sm{padding:11px 18px;border-radius:12px;font-size:.82rem;width:auto}
 
-/* Inputs */
 .inp{
   width:100%;padding:15px 16px;
   background:var(--bg2);border:2px solid transparent;border-radius:14px;
@@ -202,7 +190,6 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 .srch input{border:none;outline:none;background:none;font-family:var(--f);font-size:.88rem;color:var(--txt);flex:1}
 .srch input::placeholder{color:var(--txt3)}
 
-/* TX items */
 .tx{
   display:flex;align-items:center;gap:14px;
   padding:13px 18px;border-bottom:1px solid var(--border);cursor:pointer;transition:.1s;
@@ -220,7 +207,6 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 .tx-amt.db{color:#dc2626}
 .tx-tag{font-size:.55rem;color:var(--txt3);margin-top:2px;font-family:var(--fm)}
 
-/* Overlay */
 .overlay{
   position:absolute;inset:0;border-radius:inherit;
   background:rgba(10,74,46,.96);
@@ -247,7 +233,6 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 }
 .ov-btn:active{transform:scale(.96)}
 
-/* Toast */
 .toast{
   position:absolute;bottom:90px;left:50%;
   transform:translateX(-50%) translateY(16px);
@@ -261,7 +246,6 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 .toast.err{background:#dc2626}
 .toast.inf{background:var(--forest)}
 
-/* Modals */
 .modal{
   position:absolute;inset:0;border-radius:inherit;
   background:rgba(0,0,0,.5);backdrop-filter:blur(8px);
@@ -279,7 +263,6 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 .modal-handle{width:44px;height:4px;background:var(--bg3);border-radius:100px;margin:0 auto 6px}
 .modal-title{font-size:.95rem;font-weight:800;color:var(--txt);text-align:center}
 
-/* Pills */
 .pills{display:flex;gap:8px;flex-wrap:wrap}
 .pill{
   padding:10px 16px;border-radius:12px;
@@ -289,7 +272,6 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 .pill:active{transform:scale(.93)}
 .pill.on{border-color:var(--gold);background:rgba(212,160,23,.08);color:var(--gold)}
 
-/* Install */
 .install{
   position:absolute;top:0;left:0;right:0;
   background:linear-gradient(135deg,var(--forest),var(--forest2));
@@ -382,7 +364,6 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 }
 .home-av:active{transform:scale(.92)}
 
-/* Balance */
 .bal-card{
   background:linear-gradient(135deg,var(--gold) 0%,var(--gold2) 50%,var(--gold3) 100%);
   border-radius:22px;padding:20px 22px;position:relative;overflow:hidden;
@@ -404,17 +385,131 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 }
 .bal-badge svg{width:11px;height:11px;stroke:rgba(10,74,46,.6);stroke-width:2.5;fill:none}
 
-/* Quick actions */
-.qa-row{
-  display:grid;grid-template-columns:repeat(5,1fr);
-  background:var(--card);padding:14px 8px;gap:4px;
-  border-bottom:1px solid var(--border);flex-shrink:0;
+/* ══════════════════════════════════════
+   QUICK ACTIONS — NOUVEAU DESIGN
+   Envoyer + Recevoir en premier plan
+   Scanner / Payer / Tontine en secondaire
+   ══════════════════════════════════════ */
+.qa-section{
+  background:var(--card);
+  flex-shrink:0;
+  padding:14px 14px 0;
+  border-bottom:1px solid var(--border);
 }
-.qa{display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;padding:4px 2px;border-radius:12px;transition:.12s}
-.qa:active{transform:scale(.88)}
-.qa-ic{width:50px;height:50px;border-radius:16px;display:flex;align-items:center;justify-content:center}
-.qa-ic svg{width:22px;height:22px;stroke-width:1.9;fill:none}
-.qa-lbl{font-size:.52rem;font-weight:800;color:var(--txt);text-align:center;text-transform:uppercase;letter-spacing:.03em}
+
+/* Rangée 1 : Envoyer + Recevoir — grands boutons mis en évidence */
+.qa-primary{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.qa-cta{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:18px 12px 16px;
+  border-radius:18px;
+  cursor:pointer;
+  transition:.18s;
+  border:none;
+  position:relative;
+  overflow:hidden;
+  min-height:90px;
+}
+.qa-cta:active{transform:scale(.96)}
+
+/* Bouton Envoyer — gradient doré */
+.qa-cta-send{
+  background:linear-gradient(145deg,var(--gold) 0%,var(--gold2) 60%,#fcd34d 100%);
+  box-shadow:0 8px 28px rgba(212,160,23,.38);
+}
+.qa-cta-send::after{
+  content:'';position:absolute;width:80px;height:80px;border-radius:50%;
+  background:rgba(255,255,255,.18);bottom:-22px;right:-18px;pointer-events:none;
+}
+
+/* Bouton Recevoir — gradient forêt */
+.qa-cta-recv{
+  background:linear-gradient(145deg,var(--forest) 0%,var(--forest2) 60%,#1A6B40 100%);
+  box-shadow:0 8px 28px rgba(10,74,46,.35);
+}
+.qa-cta-recv::after{
+  content:'';position:absolute;width:80px;height:80px;border-radius:50%;
+  background:rgba(255,255,255,.07);bottom:-22px;right:-18px;pointer-events:none;
+}
+
+.qa-cta-ic{
+  width:46px;height:46px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.qa-cta-send .qa-cta-ic{background:rgba(0,0,0,.12)}
+.qa-cta-recv .qa-cta-ic{background:rgba(255,255,255,.15)}
+
+.qa-cta-ic svg{width:22px;height:22px;stroke-width:2.2;fill:none}
+.qa-cta-send .qa-cta-ic svg{stroke:var(--forest)}
+.qa-cta-recv .qa-cta-ic svg{stroke:#fff}
+
+.qa-cta-lbl{
+  font-size:.82rem;
+  font-weight:900;
+  letter-spacing:.02em;
+  text-transform:uppercase;
+}
+.qa-cta-send .qa-cta-lbl{color:var(--forest)}
+.qa-cta-recv .qa-cta-lbl{color:#fff}
+
+.qa-cta-sub{
+  font-size:.58rem;
+  font-weight:600;
+  font-family:var(--fm);
+  opacity:.6;
+  margin-top:-4px;
+}
+.qa-cta-send .qa-cta-sub{color:rgba(0,0,0,.6)}
+.qa-cta-recv .qa-cta-sub{color:rgba(255,255,255,.7)}
+
+/* Rangée 2 : Scanner / Payer / Tontine — boutons secondaires plus discrets */
+.qa-secondary{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  padding:0 0 14px;
+  border-top:1px solid var(--border);
+  padding-top:12px;
+}
+
+.qa-sec-btn{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:7px;
+  padding:10px 6px;
+  border-radius:14px;
+  cursor:pointer;
+  transition:.15s;
+  background:var(--bg2);
+}
+.qa-sec-btn:active{transform:scale(.92);background:var(--bg3)}
+
+.qa-sec-ic{
+  width:40px;height:40px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+}
+.qa-sec-ic svg{width:19px;height:19px;stroke-width:1.9;fill:none}
+
+.qa-sec-lbl{
+  font-size:.56rem;
+  font-weight:800;
+  color:var(--txt2);
+  text-align:center;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+}
 
 /* Coffre strip */
 .cstrip{
@@ -646,7 +741,7 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 </head>
 <body>
 <div class="shell">
-<div class="shell-inner" id="root"><!-- Navbar --><img src="ghettopay-icon.svg" alt="GhettoPay" height="60"/>
+<div class="shell-inner" id="root">
 
 <svg style="display:none"><defs>
 <symbol id="z" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
@@ -745,13 +840,50 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
       <div class="bal-badge"><svg><use href="#trend"/></svg>+12.4% ce mois · Gabon Vert</div>
     </div>
   </div>
-  <div class="qa-row">
-    <div class="qa" onclick="G.go('send')"><div class="qa-ic" style="background:rgba(212,160,23,.12)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.9"><use href="#send"/></svg></div><div class="qa-lbl">Envoyer</div></div>
-    <div class="qa" onclick="G.ok('QR prêt','Partage-le pour recevoir')"><div class="qa-ic" style="background:rgba(22,163,74,.12)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="1.9"><use href="#recv"/></svg></div><div class="qa-lbl">Recevoir</div></div>
-    <div class="qa" onclick="G.go('qr')"><div class="qa-ic" style="background:rgba(99,102,241,.12)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.9"><use href="#qric"/></svg></div><div class="qa-lbl">Scanner</div></div>
-    <div class="qa" onclick="G.go('factures')"><div class="qa-ic" style="background:rgba(59,130,246,.12)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.9"><use href="#pay"/></svg></div><div class="qa-lbl">Payer</div></div>
-    <div class="qa" onclick="G.go('tontine')"><div class="qa-ic" style="background:rgba(168,85,247,.12)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="1.9"><use href="#users"/></svg></div><div class="qa-lbl">Tontine</div></div>
+
+  <!-- ══ ZONE ACTIONS RAPIDES (NOUVEAU) ══ -->
+  <div class="qa-section">
+    <!-- Rangée 1 : ENVOYER + RECEVOIR — grands boutons mis en évidence -->
+    <div class="qa-primary">
+      <div class="qa-cta qa-cta-send" onclick="G.go('send')">
+        <div class="qa-cta-ic">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--forest)" stroke-width="2.2"><use href="#send"/></svg>
+        </div>
+        <div class="qa-cta-lbl">Envoyer</div>
+        <div class="qa-cta-sub">Rapide &amp; sécurisé</div>
+      </div>
+      <div class="qa-cta qa-cta-recv" onclick="G.ok('QR prêt','Partage-le pour recevoir')">
+        <div class="qa-cta-ic">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><use href="#recv"/></svg>
+        </div>
+        <div class="qa-cta-lbl">Recevoir</div>
+        <div class="qa-cta-sub">Partage ton QR</div>
+      </div>
+    </div>
+
+    <!-- Rangée 2 : SCANNER / PAYER / TONTINE — actions secondaires -->
+    <div class="qa-secondary">
+      <div class="qa-sec-btn" onclick="G.go('qr')">
+        <div class="qa-sec-ic" style="background:rgba(99,102,241,.12)">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.9"><use href="#qric"/></svg>
+        </div>
+        <div class="qa-sec-lbl">Scanner</div>
+      </div>
+      <div class="qa-sec-btn" onclick="G.go('factures')">
+        <div class="qa-sec-ic" style="background:rgba(59,130,246,.12)">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.9"><use href="#pay"/></svg>
+        </div>
+        <div class="qa-sec-lbl">Payer</div>
+      </div>
+      <div class="qa-sec-btn" onclick="G.go('tontine')">
+        <div class="qa-sec-ic" style="background:rgba(168,85,247,.12)">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="1.9"><use href="#users"/></svg>
+        </div>
+        <div class="qa-sec-lbl">Tontine</div>
+      </div>
+    </div>
   </div>
+
   <div class="cstrip" onclick="G.go('coffre')">
     <div class="cstrip-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold2)" stroke-width="2"><use href="#lock"/></svg></div>
     <div class="cstrip-body"><div class="cstrip-t">Mon Coffre Forêt</div><div class="cstrip-s">Épargne sécurisée · 5.5%/an</div></div>
@@ -1120,7 +1252,6 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 </div></div>
 
 <script>
-/* STORAGE */
 const S={
   get(k,d){try{const v=localStorage.getItem('gp3_'+k);return v!==null?JSON.parse(v):d}catch{return d}},
   set(k,v){try{localStorage.setItem('gp3_'+k,JSON.stringify(v))}catch{}}
@@ -1426,14 +1557,12 @@ const G={
 
 function setBudTab(btn){btn.closest('.bud-tabs').querySelectorAll('.btab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');G.render('budget')}
 
-/* CLOCK */
 function tick(){
   const n=new Date(),t=`${n.getHours().toString().padStart(2,'0')}:${n.getMinutes().toString().padStart(2,'0')}`;
   document.querySelectorAll('[id^="clk"]').forEach(el=>el.textContent=t);
 }
 tick();setInterval(tick,30000);
 
-/* PWA */
 let dp;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;setTimeout(()=>document.getElementById('install-banner').classList.add('on'),4000)});
 document.getElementById('install-btn').addEventListener('click',async()=>{
@@ -1441,7 +1570,6 @@ document.getElementById('install-btn').addEventListener('click',async()=>{
   if(dp){dp.prompt();await dp.userChoice;dp=null}
 });
 
-/* BOOT */
 initData();
 cur='pin';
 </script>
