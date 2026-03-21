@@ -1,0 +1,177 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 560" width="480" height="560">
+<defs>
+  <linearGradient id="flame1" x1="0" y1="1" x2="0" y2="0">
+    <stop offset="0%" stop-color="#C8390A"/>
+    <stop offset="40%" stop-color="#E8720C"/>
+    <stop offset="75%" stop-color="#F5B230"/>
+    <stop offset="100%" stop-color="#FDE87A" stop-opacity="0.7"/>
+  </linearGradient>
+  <linearGradient id="flame2" x1="0" y1="1" x2="0" y2="0">
+    <stop offset="0%" stop-color="#B02800"/>
+    <stop offset="55%" stop-color="#D96010"/>
+    <stop offset="100%" stop-color="#F5C040" stop-opacity="0.5"/>
+  </linearGradient>
+  <linearGradient id="stickGrad" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0%" stop-color="#5C3A10"/>
+    <stop offset="40%" stop-color="#7A4E1A"/>
+    <stop offset="100%" stop-color="#4A2D0A"/>
+  </linearGradient>
+  <linearGradient id="headGrad" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0%" stop-color="#3D2208"/>
+    <stop offset="50%" stop-color="#5C3010"/>
+    <stop offset="100%" stop-color="#3A1E06"/>
+  </linearGradient>
+  <linearGradient id="coinGrad" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#F0C040"/>
+    <stop offset="50%" stop-color="#D4A017"/>
+    <stop offset="100%" stop-color="#A87010"/>
+  </linearGradient>
+  <linearGradient id="coinShine" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0%" stop-color="#FDE68A" stop-opacity="0.7"/>
+    <stop offset="100%" stop-color="#FDE68A" stop-opacity="0"/>
+  </linearGradient>
+  <linearGradient id="coinGrad2" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#D4A017"/>
+    <stop offset="100%" stop-color="#8A6008"/>
+  </linearGradient>
+  <radialGradient id="auraGlow" cx="50%" cy="55%" r="50%">
+    <stop offset="0%" stop-color="#F5A020" stop-opacity="0.15"/>
+    <stop offset="100%" stop-color="#F5A020" stop-opacity="0"/>
+  </radialGradient>
+  <pattern id="woodGrain" x="0" y="0" width="4" height="8" patternUnits="userSpaceOnUse">
+    <line x1="0" y1="2" x2="4" y2="2" stroke="#3A1E06" stroke-width="0.4" stroke-opacity="0.35"/>
+    <line x1="0" y1="6" x2="4" y2="6" stroke="#7A4E1A" stroke-width="0.3" stroke-opacity="0.2"/>
+  </pattern>
+</defs>
+
+<!-- Fond blanc -->
+<rect width="480" height="560" fill="white"/>
+
+<!-- Halo chaleur -->
+<ellipse cx="240" cy="200" rx="150" ry="130" fill="url(#auraGlow)"/>
+
+<!-- ── MANCHE ── -->
+<rect x="226" y="252" width="28" height="160" rx="6" fill="url(#stickGrad)"/>
+<rect x="226" y="252" width="28" height="160" rx="6" fill="url(#woodGrain)" opacity="0.6"/>
+<rect x="230" y="252" width="4" height="160" rx="2" fill="#9C6830" opacity="0.25"/>
+<rect x="246" y="252" width="3" height="160" rx="1.5" fill="#2E1605" opacity="0.2"/>
+<!-- Nœuds bois -->
+<ellipse cx="237" cy="298" rx="5" ry="2.5" fill="#2E1605" opacity="0.3"/>
+<ellipse cx="241" cy="360" rx="4" ry="2" fill="#2E1605" opacity="0.25"/>
+<!-- Grip wrapping -->
+<line x1="226" y1="322" x2="254" y2="327" stroke="#1A0D04" stroke-width="2.5" opacity="0.45"/>
+<line x1="226" y1="331" x2="254" y2="336" stroke="#1A0D04" stroke-width="2" opacity="0.35"/>
+<line x1="226" y1="340" x2="254" y2="344" stroke="#1A0D04" stroke-width="1.5" opacity="0.28"/>
+<!-- Embout bas -->
+<rect x="223" y="394" width="34" height="16" rx="5" fill="#2E1205"/>
+
+<!-- ── TÊTE TORCHE ── -->
+<rect x="213" y="207" width="54" height="55" rx="8" fill="url(#headGrad)"/>
+<rect x="213" y="207" width="54" height="55" rx="8" fill="url(#woodGrain)" opacity="0.5"/>
+<!-- Bandages -->
+<rect x="212" y="214" width="56" height="7" rx="2" fill="#1A0A03" opacity="0.5"/>
+<rect x="213" y="225" width="54" height="6" rx="2" fill="#220F05" opacity="0.45"/>
+<rect x="212" y="235" width="56" height="6" rx="2" fill="#1A0A03" opacity="0.4"/>
+<rect x="213" y="245" width="54" height="5" rx="2" fill="#220F05" opacity="0.35"/>
+<!-- Côtés brûlés -->
+<rect x="211" y="208" width="6" height="53" rx="3" fill="#0D0603" opacity="0.6"/>
+<rect x="263" y="208" width="6" height="53" rx="3" fill="#0D0603" opacity="0.6"/>
+<!-- Lien fixation -->
+<rect x="218" y="250" width="44" height="10" rx="3" fill="#0D0603"/>
+<rect x="221" y="252" width="38" height="6" rx="2" fill="#1F0C03" opacity="0.8"/>
+
+<!-- ── FLAMMES ── -->
+<!-- Halo flamme -->
+<ellipse cx="240" cy="170" rx="55" ry="62" fill="#E07010" opacity="0.07"/>
+<ellipse cx="240" cy="162" rx="36" ry="48" fill="#F5B230" opacity="0.09"/>
+
+<!-- Corps principal -->
+<path d="M240,202 C218,190 206,170 210,147 C213,130 222,117 230,102 C235,90 238,74 240,57 C242,74 245,90 250,102 C258,117 267,130 270,147 C274,170 262,190 240,202Z" fill="url(#flame1)"/>
+<!-- Flamme gauche -->
+<path d="M235,200 C220,190 212,172 215,152 C218,137 226,124 230,110 C233,98 236,82 237,67 C240,82 241,100 238,117 C235,134 230,150 234,167 C236,180 238,192 235,200Z" fill="url(#flame2)" opacity="0.75"/>
+<!-- Flamme droite -->
+<path d="M245,200 C260,190 268,172 265,152 C262,137 254,124 250,110 C247,98 244,82 243,67 C241,82 242,100 245,117 C248,134 253,150 249,167 C247,180 245,192 245,200Z" fill="url(#flame2)" opacity="0.7"/>
+<!-- Cœur chaud -->
+<path d="M240,200 C232,187 228,172 230,157 C232,144 238,132 240,117 C242,132 248,144 250,157 C252,172 248,187 240,200Z" fill="#FDE68A" opacity="0.9"/>
+<path d="M240,198 C234,184 231,170 233,156 C235,145 239,134 240,122 C241,134 245,145 247,156 C249,170 246,184 240,198Z" fill="#FEFCE8" opacity="0.55"/>
+
+<!-- Étincelles -->
+<circle cx="220" cy="132" r="2" fill="#FDE68A" opacity="0.7"/>
+<circle cx="216" cy="117" r="1.2" fill="#F5C040" opacity="0.55"/>
+<circle cx="262" cy="124" r="1.8" fill="#FDE68A" opacity="0.6"/>
+<circle cx="258" cy="110" r="1" fill="#F5C040" opacity="0.45"/>
+<circle cx="240" cy="54" r="1.5" fill="#FFF0AA" opacity="0.5"/>
+<circle cx="228" cy="82" r="1" fill="#FDE68A" opacity="0.4"/>
+<circle cx="253" cy="90" r="0.9" fill="#FDE68A" opacity="0.4"/>
+
+<!-- Fumée -->
+<path d="M233,54 Q229,40 234,30 Q236,22 233,14" fill="none" stroke="#888" stroke-width="1.5" stroke-linecap="round" opacity="0.12"/>
+<path d="M240,52 Q244,36 241,26 Q239,18 243,10" fill="none" stroke="#888" stroke-width="1.2" stroke-linecap="round" opacity="0.09"/>
+<path d="M248,57 Q252,42 249,32 Q247,24 250,16" fill="none" stroke="#888" stroke-width="1" stroke-linecap="round" opacity="0.07"/>
+
+<!-- ── PIÈCE PRINCIPALE ── -->
+<circle cx="184" cy="297" r="26" fill="#0A0A0A" opacity="0.12"/>
+<circle cx="183" cy="294" r="26" fill="url(#coinGrad)"/>
+<circle cx="183" cy="294" r="26" fill="none" stroke="#A07010" stroke-width="2.5"/>
+<circle cx="183" cy="294" r="22" fill="none" stroke="#F0C040" stroke-width="0.8" opacity="0.5"/>
+<ellipse cx="177" cy="285" rx="10" ry="6" fill="url(#coinShine)" opacity="0.55"/>
+<text x="183" y="289" text-anchor="middle" dominant-baseline="central"
+  font-family="Georgia, serif" font-size="13" font-weight="700" fill="#5C3008">F</text>
+<text x="183" y="302" text-anchor="middle" dominant-baseline="central"
+  font-family="Georgia, serif" font-size="9" font-weight="600" fill="#7A4A10" letter-spacing="1">CFA</text>
+<!-- Flèche transfert -->
+<path d="M171,294 L194,294" stroke="#7A4A10" stroke-width="1.5" fill="none" opacity="0.6"/>
+<path d="M189,290 L195,294 L189,298" fill="none" stroke="#7A4A10" stroke-width="1.5" stroke-linejoin="round" opacity="0.6"/>
+
+<!-- ── PIÈCE SECONDAIRE ── -->
+<circle cx="302" cy="310" r="20" fill="url(#coinGrad2)"/>
+<circle cx="302" cy="310" r="20" fill="none" stroke="#8A6008" stroke-width="2"/>
+<circle cx="302" cy="310" r="17" fill="none" stroke="#F0C040" stroke-width="0.6" opacity="0.4"/>
+<ellipse cx="297" cy="303" rx="8" ry="4.5" fill="#FDE68A" opacity="0.28"/>
+<text x="302" y="313" text-anchor="middle" dominant-baseline="central"
+  font-family="Georgia, serif" font-size="10" font-weight="700" fill="#3A1E06">GP</text>
+
+<!-- ── SILHOUETTE GABON ── -->
+<g opacity="0.18" transform="translate(130, 295) scale(0.85)">
+  <path d="M60,0 C80,0 105,8 115,22 C128,38 130,55 122,68 C112,82 95,88 80,95 C65,102 50,108 40,120 C28,133 25,150 32,163 C40,177 58,185 75,190 C92,195 108,190 118,178 C130,165 132,148 125,135 C117,120 102,112 90,100 C76,87 70,70 72,55 C74,40 84,28 80,15 C78,8 70,2 60,0Z" fill="#0A4A2E"/>
+</g>
+
+<!-- ── MOTIFS TRIBAUX ── -->
+<g opacity="0.14">
+  <rect x="60" y="240" width="22" height="3" rx="1.5" fill="#0A4A2E"/>
+  <rect x="65" y="248" width="17" height="3" rx="1.5" fill="#0A4A2E"/>
+  <rect x="70" y="256" width="12" height="3" rx="1.5" fill="#0A4A2E"/>
+  <rect x="65" y="264" width="17" height="3" rx="1.5" fill="#0A4A2E"/>
+  <rect x="60" y="272" width="22" height="3" rx="1.5" fill="#0A4A2E"/>
+</g>
+<g opacity="0.14">
+  <rect x="398" y="240" width="22" height="3" rx="1.5" fill="#0A4A2E"/>
+  <rect x="398" y="248" width="17" height="3" rx="1.5" fill="#0A4A2E"/>
+  <rect x="398" y="256" width="12" height="3" rx="1.5" fill="#0A4A2E"/>
+  <rect x="398" y="264" width="17" height="3" rx="1.5" fill="#0A4A2E"/>
+  <rect x="398" y="272" width="22" height="3" rx="1.5" fill="#0A4A2E"/>
+</g>
+
+<!-- ── TYPOGRAPHIE ── -->
+<!-- Ombre -->
+<text x="242" y="460" text-anchor="middle"
+  font-family="Georgia, 'Times New Roman', serif"
+  font-size="58" font-weight="900" font-style="italic"
+  fill="#0A1A0A" opacity="0.15" letter-spacing="-1">GhettoPay</text>
+<!-- Texte principal -->
+<text x="240" y="458" text-anchor="middle"
+  font-family="Georgia, 'Times New Roman', serif"
+  font-size="58" font-weight="900" font-style="italic"
+  letter-spacing="-1">
+  <tspan fill="#1A1A1A">Ghetto</tspan><tspan fill="#D4A017">Pay</tspan>
+</text>
+<!-- Tagline -->
+<text x="240" y="486" text-anchor="middle"
+  font-family="'Courier New', 'Lucida Console', monospace"
+  font-size="11" font-weight="500"
+  fill="#0A4A2E" letter-spacing="5">LIBREVILLE · GABON</text>
+<!-- Ornements -->
+<line x1="148" y1="494" x2="196" y2="494" stroke="#D4A017" stroke-width="1" opacity="0.6"/>
+<circle cx="240" cy="494" r="2.5" fill="#D4A017" opacity="0.7"/>
+<line x1="284" y1="494" x2="332" y2="494" stroke="#D4A017" stroke-width="1" opacity="0.6"/>
+</svg>

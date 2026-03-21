@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+<defs>
+  <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#0A4A2E"/>
+    <stop offset="100%" stop-color="#0F5C38"/>
+  </linearGradient>
+  <linearGradient id="fl1" x1="0" y1="1" x2="0" y2="0">
+    <stop offset="0%" stop-color="#C8390A"/>
+    <stop offset="45%" stop-color="#E8720C"/>
+    <stop offset="80%" stop-color="#F5B230"/>
+    <stop offset="100%" stop-color="#FDE87A" stop-opacity="0.7"/>
+  </linearGradient>
+  <linearGradient id="fl2" x1="0" y1="1" x2="0" y2="0">
+    <stop offset="0%" stop-color="#B02800"/>
+    <stop offset="100%" stop-color="#F5C040" stop-opacity="0.5"/>
+  </linearGradient>
+  <linearGradient id="sk" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0%" stop-color="#5C3A10"/>
+    <stop offset="50%" stop-color="#7A4E1A"/>
+    <stop offset="100%" stop-color="#4A2D0A"/>
+  </linearGradient>
+  <linearGradient id="hd" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0%" stop-color="#3D2208"/>
+    <stop offset="50%" stop-color="#5C3010"/>
+    <stop offset="100%" stop-color="#3A1E06"/>
+  </linearGradient>
+  <linearGradient id="co" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#F0C040"/>
+    <stop offset="100%" stop-color="#A87010"/>
+  </linearGradient>
+  <radialGradient id="gl" cx="50%" cy="45%" r="40%">
+    <stop offset="0%" stop-color="#F5A020" stop-opacity="0.2"/>
+    <stop offset="100%" stop-color="#F5A020" stop-opacity="0"/>
+  </radialGradient>
+  <clipPath id="circle-clip">
+    <circle cx="100" cy="100" r="96"/>
+  </clipPath>
+</defs>
+
+<!-- Fond rond vert -->
+<circle cx="100" cy="100" r="100" fill="url(#bgGrad)"/>
+
+<!-- Bordure or -->
+<circle cx="100" cy="100" r="96" fill="none" stroke="#D4A017" stroke-width="2.5"/>
+<circle cx="100" cy="100" r="90" fill="none" stroke="#D4A017" stroke-width="0.8" opacity="0.4"/>
+
+<g clip-path="url(#circle-clip)">
+  <!-- Aura flamme -->
+  <ellipse cx="100" cy="95" rx="48" ry="55" fill="url(#gl)"/>
+
+  <!-- MANCHE -->
+  <rect x="92" y="128" width="16" height="90" rx="4" fill="url(#sk)"/>
+  <rect x="94" y="128" width="3" height="90" rx="1.5" fill="#9C6830" opacity="0.25"/>
+  <!-- Grip -->
+  <line x1="92" y1="158" x2="108" y2="162" stroke="#1A0D04" stroke-width="2" opacity="0.45"/>
+  <line x1="92" y1="166" x2="108" y2="170" stroke="#1A0D04" stroke-width="1.5" opacity="0.35"/>
+  <!-- Embout -->
+  <rect x="90" y="205" width="20" height="10" rx="3" fill="#2E1205"/>
+
+  <!-- TÊTE TORCHE -->
+  <rect x="83" y="104" width="34" height="34" rx="6" fill="url(#hd)"/>
+  <!-- Bandages -->
+  <rect x="82" y="109" width="36" height="5" rx="1.5" fill="#1A0A03" opacity="0.5"/>
+  <rect x="83" y="117" width="34" height="4" rx="1.5" fill="#220F05" opacity="0.45"/>
+  <rect x="82" y="124" width="36" height="4" rx="1.5" fill="#1A0A03" opacity="0.4"/>
+  <!-- Côtés brûlés -->
+  <rect x="81" y="105" width="5" height="33" rx="2.5" fill="#0D0603" opacity="0.65"/>
+  <rect x="114" y="105" width="5" height="33" rx="2.5" fill="#0D0603" opacity="0.65"/>
+  <!-- Lien -->
+  <rect x="86" y="128" width="28" height="8" rx="2" fill="#0D0603"/>
+
+  <!-- FLAMMES -->
+  <!-- Corps -->
+  <path d="M100,107 C86,98 79,84 82,68 C84,57 90,48 95,38 C97,31 99,22 100,13 C101,22 103,31 105,38 C110,48 116,57 118,68 C121,84 114,98 100,107Z" fill="url(#fl1)"/>
+  <!-- Flamme gauche -->
+  <path d="M97,106 C86,97 80,82 83,66 C85,54 91,44 94,33 C96,25 98,16 98,8 C100,17 101,28 99,42 C97,55 93,67 96,80 C98,90 99,100 97,106Z" fill="url(#fl2)" opacity="0.7"/>
+  <!-- Flamme droite -->
+  <path d="M103,106 C114,97 120,82 117,66 C115,54 109,44 106,33 C104,25 102,16 102,8 C100,17 99,28 101,42 C103,55 107,67 104,80 C102,90 101,100 103,106Z" fill="url(#fl2)" opacity="0.65"/>
+  <!-- Cœur chaud -->
+  <path d="M100,106 C94,96 91,84 93,72 C95,62 99,52 100,41 C101,52 105,62 107,72 C109,84 106,96 100,106Z" fill="#FDE68A" opacity="0.9"/>
+  <path d="M100,104 C95,93 93,81 95,70 C97,61 99,52 100,43 C101,52 103,61 105,70 C107,81 105,93 100,104Z" fill="#FEFCE8" opacity="0.55"/>
+
+  <!-- Étincelles -->
+  <circle cx="85" cy="58" r="1.8" fill="#FDE68A" opacity="0.7"/>
+  <circle cx="82" cy="47" r="1.1" fill="#F5C040" opacity="0.55"/>
+  <circle cx="117" cy="52" r="1.6" fill="#FDE68A" opacity="0.6"/>
+  <circle cx="100" cy="10" r="1.3" fill="#FFF0AA" opacity="0.5"/>
+
+  <!-- PIÈCE MONNAIE -->
+  <circle cx="68" cy="158" r="20" fill="url(#co)"/>
+  <circle cx="68" cy="158" r="20" fill="none" stroke="#A07010" stroke-width="2"/>
+  <circle cx="68" cy="158" r="16.5" fill="none" stroke="#F0C040" stroke-width="0.7" opacity="0.5"/>
+  <ellipse cx="63" cy="151" rx="8" ry="5" fill="#FDE68A" opacity="0.3"/>
+  <text x="68" y="153" text-anchor="middle" dominant-baseline="central"
+    font-family="Georgia, serif" font-size="10" font-weight="700" fill="#5C3008">F</text>
+  <text x="68" y="164" text-anchor="middle" dominant-baseline="central"
+    font-family="Georgia, serif" font-size="7" font-weight="600" fill="#7A4A10" letter-spacing="0.5">CFA</text>
+
+  <!-- Flèche transfert -->
+  <path d="M58,158 L78,158" stroke="#7A4A10" stroke-width="1.5" fill="none" opacity="0.65"/>
+  <path d="M74,154 L79,158 L74,162" fill="none" stroke="#7A4A10" stroke-width="1.5" stroke-linejoin="round" opacity="0.65"/>
+</g>
+
+<!-- Lettre G stylisée en bas -->
+<text x="100" y="196" text-anchor="middle" dominant-baseline="central"
+  font-family="Georgia, serif" font-size="14" font-weight="900" font-style="italic"
+  fill="#D4A017" letter-spacing="2">GP</text>
+</svg>
