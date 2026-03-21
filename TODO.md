@@ -1,9 +1,22 @@
-# TODO: Replace Hero Section in GhettoPay Project
+# Task: Improve responsiveness, colors, button layout in index.html
 
-## Steps to complete (approved plan):
-- [x] Step 1: Create TODO.md to track progress (done).
-- [x] Step 2: Edit index.html to replace the entire existing hero section (from `<!-- HERO -->` to `</section>`) with the new GhettoPay hero HTML provided.
-- [x] Step 3: Verify the change by reading the updated file content.
-- [x] Step 4: Test the page (suggest browser refresh or open command).
-- [x] Step 5: Mark complete and attempt_completion.
+## Plan
+**Goal**: Enhance mobile/tablet/desktop UX.
+
+**Changes**:
+1. **Responsivity**: Add tablet/desktop media queries using --bp vars; adjust --fs-*/--sp-* clamps.
+2. **Colors**: Improve contrast (WCAG AA), add hover variants, subtle gradients.
+3. **Buttons**: Better spacing (gap utility), hover/active states, size variants.
+
+**Files**: index.html (CSS sections).
+
+**Follow-up**: Test on different viewport sizes.
+
+Approved - proceeding.
+
+Steps:
+- [ ] Step 1: Create TODO.md ✓
+- [ ] Step 2: Update CSS vars/media queries
+- [ ] Step 3: Fix button layouts (nav, pad, qa-row)
+- [ ] Step 4: Test & complete
 
