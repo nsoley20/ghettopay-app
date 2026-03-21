@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="GhettoPay"/>
+<meta name="theme-color" content="#060d08"/>
+<link rel="manifest" href="./manifest.json"/>
+<title>GhettoPay</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+/* ─── RESET & VARS ─────────────────────────────── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{\n  /* Colors */\n  --bg:#060d08; --surface:#0e1a10; --forest:#0d3d1f; --forest2:#145228;\n  --green:#16a34a; --green2:#22c55e; --green3:#86efac;\n  --gold:#c8960e; --gold2:#e8b020; --gold3:#fcd34d;\n  --white:#f0f7f0; --muted:rgba(240,247,240,.38); --muted2:rgba(240,247,240,.18);\n  --app:#f2f5f2; --app2:#e8ede8; --app3:#dde5dd;\n  --apptext:#0a130b; --appsub:#6b7c6d; --appsub2:#9aaa9c;\n  --card:#ffffff; --border:rgba(0,0,0,.07); --border2:rgba(255,255,255,.07);\n\n  /* Typography - Responsive */\n  --fs-xs: clamp(0.5rem, 1.5vw, 0.625rem);\n  --fs-sm: clamp(0.625rem, 2vw, 0.75rem);\n  --fs-base: clamp(0.75rem, 2.5vw, 0.875rem);\n  --fs-lg: clamp(0.875rem, 3vw, 1rem);\n  --fs-xl: clamp(1rem, 4vw, 1.25rem);\n  --fs-xxl: clamp(1.25rem, 5vw, 1.5rem);\n  --fs-hdr: clamp(1.5rem, 6vw, 2rem);\n  --fs-display: clamp(2rem, 8vw, 3rem);\n\n  /* Spacing - Responsive */\n  --sp-xs: clamp(4px, 1vw, 8px);\n  --sp-sm: clamp(8px, 2vw, 12px);\n  --sp: clamp(12px, 3vw, 16px);\n  --sp-lg: clamp(16px, 4vw, 20px);\n  --sp-xl: clamp(20px, 5vw, 24px);\n  --sp-2xl: clamp(24px, 6vw, 32px);\n\n  /* Breakpoints */\n  --bp-tablet: 768px;\n  --bp-desktop: 1024px;\n\n  /* Layout */\n  --f:'Syne',sans-serif; --fd:'Playfair Display',serif; --fm:'JetBrains Mono',monospace;\n  --safe-top:env(safe-area-inset-top,0px); --safe-bot:env(safe-area-inset-bottom,0px);\n  --r: clamp(12px, 3vw, 20px); --r2: clamp(10px, 2.5vw, 14px);\n\n  /* Phone frame sizes */\n  --phone-w: 390px; --phone-h: 844px;\n  --tablet-w: 428px; --tablet-h: 926px;\n}
+html{height:100%;-webkit-text-size-adjust:100%}
+body{\n  font-family:var(--f); font-size:var(--fs-base);\n  background:var(--bg);\n  height:100%; max-height:100%;\n  display:flex; align-items:center; justify-content:center;\n  overflow:hidden;\n  line-height:1.5;\n}
+
+/* ─── APP SHELL ─────────────────────────────────── */
+/* Desktop: show phone frame */
+.app-shell{\n  width:100%; max-width:var(--phone-w);\n  height:min(100vh, var(--phone-h));\n  aspect-ratio: 390 / 844;\n  background:#05090a;\n  border-radius:clamp(32px, 8vw, 52px); padding:var(--sp-sm);\n  box-shadow:0 0 0 1px rgba(255,255,255,.08),0 60px 140px rgba(0,0,0,.9);\n  position:relative; flex-shrink:0;\n  margin:0 auto;\n}
+.app-inner{
+  width:100%; height:100%;
+  background:var(--app); border-radius:40px;
+  overflow:hidden; position:relative;
+  display:flex; flex-direction:column;
+}
+.island{
+  position:absolute; top:12px; left:50%; transform:translateX(-50%);
+  width:120px; height:34px; background:#05090a;
+  border-radius:100px; z-index:100;
+}
+
+/* Mobile: full screen */
+@media(max-width:430px),(max-height:860px){
+  body{align-items:stretch;justify-content:stretch}
+  .app-shell{
+    width:100%; height:100%; border-radius:0; padding:0;
+    box-shadow:none;
+  }
+  .app-inner{border-radius:0}
+  .island{display:none}
+}
+
+/* ─── SCREENS ───────────────────────────────────── */
+.screen{
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  background:var(--app); border-radius:inherit;
+  overflow:hidden;
+  transition:transform .36s cubic-bezier(.32,.72,0,1),opacity .28s;
+  transform:translateX(100%); opacity:0; pointer-events:none; z-index:1;
+}
+.screen.active{transform:translateX(0);opacity:1;pointer-events:all;z-index:10}
+.screen.leaving{transform:translateX(-20%);opacity:0;z-index:2}
+.screen-dark{background:var(--bg)}
+
+/* ─── STATUS BAR ────────────────────────────────── */
+.sb{
+  padding:calc(var(--safe-top) + 10px) 20px 6px;
+  display:flex; align-items:center; justify-content:space-between;
+  flex-shrink:0;
+}
+.sb.dark{padding-top:calc(var(--safe-top) + 14px)}
+.sb .clock{font-family:var(--fm);font-size:.68rem;font-weight:600;color:var(--apptext)}
+.sb.dark .clock{color:var(--white)}
+.sb-right{display:flex;gap:5px;align-items:center}
+.sb-right svg{fill:var(--apptext)}
+.sb.dark .sb-right svg{fill:rgba(255,255,255,.7)}
+
+/* ─── NAV BAR ───────────────────────────────────── */
+.bnav{
+  flex-shrink:0; display:flex; align-items:center; justify-content:space-around;
+  background:var(--card); padding:8px 4px calc(8px + var(--safe-bot));
+  border-top:1px solid var(--border); z-index:20;
+}
+.bnt{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  cursor:pointer;padding:5px 10px;border-radius:12px;transition:.15s;min-width:50px;
+}
+.bnt.on{background:rgba(13,61,31,.08)}
+.bnt svg{width:22px;height:22px;stroke-width:1.8;fill:none;transition:.15s}
+.bnt.on svg{stroke:var(--forest2)} .bnt:not(.on) svg{stroke:var(--appsub2)}
+.bnt-lbl{font-size:.5rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.bnt.on .bnt-lbl{color:var(--forest2)} .bnt:not(.on) .bnt-lbl{color:var(--appsub2)}
+.bnt-qr{
+  width:52px;height:52px;border-radius:50%;margin-top:-20px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--gold),var(--gold3));
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px rgba(200,150,14,.5);cursor:pointer;transition:.18s;
+}
+.bnt-qr:active{transform:scale(.92)}
+.bnt-qr svg{width:24px;height:24px;stroke:var(--bg);stroke-width:2.2;fill:none}
+
+/* ─── SCROLL BODY ───────────────────────────────── */
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.scroll::-webkit-scrollbar{display:none}
+.pad{padding:var(--sp-lg)}
+.gap8{display:flex;flex-direction:column;gap:var(--sp-xs)}
+.gap12{display:flex;flex-direction:column;gap:var(--sp)}
+.gap16{display:flex;flex-direction:column;gap:var(--sp-lg)}
+.sec-label{font-size:var(--fs-xs);font-weight:800;color:var(--appsub);text-transform:uppercase;letter-spacing:.12em}
+
+/* ─── SCREEN NAV ────────────────────────────────── */
+.snav{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 16px 12px;background:var(--card);
+  border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.snav.dark{background:transparent;border-color:var(--border2)}
+.snav-title{font-size:var(--fs-lg);font-weight:800;color:var(--apptext)}
+.snav.dark .snav-title{color:var(--white)}
+.snav-action{margin-left:auto;font-size:var(--fs-base);font-weight:700;color:var(--forest2);cursor:pointer}
+.snav.dark .snav-action{color:var(--gold3)}
+.btn-back{
+  width:36px;height:36px;border-radius:50%;background:var(--app2);
+  border:none;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;transition:.12s;
+}
+.btn-back:active{transform:scale(.9)}
+.btn-back svg{width:16px;height:16px;stroke:var(--apptext);stroke-width:2.2;fill:none}
+.btn-back.dark{background:rgba(255,255,255,.1)}
+.btn-back.dark svg{stroke:var(--white)}
+
+/* ─── CARDS ─────────────────────────────────────── */
+.card{background:var(--card);border-radius:var(--r);border:1px solid var(--border);overflow:hidden}
+.card-p{padding:14px 16px}
+
+/* ─── BUTTONS ───────────────────────────────────── */
+.btn{
+  width:100%;padding:15px;border:none;border-radius:14px;
+  font-family:var(--f);font-size:.88rem;font-weight:800;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  cursor:pointer;transition:.18s;
+}
+.btn:active{transform:scale(.97)}
+.btn svg{width:16px;height:16px;stroke-width:2.5;fill:none}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold3));color:var(--bg);box-shadow:0 4px 20px rgba(200,150,14,.35)}
+.btn-gold svg{stroke:var(--bg)}
+.btn-gold:hover{box-shadow:0 8px 28px rgba(200,150,14,.5)}
+.btn-forest{background:linear-gradient(135deg,var(--forest),var(--forest2));color:var(--white)}
+.btn-forest svg{stroke:var(--white)}
+.btn-ghost{background:rgba(0,0,0,.05);border:1px solid rgba(0,0,0,.08);color:var(--appsub)}
+.btn-ghost svg{stroke:var(--appsub)}
+.btn-danger{background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.12);color:#dc2626}
+.btn-danger svg{stroke:#dc2626}
+.btn-sm{padding:10px 16px;border-radius:10px;font-size:.78rem;width:auto}
+
+/* ─── INPUTS ────────────────────────────────────── */
+.input{
+  width:100%;padding:13px 14px;
+  background:var(--app2);border:1.5px solid transparent;border-radius:12px;
+  font-family:var(--f);font-size:.84rem;color:var(--apptext);
+  outline:none;transition:.2s;
+}
+.input:focus{border-color:rgba(13,61,31,.25);background:var(--app)}
+.input::placeholder{color:var(--appsub2)}
+.search-wrap{display:flex;align-items:center;gap:10px;background:var(--app2);border-radius:12px;padding:12px 14px;border:1.5px solid transparent;transition:.2s}
+.search-wrap:focus-within{border-color:rgba(13,61,31,.2);background:var(--app)}
+.search-wrap svg{width:16px;height:16px;stroke:var(--appsub);stroke-width:2;fill:none;flex-shrink:0}
+.search-wrap input{border:none;outline:none;background:none;font-family:var(--f);font-size:.82rem;color:var(--apptext);flex:1}
+.search-wrap input::placeholder{color:var(--appsub2)}
+textarea.input{resize:none;height:60px}
+
+/* ─── TX ITEMS ──────────────────────────────────── */
+.tx-item{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid rgba(0,0,0,.04);cursor:pointer;transition:.1s}
+.tx-item:last-child{border-bottom:none}
+.tx-item:active{background:rgba(0,0,0,.03)}
+.tx-av{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.tx-av-ltr{font-family:var(--fd);font-size:.9rem;font-weight:900;color:var(--white)}
+.tx-info{flex:1;min-width:0}
+.tx-name{font-size:.78rem;font-weight:700;color:var(--apptext);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tx-meta{font-size:.6rem;color:var(--appsub);margin-top:2px;font-family:var(--fm)}
+.tx-right{text-align:right;flex-shrink:0}
+.tx-amount{font-size:.8rem;font-weight:900;font-family:var(--fd)}
+.tx-amount.credit{color:#15803d}
+.tx-amount.debit{color:#dc2626}
+.tx-cat{font-size:.54rem;color:var(--appsub2);margin-top:2px;font-family:var(--fm)}
+
+/* ══════════════════════════════════════════════════
+   SCREEN: PIN
+══════════════════════════════════════════════════ */
+#sc-pin{background:var(--bg)}
+.pin-wrap{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:32px 24px;gap:32px;
+}
+.pin-logo{
+  width:64px;height:64px;border-radius:20px;
+  background:linear-gradient(135deg,var(--gold),var(--gold3));
+  display:flex;align-items:center;justify-content:center;
+}
+.pin-logo svg{width:32px;height:32px;stroke:var(--bg);stroke-width:2.5;fill:none}
+.pin-title{font-family:var(--fd);font-size:1.4rem;font-weight:900;color:var(--white);text-align:center}
+.pin-sub{font-size:.78rem;color:var(--muted);text-align:center;margin-top:-20px;font-family:var(--fm)}
+.pin-dots{display:flex;gap:18px}
+.pin-dot{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.25);background:transparent;
+  transition:.18s;
+}
+.pin-dot.filled{background:var(--gold3);border-color:var(--gold3)}
+.pin-dot.error{background:#ef4444;border-color:#ef4444;animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
+.pin-key{
+  height:64px;border-radius:16px;border:none;
+  background:rgba(255,255,255,.07);
+  font-family:var(--f);font-size:1.3rem;font-weight:700;color:var(--white);
+  cursor:pointer;transition:.12s;display:flex;align-items:center;justify-content:center;
+}
+.pin-key:active{background:rgba(255,255,255,.15);transform:scale(.94)}
+.pin-key.del{font-size:.9rem;color:rgba(255,255,255,.5)}
+.pin-key.del svg{width:20px;height:20px;stroke:rgba(255,255,255,.5);stroke-width:2;fill:none}
+.pin-skip{font-size:.72rem;color:rgba(255,255,255,.3);cursor:pointer;font-family:var(--fm);text-align:center}
+
+/* ══════════════════════════════════════════════════
+   SCREEN: HOME
+══════════════════════════════════════════════════ */
+.home-hdr{
+  background:linear-gradient(160deg,var(--bg) 0%,var(--forest) 75%,var(--forest2) 100%);
+  flex-shrink:0;padding:0 20px 18px;position:relative;overflow:hidden;
+}
+.home-hdr::after{
+  content:'';position:absolute;width:280px;height:280px;border-radius:50%;
+  background:radial-gradient(circle,rgba(200,150,14,.1),transparent 70%);
+  right:-50px;top:-80px;pointer-events:none;
+}
+.home-topbar{display:flex;align-items:center;justify-content:space-between;padding:6px 0 14px}
+.home-greet{font-size:.54rem;font-weight:600;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.1em;font-family:var(--fm)}
+.home-name{font-size:.92rem;font-weight:800;color:var(--white);margin-top:2px}
+.home-right{display:flex;gap:8px;align-items:center}
+.icon-btn{
+  width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.1);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;
+  position:relative;transition:.15s;
+}
+.icon-btn:active{transform:scale(.92)}
+.icon-btn svg{width:18px;height:18px;stroke:rgba(255,255,255,.75);stroke-width:2;fill:none}
+.notif-badge{
+  position:absolute;top:4px;right:4px;
+  width:18px;height:18px;border-radius:50%;
+  background:#ef4444;border:2px solid var(--forest);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.45rem;font-weight:800;color:white;font-family:var(--fm);
+}
+.home-av{
+  width:40px;height:40px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold),var(--forest2));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fd);font-size:.95rem;font-weight:900;color:var(--white);
+  border:2px solid rgba(255,255,255,.12);cursor:pointer;
+}
+
+/* BALANCE CARD */
+.bal-card{
+  background:linear-gradient(135deg,var(--gold) 0%,var(--gold2) 50%,var(--gold3) 100%);
+  border-radius:20px;padding:16px 18px;position:relative;overflow:hidden;
+  box-shadow:0 8px 32px rgba(200,150,14,.3);
+}
+.bal-card::before{content:'';position:absolute;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.12);bottom:-40px;right:-20px}
+.bal-card::after{content:'';position:absolute;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.08);top:-25px;right:70px}
+.bal-top{display:flex;align-items:flex-start;justify-content:space-between}
+.bal-label{font-size:.54rem;font-weight:700;color:rgba(0,0,0,.45);text-transform:uppercase;letter-spacing:.1em;font-family:var(--fm)}
+.bal-eye{width:28px;height:28px;border-radius:8px;background:rgba(0,0,0,.1);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.bal-eye svg{width:13px;height:13px;stroke:rgba(0,0,0,.5);stroke-width:2;fill:none}
+.bal-amount{font-family:var(--fd);font-size:1.85rem;font-weight:900;color:var(--bg);line-height:1;margin:6px 0 3px;letter-spacing:-.02em}
+.bal-amount .bc{font-size:.95rem;font-weight:600;opacity:.65}
+.bal-sub{font-size:.56rem;color:rgba(0,0,0,.4);font-family:var(--fm)}
+.bal-tag{
+  display:inline-flex;align-items:center;gap:4px;margin-top:10px;
+  padding:3px 8px;background:rgba(0,0,0,.08);border-radius:6px;
+  font-family:var(--fm);font-size:.54rem;color:rgba(0,0,0,.5);
+}
+.bal-tag svg{width:10px;height:10px;stroke:rgba(0,70,0,.7);stroke-width:2.5;fill:none}
+
+/* QUICK ACTIONS */
+.qa-row{
+  display:grid;grid-template-columns:repeat(5,1fr);
+  background:var(--card);padding:12px 6px;gap:2px;
+  border-bottom:1px solid rgba(0,0,0,.05);flex-shrink:0;
+}
+.qa{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;padding:3px;border-radius:10px;transition:.12s}
+.qa:active{transform:scale(.88)}
+.qa-ic{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center}
+.qa-lbl{font-size:.5rem;font-weight:800;color:var(--apptext);text-align:center;text-transform:uppercase;letter-spacing:.02em}
+
+/* COFFRE STRIP */
+.cs{
+  margin:10px 16px;background:linear-gradient(135deg,var(--bg),var(--forest));
+  border-radius:16px;padding:13px 16px;display:flex;align-items:center;gap:12px;
+  border:1px solid rgba(200,150,14,.15);cursor:pointer;transition:.18s;flex-shrink:0;
+}
+.cs:active{transform:scale(.98)}
+.cs-ic{width:36px;height:36px;border-radius:11px;background:rgba(200,150,14,.14);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cs-ic svg{width:16px;height:16px;stroke:var(--gold3);stroke-width:2;fill:none}
+.cs-title{font-size:.7rem;font-weight:800;color:var(--gold3)}
+.cs-sub{font-size:.57rem;color:rgba(255,255,255,.38);margin-top:1px}
+.cs-val{font-family:var(--fd);font-size:1rem;font-weight:900;color:var(--gold3);margin-left:auto;flex-shrink:0}
+.cs-arr svg{width:14px;height:14px;stroke:rgba(255,255,255,.25);stroke-width:2;fill:none;margin-left:6px}
+.row-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 7px;flex-shrink:0}
+.row-hdr-title{font-size:.6rem;font-weight:800;color:var(--apptext);text-transform:uppercase;letter-spacing:.1em}
+.row-hdr-link{font-size:.62rem;font-weight:700;color:var(--forest2);cursor:pointer}
+
+/* ══════════════════════════════════════════════════
+   SCREEN: SEND
+══════════════════════════════════════════════════ */
+.contact-scroll{display:flex;gap:10px;overflow-x:auto;padding:2px 0 10px}
+.contact-scroll::-webkit-scrollbar{display:none}
+.contact-chip{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;min-width:54px;transition:.14s;flex-shrink:0}
+.contact-chip:active{transform:scale(.88)}
+.contact-av{
+  width:48px;height:48px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fd);font-size:.95rem;font-weight:900;color:var(--white);
+  border:2.5px solid transparent;transition:.18s;position:relative;
+}
+.contact-av.selected{border-color:var(--green2)}
+.contact-av.selected::after{content:'';position:absolute;bottom:0;right:0;width:14px;height:14px;border-radius:50%;background:var(--green2);border:2px solid var(--card)}
+.contact-name{font-size:.52rem;font-weight:700;color:var(--apptext);text-align:center}
+.rec-row{
+  display:flex;align-items:center;gap:12px;padding:12px 14px;
+  background:rgba(21,128,61,.06);border-radius:14px;border:1.5px solid rgba(21,128,61,.18);
+}
+.rec-av{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:.9rem;font-weight:900;color:var(--white)}
+.rec-name{font-size:.82rem;font-weight:800;color:var(--apptext)}
+.rec-phone{font-size:.62rem;color:var(--appsub);font-family:var(--fm);margin-top:1px}
+.rec-check{margin-left:auto;width:24px;height:24px;border-radius:50%;background:var(--green2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rec-check svg{width:12px;height:12px;stroke:white;stroke-width:2.5;fill:none}
+.amt-display{background:var(--card);border-radius:18px;padding:18px 16px 14px;border:1px solid var(--border);text-align:center}
+.amt-label{font-size:.57rem;font-weight:700;color:var(--appsub);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px;font-family:var(--fm)}
+.amt-val{font-family:var(--fd);font-size:2.8rem;font-weight:900;color:var(--apptext);line-height:1;letter-spacing:-.02em}
+.amt-val .cur{font-size:1.1rem;color:var(--appsub);font-weight:600}
+.amt-fee{display:inline-flex;align-items:center;gap:4px;margin-top:8px;padding:4px 10px;background:rgba(21,128,61,.08);border-radius:6px;font-family:var(--fm);font-size:.55rem;color:#15803d}
+.amt-fee svg{width:10px;height:10px;stroke:#15803d;stroke-width:2.5;fill:none}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.nk{
+  height:58px;border-radius:14px;border:none;background:var(--app2);
+  font-family:var(--f);font-size:1.15rem;font-weight:700;color:var(--apptext);
+  cursor:pointer;transition:.1s;display:flex;align-items:center;justify-content:center;
+}
+.nk:active{transform:scale(.92);background:var(--app3)}
+.nk.del{background:rgba(220,38,38,.07);color:#dc2626}
+.nk.del svg{width:19px;height:19px;stroke:#dc2626;stroke-width:2;fill:none}
+
+/* ══════════════════════════════════════════════════
+   SCREEN: QR
+══════════════════════════════════════════════════ */
+#sc-qr{background:var(--bg)}
+.qr-scanner-area{
+  flex:0 0 auto;display:flex;flex-direction:column;align-items:center;
+  padding:20px 20px 14px;gap:14px;
+}
+.qr-viewfinder{
+  width:210px;height:210px;border-radius:22px;
+  background:rgba(255,255,255,.04);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.qr-corner{position:absolute;width:30px;height:30px;border-color:var(--green2);border-style:solid}
+.qr-corner.tl{top:10px;left:10px;border-width:3px 0 0 3px;border-radius:4px 0 0 0}
+.qr-corner.tr{top:10px;right:10px;border-width:3px 3px 0 0;border-radius:0 4px 0 0}
+.qr-corner.bl{bottom:10px;left:10px;border-width:0 0 3px 3px;border-radius:0 0 0 4px}
+.qr-corner.br{bottom:10px;right:10px;border-width:0 3px 3px 0;border-radius:0 0 4px 0}
+.qr-scanline{
+  position:absolute;left:14px;right:14px;height:2px;
+  background:linear-gradient(90deg,transparent,var(--green2),transparent);
+  animation:scan 2.5s ease-in-out infinite;
+}
+@keyframes scan{0%{top:20px;opacity:.7}50%{top:190px;opacity:1}100%{top:20px;opacity:.7}}
+.qr-inner-grid{opacity:.08}
+.qr-hint{font-family:var(--fm);font-size:.62rem;color:rgba(255,255,255,.4);text-align:center}
+.qr-simulate-form{background:rgba(255,255,255,.05);border-radius:16px;padding:14px;border:1px solid rgba(255,255,255,.08);width:100%}
+.qr-simulate-form label{font-size:.58rem;color:rgba(255,255,255,.4);font-family:var(--fm);text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:5px;margin-top:10px}
+.qr-simulate-form label:first-child{margin-top:0}
+.qr-simulate-form .input{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.1);color:var(--white)}
+.qr-simulate-form .input:focus{border-color:rgba(200,150,14,.4)}
+.qr-simulate-form .input::placeholder{color:rgba(255,255,255,.25)}
+.qr-divider{display:flex;align-items:center;gap:10px;padding:0 20px;flex-shrink:0}
+.qr-divider-line{flex:1;height:1px;background:rgba(0,0,0,.08)}
+.qr-divider-txt{font-size:.6rem;font-weight:700;color:var(--appsub);text-transform:uppercase;letter-spacing:.1em}
+.qr-mycard{background:var(--card);border-radius:var(--r);border:1px solid var(--border);padding:14px 16px;display:flex;align-items:center;gap:14px}
+.qr-mycard-img{width:80px;height:80px;background:var(--apptext);border-radius:10px;padding:7px;flex-shrink:0}
+.qr-mycard-img svg{width:100%;height:100%}
+.qr-mycard-name{font-size:.85rem;font-weight:800;color:var(--apptext)}
+.qr-mycard-phone{font-family:var(--fm);font-size:.6rem;color:var(--appsub);margin-top:2px}
+.qr-share-btn{
+  margin-left:auto;width:38px;height:38px;border-radius:11px;
+  background:rgba(13,61,31,.1);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+}
+.qr-share-btn svg{width:15px;height:15px;stroke:var(--forest2);stroke-width:2;fill:none}
+
+/* ══════════════════════════════════════════════════
+   SCREEN: COFFRE
+══════════════════════════════════════════════════ */
+.coffre-hdr{
+  background:linear-gradient(160deg,var(--bg),var(--forest));
+  flex-shrink:0;padding:0 20px 20px;position:relative;overflow:hidden;
+}
+.coffre-hdr::after{content:'';position:absolute;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(200,150,14,.1),transparent 70%);right:-50px;top:-70px;pointer-events:none}
+.coffre-hdr-top{display:flex;align-items:center;justify-content:space-between;padding:8px 0 16px}
+.coffre-title-txt{font-family:var(--fd);font-size:.95rem;font-style:italic;font-weight:700;color:var(--gold3)}
+.coffre-plus-btn{width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;border:none}
+.coffre-plus-btn svg{width:16px;height:16px;stroke:rgba(255,255,255,.7);stroke-width:2;fill:none}
+.coffre-total-lbl{font-size:.54rem;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.1em;font-family:var(--fm)}
+.coffre-total-val{font-family:var(--fd);font-size:2rem;font-weight:900;color:var(--white);margin:4px 0 2px;letter-spacing:-.02em}
+.coffre-rate-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(34,197,94,.15);border-radius:6px;font-family:var(--fm);font-size:.57rem;font-weight:600;color:var(--green3)}
+.coffre-rate-pill svg{width:10px;height:10px;stroke:var(--green3);stroke-width:2.5;fill:none}
+.coffre-item{background:var(--card);border-radius:var(--r);border:1px solid var(--border);padding:14px 16px;cursor:pointer;transition:.18s}
+.coffre-item:active{transform:scale(.98)}
+.ci-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.ci-ic{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ci-name{font-size:.8rem;font-weight:800;color:var(--apptext)}
+.ci-dl{font-size:.6rem;color:var(--appsub);margin-top:1px;font-family:var(--fm)}
+.ci-right{margin-left:auto;text-align:right;flex-shrink:0}
+.ci-val{font-family:var(--fd);font-size:.95rem;font-weight:900;color:var(--apptext)}
+.ci-rate{font-size:.58rem;font-weight:700;color:#15803d;margin-top:1px}
+.ci-bar-bg{background:rgba(0,0,0,.07);border-radius:100px;height:6px;overflow:hidden}
+.ci-bar{height:100%;border-radius:100px;transition:.3s}
+.ci-bar-labels{display:flex;justify-content:space-between;margin-top:5px}
+.ci-bar-labels span{font-family:var(--fm);font-size:.5rem;color:var(--appsub2)}
+.coffre-new{border:2px dashed rgba(0,0,0,.1);border-radius:var(--r);padding:18px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:.14s;background:transparent;width:100%}
+.coffre-new:active{transform:scale(.97)}
+.coffre-new svg{width:16px;height:16px;stroke:var(--appsub);stroke-width:2;fill:none}
+.coffre-new span{font-size:.75rem;font-weight:700;color:var(--appsub)}
+
+/* COFFRE DETAIL */
+.cd-hero{
+  background:linear-gradient(160deg,var(--bg),var(--forest));
+  flex-shrink:0;padding:0 20px 20px;
+}
+.cd-hero-top{display:flex;align-items:center;justify-content:space-between;padding:8px 0 16px}
+.cd-name{font-family:var(--fd);font-size:1.1rem;font-style:italic;font-weight:700;color:var(--white)}
+.cd-saved-label{font-size:.54rem;color:rgba(255,255,255,.4);font-family:var(--fm);text-transform:uppercase;letter-spacing:.1em}
+.cd-saved{font-family:var(--fd);font-size:2rem;font-weight:900;color:var(--white);letter-spacing:-.02em;margin:4px 0 2px}
+.cd-bar-wrap{background:rgba(255,255,255,.12);border-radius:100px;height:8px;overflow:hidden;margin-top:12px}
+.cd-bar{height:100%;border-radius:100px}
+.cd-bar-row{display:flex;justify-content:space-between;margin-top:6px}
+.cd-bar-lbl{font-family:var(--fm);font-size:.56rem;color:rgba(255,255,255,.4)}
+.cd-meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.cd-meta{background:rgba(255,255,255,.07);border-radius:10px;padding:10px 8px;text-align:center}
+.cd-meta-n{font-family:var(--fd);font-size:.92rem;font-weight:900;color:var(--gold3)}
+.cd-meta-l{font-family:var(--fm);font-size:.5rem;color:rgba(255,255,255,.35);margin-top:2px;text-transform:uppercase}
+.cd-input-wrap{display:flex;gap:8px;align-items:center}
+.cd-input-wrap .input{flex:1}
+
+/* ══════════════════════════════════════════════════
+   SCREEN: BUDGET
+══════════════════════════════════════════════════ */
+.bud-summary{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bud-sum-card{border-radius:14px;padding:14px;display:flex;align-items:center;justify-content:space-between}
+.bud-sum-label{font-size:.56rem;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.08em;font-family:var(--fm)}
+.bud-sum-val{font-family:var(--fd);font-size:1rem;font-weight:900;color:var(--white);margin-top:4px}
+.bud-sum-ic{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.bud-sum-ic svg{width:17px;height:17px;stroke:var(--gold3);stroke-width:1.9;fill:none}
+.bud-tabs{display:flex;gap:4px;background:var(--app2);border-radius:10px;padding:3px}
+.btab{flex:1;padding:8px 4px;border-radius:8px;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;transition:.15s;border:none;background:none;font-family:var(--f);color:var(--appsub)}
+.btab.on{background:var(--card);color:var(--apptext);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.cat-item{background:var(--card);border-radius:14px;border:1px solid var(--border);padding:12px 14px;display:flex;align-items:center;gap:12px}
+.cat-ic{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cat-name{font-size:.76rem;font-weight:700;color:var(--apptext);flex:1}
+.cat-bar-wrap{flex:1.5;background:rgba(0,0,0,.06);border-radius:100px;height:4px;overflow:hidden}
+.cat-bar-fill{height:100%;border-radius:100px}
+.cat-right{text-align:right;flex-shrink:0}
+.cat-val{font-size:.76rem;font-weight:800;color:var(--apptext);font-family:var(--fd)}
+.cat-pct{font-size:.54rem;color:var(--appsub2);font-family:var(--fm);margin-top:1px}
+
+/* ══════════════════════════════════════════════════
+   SCREEN: TONTINE
+══════════════════════════════════════════════════ */
+.tontine-item{background:var(--card);border-radius:var(--r);border:1px solid var(--border);padding:14px 16px}
+.tnt-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.tnt-av{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:.88rem;font-weight:900;color:var(--white)}
+.tnt-name{font-size:.8rem;font-weight:800;color:var(--apptext)}
+.tnt-members{font-size:.6rem;color:var(--appsub);margin-top:1px;font-family:var(--fm)}
+.tnt-amount{margin-left:auto;text-align:right}
+.tnt-val{font-family:var(--fd);font-size:.9rem;font-weight:900;color:var(--apptext)}
+.tnt-cycle{font-size:.56rem;color:var(--appsub2);font-family:var(--fm);margin-top:1px}
+.tnt-turn-badge{background:rgba(21,128,61,.08);border:1px solid rgba(21,128,61,.15);border-radius:8px;padding:6px 10px;font-size:.65rem;font-weight:700;color:#15803d;margin-bottom:10px}
+.tnt-bar-bg{background:rgba(0,0,0,.07);border-radius:100px;height:5px;overflow:hidden;margin-bottom:5px}
+.tnt-bar{height:100%;border-radius:100px}
+.tnt-footer{display:flex;justify-content:space-between;margin-bottom:10px}
+.tnt-footer span{font-family:var(--fm);font-size:.52rem;color:var(--appsub2)}
+.tnt-btn{width:100%;padding:11px;border:none;border-radius:12px;background:rgba(13,61,31,.08);border:1px solid rgba(13,61,31,.15);font-family:var(--f);font-size:.78rem;font-weight:800;color:var(--forest2);cursor:pointer;transition:.15s}
+.tnt-btn:active{transform:scale(.97)}
+
+/* ══════════════════════════════════════════════════
+   SCREEN: FACTURES
+══════════════════════════════════════════════════ */
+.bill-item{display:flex;align-items:center;gap:12px;padding:13px 16px;background:var(--card);border-radius:14px;border:1px solid var(--border)}
+.bill-item.paid{opacity:.55}
+.bill-ic{width:42px;height:42px;border-radius:13px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.bill-name{font-size:.8rem;font-weight:700;color:var(--apptext)}
+.bill-ref{font-size:.6rem;color:var(--appsub);font-family:var(--fm);margin-top:2px}
+.bill-right{margin-left:auto;text-align:right;flex-shrink:0}
+.bill-val{font-family:var(--fd);font-size:.88rem;font-weight:900;color:var(--apptext)}
+.bill-due{font-size:.56rem;font-family:var(--fm);margin-top:2px;font-weight:600;color:#dc2626}
+.bill-due.ok{color:#15803d}
+.bill-pay-btn{
+  margin-left:8px;flex-shrink:0;
+  padding:8px 14px;border:none;border-radius:9px;
+  background:linear-gradient(135deg,var(--gold),var(--gold3));
+  font-family:var(--f);font-size:.7rem;font-weight:800;color:var(--bg);cursor:pointer;transition:.15s;
+}
+.bill-pay-btn:active{transform:scale(.94)}
+.bills-empty{text-align:center;padding:20px;color:var(--appsub);font-size:.78rem}
+
+/* ══════════════════════════════════════════════════
+   SCREEN: RECHARGE
+══════════════════════════════════════════════════ */
+.op-selector{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.op-btn{
+  padding:14px;border:2px solid var(--border);border-radius:14px;
+  background:var(--card);cursor:pointer;text-align:center;transition:.15s;
+}
+.op-btn:active{transform:scale(.96)}
+.op-btn.on{border-color:var(--green2);background:rgba(34,197,94,.05)}
+.op-name{font-size:.8rem;font-weight:800;color:var(--apptext)}
+.op-sub{font-size:.6rem;color:var(--appsub);margin-top:2px}
+.amount-pills{display:flex;gap:6px;flex-wrap:wrap}
+.amount-pill{
+  padding:8px 14px;border-radius:10px;
+  border:1.5px solid var(--border);background:var(--card);
+  font-size:.78rem;font-weight:700;color:var(--apptext);cursor:pointer;transition:.14s;
+}
+.amount-pill:active{transform:scale(.94)}
+.amount-pill.on{border-color:var(--gold2);background:rgba(200,150,14,.07);color:var(--gold2)}
+
+/* ══════════════════════════════════════════════════
+   SCREEN: NOTIFS
+══════════════════════════════════════════════════ */
+.notif-item{display:flex;align-items:flex-start;gap:12px;padding:13px 16px;border-bottom:1px solid rgba(0,0,0,.04);position:relative;cursor:pointer;transition:.1s}
+.notif-item:last-child{border-bottom:none}
+.notif-item:active{background:rgba(0,0,0,.03)}
+.notif-item.unread::before{content:'';position:absolute;left:6px;top:18px;width:6px;height:6px;border-radius:50%;background:var(--green2)}
+.notif-ic{width:38px;height:38px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.notif-title{font-size:.76rem;font-weight:700;color:var(--apptext)}
+.notif-desc{font-size:.64rem;color:var(--appsub);margin-top:2px;line-height:1.5}
+.notif-time{font-family:var(--fm);font-size:.54rem;color:var(--appsub2);margin-top:4px}
+
+/* ══════════════════════════════════════════════════
+   SCREEN: PROFIL
+══════════════════════════════════════════════════ */
+.profil-hdr{background:linear-gradient(160deg,var(--bg),var(--forest));flex-shrink:0;padding:0 20px 22px;text-align:center;position:relative;overflow:hidden}
+.profil-hdr::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 70% 30%,rgba(200,150,14,.08),transparent 60%);pointer-events:none}
+.profil-av{width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--forest2));display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:1.8rem;font-weight:900;color:var(--white);margin:0 auto 10px;border:3px solid rgba(255,255,255,.12)}
+.profil-name{font-size:1rem;font-weight:800;color:var(--white)}
+.profil-phone{font-family:var(--fm);font-size:.62rem;color:rgba(255,255,255,.4);margin-top:3px}
+.profil-loc{font-size:.64rem;color:rgba(255,255,255,.35);margin-top:2px}
+.profil-badge{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:4px 12px;background:rgba(200,150,14,.12);border:1px solid rgba(200,150,14,.2);border-radius:100px;font-family:var(--fm);font-size:.57rem;font-weight:600;color:var(--gold3)}
+.profil-badge svg{width:10px;height:10px;stroke:var(--gold3);stroke-width:2.5;fill:none}
+.pstats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(0,0,0,.07);border-radius:14px;overflow:hidden}
+.pstat{background:var(--card);padding:12px 8px;text-align:center}
+.pstat-n{font-family:var(--fd);font-size:1.15rem;font-weight:900;color:var(--apptext)}
+.pstat-l{font-family:var(--fm);font-size:.5rem;color:var(--appsub);margin-top:2px;text-transform:uppercase;letter-spacing:.05em}
+.menu-group{background:var(--card);border-radius:var(--r);overflow:hidden;border:1px solid var(--border)}
+.mi{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid rgba(0,0,0,.05);cursor:pointer;transition:.1s}
+.mi:last-child{border-bottom:none}
+.mi:active{background:rgba(0,0,0,.03)}
+.mi-ic{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mi-ic svg{width:16px;height:16px;stroke-width:1.9;fill:none}
+.mi-title{font-size:.8rem;font-weight:700;color:var(--apptext)}
+.mi-sub{font-size:.62rem;color:var(--appsub);margin-top:1px}
+.mi-right{margin-left:auto;display:flex;align-items:center;gap:6px}
+.mi-arr svg{width:14px;height:14px;stroke:var(--appsub2);stroke-width:2;fill:none}
+.mi-tag{font-family:var(--fm);font-size:.5rem;font-weight:700;padding:3px 7px;border-radius:6px}
+.mi-tag.gold{background:rgba(200,150,14,.1);color:var(--gold2)}
+.mi-tag.red{background:rgba(220,38,38,.1);color:#dc2626}
+
+/* ══════════════════════════════════════════════════
+   MODALS
+══════════════════════════════════════════════════ */
+.modal{
+  position:absolute;inset:0;border-radius:inherit;
+  background:rgba(6,13,8,.7);backdrop-filter:blur(6px);
+  display:flex;align-items:flex-end;justify-content:center;
+  z-index:500;opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.modal.on{opacity:1;pointer-events:all}
+.modal-box{
+  background:var(--card);border-radius:22px 22px 0 0;
+  padding:20px 20px calc(20px + var(--safe-bot));width:100%;
+  transform:translateY(40px);transition:transform .28s cubic-bezier(.32,.72,0,1);
+  display:flex;flex-direction:column;gap:12px;
+}
+.modal.on .modal-box{transform:translateY(0)}
+.modal-handle{width:40px;height:4px;background:rgba(0,0,0,.12);border-radius:100px;margin:0 auto 4px}
+.modal-title{font-size:.9rem;font-weight:800;color:var(--apptext);text-align:center}
+
+/* ── OVERLAY ─────────────────────────────────────── */
+.overlay{
+  position:absolute;inset:0;border-radius:inherit;
+  background:rgba(6,13,8,.96);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;z-index:300;opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.overlay.on{opacity:1;pointer-events:all}
+.ov-circle{
+  width:80px;height:80px;border-radius:50%;
+  background:linear-gradient(135deg,var(--green),var(--green2));
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 50px rgba(34,197,94,.35);
+  animation:popIn .4s cubic-bezier(.32,.72,0,1) both;
+}
+.ov-circle svg{width:36px;height:36px;stroke:white;stroke-width:2.5;fill:none}
+@keyframes popIn{from{transform:scale(0)}to{transform:scale(1)}}
+.ov-title{font-family:var(--fd);font-size:1.3rem;font-weight:900;color:var(--white);text-align:center}
+.ov-sub{font-size:.75rem;color:rgba(255,255,255,.4);text-align:center;max-width:240px;line-height:1.7}
+.ov-btn{padding:13px 36px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--gold),var(--gold3));font-family:var(--f);font-size:.88rem;font-weight:800;color:var(--bg);cursor:pointer;transition:.15s;margin-top:4px}
+.ov-btn:active{transform:scale(.95)}
+
+/* ── TOAST ───────────────────────────────────────── */
+.toast{
+  position:absolute;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--apptext);color:var(--white);padding:10px 18px;border-radius:10px;
+  font-size:.76rem;font-weight:700;white-space:nowrap;
+  opacity:0;transition:opacity .22s,transform .22s;pointer-events:none;z-index:1000;
+  font-family:var(--fm);letter-spacing:.02em;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.error{background:#dc2626}
+.toast.info{background:var(--forest2)}
+
+/* ── INSTALL BANNER ──────────────────────────────── */
+.install-banner{
+  position:absolute;top:0;left:0;right:0;
+  background:linear-gradient(135deg,var(--forest),var(--forest2));
+  padding:12px 16px calc(12px + var(--safe-top));
+  display:flex;align-items:center;gap:10px;
+  z-index:400;transform:translateY(-100%);transition:transform .3s;
+}
+.install-banner.show{transform:translateY(0)}
+.install-text{flex:1;font-size:.72rem;color:rgba(255,255,255,.8);line-height:1.5}
+.install-text strong{color:var(--white);display:block;font-size:.78rem}
+.install-btn{padding:8px 14px;background:linear-gradient(135deg,var(--gold),var(--gold3));border:none;border-radius:9px;font-family:var(--f);font-size:.72rem;font-weight:800;color:var(--bg);cursor:pointer;flex-shrink:0;white-space:nowrap}
+.install-close{width:28px;height:28px;background:rgba(255,255,255,.1);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.install-close svg{width:12px;height:12px;stroke:rgba(255,255,255,.6);stroke-width:2;fill:none}
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+ <div class="island"></div>
+ <div class="app-inner" id="appRoot">
+
+  <!-- ══ SVG ICONS ════════════════════════════════ -->
+  <svg style="display:none"><defs>
+  <symbol id="i-zap"     viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+  <symbol id="i-send"    viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></symbol>
+  <symbol id="i-recv"    viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+  <symbol id="i-qr"      viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="5" rx="1"/><rect x="16" y="3" width="5" height="5" rx="1"/><rect x="3" y="16" width="5" height="5" rx="1"/><path d="M16 16h2v2h-2zM18 18h2v2h-2zM14 14h2v2h-2zM14 18h2v2h-2zM18 14h2v2h-2z"/></symbol>
+  <symbol id="i-pay"     viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></symbol>
+  <symbol id="i-lock"    viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <symbol id="i-bell"    viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></symbol>
+  <symbol id="i-home"    viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+  <symbol id="i-chart"   viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
+  <symbol id="i-user"    viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="i-check"   viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+  <symbol id="i-arr-r"   viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></symbol>
+  <symbol id="i-arr-l"   viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></symbol>
+  <symbol id="i-eye"     viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></symbol>
+  <symbol id="i-search"  viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+  <symbol id="i-share"   viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></symbol>
+  <symbol id="i-trend"   viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></symbol>
+  <symbol id="i-users"   viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-shield"  viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+  <symbol id="i-plus"    viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+  <symbol id="i-phone"   viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+  <symbol id="i-help"    viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+  <symbol id="i-logout"  viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></symbol>
+  <symbol id="i-gift"    viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></symbol>
+  <symbol id="i-del"     viewBox="0 0 24 24"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></symbol>
+  <symbol id="i-target"  viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-drop"    viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></symbol>
+  <symbol id="i-wifi"    viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 16 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></symbol>
+  <symbol id="i-star"    viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
+  <symbol id="i-edit"    viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></symbol>
+  </defs></svg>
+
+  <!-- ══ PIN SCREEN ════════════════════════════════ -->
+  <div class="screen screen-dark active" id="sc-pin">
+    <div class="pin-wrap">
+      <div class="pin-logo"><svg><use href="#i-zap"/></svg></div>
+      <div>
+        <div class="pin-title">GhettoPay</div>
+        <div class="pin-sub" style="margin-top:6px">Saisis ton code PIN · <strong style="color:var(--gold3)">1234</strong></div>
+      </div>
+      <div class="pin-dots" id="pin-dots">
+        <div class="pin-dot"></div><div class="pin-dot"></div>
+        <div class="pin-dot"></div><div class="pin-dot"></div>
+      </div>
+      <div class="pin-pad">
+        <button class="pin-key" onclick="App.pinKey('1')">1</button>
+        <button class="pin-key" onclick="App.pinKey('2')">2</button>
+        <button class="pin-key" onclick="App.pinKey('3')">3</button>
+        <button class="pin-key" onclick="App.pinKey('4')">4</button>
+        <button class="pin-key" onclick="App.pinKey('5')">5</button>
+        <button class="pin-key" onclick="App.pinKey('6')">6</button>
+        <button class="pin-key" onclick="App.pinKey('7')">7</button>
+        <button class="pin-key" onclick="App.pinKey('8')">8</button>
+        <button class="pin-key" onclick="App.pinKey('9')">9</button>
+        <button class="pin-key" onclick="App.pinKey('0')" style="grid-column:2">0</button>
+        <button class="pin-key del" onclick="App.pinDel()"><svg><use href="#i-del"/></svg></button>
+      </div>
+      <div class="pin-skip" onclick="App.pinKey('1');App.pinKey('2');App.pinKey('3');App.pinKey('4')">Utiliser l'empreinte digitale</div>
+    </div>
+  </div>
+
+  <!-- ══ HOME SCREEN ══════════════════════════════ -->
+  <div class="screen" id="sc-home">
+    <div class="home-hdr">
+      <div class="sb dark">
+        <span class="clock">09:41</span>
+        <div class="sb-right">
+          <svg width="16" height="11" viewBox="0 0 16 12" fill="rgba(255,255,255,.7)"><rect x="0" y="5" width="3" height="7" rx="1"/><rect x="4.5" y="3" width="3" height="9" rx="1"/><rect x="9" y="1" width="3" height="11" rx="1"/><rect x="13.5" y="0" width="2.5" height="11" rx="1" opacity=".35"/></svg>
+          <svg width="18" height="12" viewBox="0 0 24 12" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.5"><rect x="0" y="0" width="20" height="12" rx="2.5"/><path d="M20 4h3v4h-3" fill="rgba(255,255,255,.7)" stroke="none"/></svg>
+        </div>
+      </div>
+      <div class="home-topbar">
+        <div><div class="home-greet">Bonjour</div><div class="home-name" id="home-name-txt">Rostand M.</div></div>
+        <div class="home-right">
+          <button class="icon-btn" onclick="Router.go('notifications')">
+            <svg><use href="#i-bell"/></svg>
+            <div class="notif-badge" id="notif-badge" style="display:none">0</div>
+          </button>
+          <div class="home-av" id="home-av-txt" onclick="Router.go('profil')">R</div>
+        </div>
+      </div>
+      <div class="bal-card">
+        <div class="bal-top">
+          <div class="bal-label">Solde disponible</div>
+          <button class="bal-eye" onclick="App.toggleBal()"><svg id="eye-icon"><use href="#i-eye"/></svg></button>
+        </div>
+        <div class="bal-amount" id="bal-amount"><span class="bc">FCFA </span>680 000</div>
+        <div class="bal-sub" id="bal-sub">+ Coffre : 245 000 FCFA</div>
+        <div class="bal-tag"><svg><use href="#i-trend"/></svg>+12.4% ce mois · Gabon Vert</div>
+      </div>
+    </div>
+
+    <div class="qa-row">
+      <div class="qa" onclick="Router.go('send')">
+        <div class="qa-ic" style="background:rgba(200,150,14,.12)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold2)" stroke-width="1.9"><use href="#i-send"/></svg></div>
+        <div class="qa-lbl">Envoyer</div>
+      </div>
+      <div class="qa" onclick="App.success('Ton QR est prêt','Partage-le pour recevoir de l\'argent')">
+        <div class="qa-ic" style="background:rgba(34,197,94,.1)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="1.9"><use href="#i-recv"/></svg></div>
+        <div class="qa-lbl">Recevoir</div>
+      </div>
+      <div class="qa" onclick="Router.go('qr')">
+        <div class="qa-ic" style="background:rgba(99,102,241,.1)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.9"><use href="#i-qr"/></svg></div>
+        <div class="qa-lbl">Scanner</div>
+      </div>
+      <div class="qa" onclick="Router.go('factures')">
+        <div class="qa-ic" style="background:rgba(59,130,246,.1)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.9"><use href="#i-pay"/></svg></div>
+        <div class="qa-lbl">Payer</div>
+      </div>
+      <div class="qa" onclick="Router.go('tontine')">
+        <div class="qa-ic" style="background:rgba(168,85,247,.1)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="1.9"><use href="#i-users"/></svg></div>
+        <div class="qa-lbl">Tontine</div>
+      </div>
+    </div>
+
+    <div class="cs" onclick="Router.go('coffre')">
+      <div class="cs-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold3)" stroke-width="2"><use href="#i-lock"/></svg></div>
+      <div><div class="cs-title">Mon Coffre Forêt</div><div class="cs-sub">Épargne sécurisée · 5.5%/an</div></div>
+      <div class="cs-val" id="cs-val">245 000</div>
+      <div class="cs-arr"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2"><use href="#i-arr-r"/></svg></div>
+    </div>
+
+    <div class="row-hdr"><div class="row-hdr-title">Activité récente</div><div class="row-hdr-link" onclick="Router.go('budget')">Tout voir</div></div>
+    <div class="scroll">
+      <div class="card" style="margin:0 16px 80px;overflow:hidden" id="tx-list"></div>
+    </div>
+
+    <div class="bnav">
+      <div class="bnt on" onclick="Router.go('home')"><svg><use href="#i-home"/></svg><span class="bnt-lbl">Accueil</span></div>
+      <div class="bnt" onclick="Router.go('budget')"><svg><use href="#i-chart"/></svg><span class="bnt-lbl">Budget</span></div>
+      <div class="bnt-qr" onclick="Router.go('qr')"><svg><use href="#i-qr"/></svg></div>
+      <div class="bnt" onclick="Router.go('coffre')"><svg><use href="#i-lock"/></svg><span class="bnt-lbl">Coffre</span></div>
+      <div class="bnt" onclick="Router.go('profil')"><svg><use href="#i-user"/></svg><span class="bnt-lbl">Profil</span></div>
+    </div>
+  </div>
+
+  <!-- ══ SEND SCREEN ══════════════════════════════ -->
+  <div class="screen" id="sc-send">
+    <div style="background:var(--card);flex-shrink:0">
+      <div class="sb"><span class="clock">09:41</span></div>
+      <div class="snav" style="border:none">
+        <button class="btn-back" onclick="Router.back()"><svg><use href="#i-arr-l"/></svg></button>
+        <span class="snav-title">Envoyer de l'argent</span>
+      </div>
+      <div class="pad gap12" style="padding-bottom:14px">
+        <div class="search-wrap"><svg><use href="#i-search"/></svg><input type="text" placeholder="Nom ou numéro de téléphone..."/></div>
+        <div class="sec-label">Contacts récents</div>
+        <div class="contact-scroll" id="contact-grid"></div>
+        <div class="rec-row" id="send-rec-row" style="display:none">
+          <div class="rec-av" id="rec-av">A</div>
+          <div><div class="rec-name" id="rec-name"></div><div class="rec-phone" id="rec-phone"></div></div>
+          <div class="rec-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><use href="#i-check"/></svg></div>
+        </div>
+      </div>
+    </div>
+    <div class="scroll">
+      <div class="pad gap12">
+        <div class="amt-display">
+          <div class="amt-label">Montant à envoyer</div>
+          <div class="amt-val"><span class="cur">FCFA </span><span id="amt-disp">0</span></div>
+          <div class="amt-fee"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5"><use href="#i-check"/></svg>Frais : ~50 FCFA seulement</div>
+        </div>
+        <div class="numpad">
+          <button class="nk" onclick="App.kp('1')">1</button><button class="nk" onclick="App.kp('2')">2</button><button class="nk" onclick="App.kp('3')">3</button>
+          <button class="nk" onclick="App.kp('4')">4</button><button class="nk" onclick="App.kp('5')">5</button><button class="nk" onclick="App.kp('6')">6</button>
+          <button class="nk" onclick="App.kp('7')">7</button><button class="nk" onclick="App.kp('8')">8</button><button class="nk" onclick="App.kp('9')">9</button>
+          <button class="nk" onclick="App.kp('000')">000</button><button class="nk" onclick="App.kp('0')">0</button>
+          <button class="nk del" onclick="App.kp('del')"><svg><use href="#i-del"/></svg></button>
+        </div>
+        <textarea class="input" id="send-note" placeholder="Ajouter une note (optionnel)..."></textarea>
+        <button class="btn btn-gold" onclick="App.doSend()"><svg><use href="#i-send"/></svg>Envoyer maintenant</button>
+        <button class="btn btn-ghost" onclick="Router.back()">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ QR SCREEN ════════════════════════════════ -->
+  <div class="screen screen-dark" id="sc-qr">
+    <div class="sb dark"><span class="clock">09:41</span></div>
+    <div class="snav dark">
+      <button class="btn-back dark" onclick="Router.back()"><svg style="stroke:var(--white)"><use href="#i-arr-l"/></svg></button>
+      <span class="snav-title">QR Code</span>
+    </div>
+    <div class="scroll">
+      <div class="qr-scanner-area">
+        <div class="qr-viewfinder">
+          <div class="qr-corner tl"></div><div class="qr-corner tr"></div>
+          <div class="qr-corner bl"></div><div class="qr-corner br"></div>
+          <div class="qr-scanline"></div>
+          <svg class="qr-inner-grid" width="80" height="80" viewBox="0 0 80 80">
+            <rect x="8" y="8" width="22" height="22" fill="white" rx="2"/><rect x="10" y="10" width="6" height="6" fill="#060d08"/>
+            <rect x="50" y="8" width="22" height="22" fill="white" rx="2"/><rect x="52" y="10" width="6" height="6" fill="#060d08"/>
+            <rect x="8" y="50" width="22" height="22" fill="white" rx="2"/><rect x="10" y="52" width="6" height="6" fill="#060d08"/>
+            <rect x="34" y="8" width="6" height="6" fill="white"/><rect x="42" y="18" width="6" height="6" fill="white"/>
+            <rect x="34" y="34" width="10" height="10" fill="white"/><rect x="46" y="34" width="6" height="6" fill="white"/>
+            <rect x="56" y="42" width="6" height="10" fill="white"/><rect x="34" y="46" width="6" height="6" fill="white"/>
+            <rect x="42" y="56" width="6" height="6" fill="white"/><rect x="50" y="54" width="6" height="6" fill="white"/>
+            <rect x="60" y="56" width="6" height="6" fill="white"/><rect x="60" y="64" width="6" height="6" fill="white"/>
+          </svg>
+        </div>
+        <div class="qr-hint">Pointe vers le QR du commerçant</div>
+        <div class="qr-simulate-form" style="width:100%">
+          <label>Nom du commerçant</label>
+          <input id="qr-merchant-input" class="input" placeholder="Ex: Market Mbolo..."/>
+          <label>Montant (FCFA)</label>
+          <input id="qr-amount-input" class="input" type="number" placeholder="Ex: 5000"/>
+        </div>
+        <button class="btn btn-gold" style="width:100%" onclick="App.doQRPay()">
+          <svg><use href="#i-shield"/></svg>Confirmer le paiement QR
+        </button>
+      </div>
+
+      <div class="qr-divider"><div class="qr-divider-line"></div><span class="qr-divider-txt">Mon QR Code</span><div class="qr-divider-line"></div></div>
+      <div class="pad gap12" style="padding-top:12px">
+        <div class="qr-mycard">
+          <div class="qr-mycard-img">
+            <svg viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+              <rect width="10" height="10" fill="white"/>
+              <rect x="0" y="0" width="4" height="4" fill="#060d08"/><rect x="1" y="1" width="2" height="2" fill="white"/>
+              <rect x="6" y="0" width="4" height="4" fill="#060d08"/><rect x="7" y="1" width="2" height="2" fill="white"/>
+              <rect x="0" y="6" width="4" height="4" fill="#060d08"/><rect x="1" y="7" width="2" height="2" fill="white"/>
+              <rect x="5" y="0" width="1" height="1" fill="#060d08"/><rect x="5" y="2" width="1" height="1" fill="#060d08"/>
+              <rect x="4" y="5" width="1" height="1" fill="#060d08"/><rect x="6" y="5" width="1" height="1" fill="#060d08"/>
+              <rect x="8" y="5" width="1" height="1" fill="#060d08"/><rect x="4" y="7" width="2" height="1" fill="#060d08"/>
+              <rect x="7" y="7" width="1" height="1" fill="#060d08"/><rect x="9" y="7" width="1" height="1" fill="#060d08"/>
+              <rect x="5" y="9" width="1" height="1" fill="#060d08"/><rect x="7" y="9" width="2" height="1" fill="#060d08"/>
+            </svg>
+          </div>
+          <div>
+            <div class="qr-mycard-name" id="qr-user-name">Rostand Moussavou</div>
+            <div class="qr-mycard-phone" id="qr-user-phone">+241 06 12 34 56</div>
+            <div class="qr-mycard-phone">GhettoPay · Libreville</div>
+          </div>
+          <button class="qr-share-btn" onclick="App.success('QR Code partagé','Ton ami peut maintenant te payer')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--forest2)" stroke-width="2"><use href="#i-share"/></svg></button>
+        </div>
+        <button class="btn btn-forest" onclick="App.success('QR affiché','Montre ce code pour te faire payer')"><svg><use href="#i-recv"/></svg>Afficher mon QR pour recevoir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ COFFRE SCREEN ════════════════════════════ -->
+  <div class="screen" id="sc-coffre">
+    <div class="coffre-hdr">
+      <div class="sb dark"><span class="clock">09:41</span></div>
+      <div class="coffre-hdr-top">
+        <button class="btn-back dark" onclick="Router.back()"><svg style="stroke:rgba(255,255,255,.6)"><use href="#i-arr-l"/></svg></button>
+        <span class="coffre-title-txt">Le Coffre</span>
+        <button class="coffre-plus-btn" onclick="App.showNewCoffre()"><svg><use href="#i-plus"/></svg></button>
+      </div>
+      <div class="coffre-total-lbl">Total épargné</div>
+      <div class="coffre-total-val" id="coffre-total">245 000 FCFA</div>
+      <div class="coffre-rate-pill"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--green3)" stroke-width="2.5"><use href="#i-trend"/></svg>Rendement actif · +5.5%/an</div>
+    </div>
+    <div class="scroll">
+      <div class="pad gap12" id="coffre-list"></div>
+      <div style="padding:0 16px 80px">
+        <button class="btn btn-gold" onclick="App.showNewCoffre()"><svg><use href="#i-plus"/></svg>Créer un nouveau coffre</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ COFFRE DETAIL SCREEN ═════════════════════ -->
+  <div class="screen" id="sc-coffre-detail">
+    <div class="cd-hero">
+      <div class="sb dark"><span class="clock">09:41</span></div>
+      <div class="cd-hero-top">
+        <button class="btn-back dark" onclick="Router.back()"><svg style="stroke:rgba(255,255,255,.6)"><use href="#i-arr-l"/></svg></button>
+        <span style="font-family:var(--fd);font-size:.92rem;font-style:italic;color:var(--gold3)" id="cd-title">Coffre</span>
+        <div style="width:36px"></div>
+      </div>
+      <div style="font-size:.54rem;color:rgba(255,255,255,.4);font-family:var(--fm);text-transform:uppercase;letter-spacing:.1em">Montant épargné</div>
+      <div class="cd-saved" id="cd-saved">0</div>
+      <div class="cd-bar-wrap"><div class="cd-bar" id="cd-bar" style="width:0%"></div></div>
+      <div class="cd-bar-row">
+        <span class="cd-bar-lbl">0 FCFA</span>
+        <span class="cd-bar-lbl" id="cd-target" style="color:var(--gold3)">250 000 FCFA</span>
+      </div>
+      <div class="cd-meta-grid">
+        <div class="cd-meta"><div class="cd-meta-n" id="cd-pct">0%</div><div class="cd-meta-l">Progression</div></div>
+        <div class="cd-meta"><div class="cd-meta-n" id="cd-rate">5.5%</div><div class="cd-meta-l">Rendement/an</div></div>
+        <div class="cd-meta"><div class="cd-meta-n" id="cd-dl">—</div><div class="cd-meta-l">Déblocage</div></div>
+      </div>
+    </div>
+    <div class="scroll">
+      <div class="pad gap12">
+        <div class="card card-p" style="background:linear-gradient(135deg,var(--forest),var(--forest2))">
+          <div style="font-size:.7rem;font-weight:800;color:var(--gold3);margin-bottom:6px">Verser dans ce coffre</div>
+          <div style="font-size:.68rem;color:rgba(255,255,255,.4);margin-bottom:12px">Le montant sera bloqué jusqu'à la date d'échéance</div>
+          <div class="cd-input-wrap">
+            <input class="input" id="cd-input" type="number" placeholder="Montant FCFA..." style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.1);color:var(--white)"/>
+            <button class="btn btn-gold btn-sm" onclick="App.addToCoffre()">Verser</button>
+          </div>
+        </div>
+        <div class="card card-p">
+          <div style="font-size:.72rem;font-weight:800;color:var(--apptext);margin-bottom:6px">Comment ça marche ?</div>
+          <div style="font-size:.68rem;color:var(--appsub);line-height:1.75">Tu bloques de l'argent jusqu'à la date que tu choisis. Impossible de retirer avant — c'est ta protection contre les dépenses impulsives. Après 6 mois, ton épargne génère 5.5% d'intérêts par an.</div>
+        </div>
+        <button class="btn btn-danger" onclick="App.toast('Action non disponible avant l\'échéance','error')"><svg><use href="#i-lock"/></svg>Déblocage anticipé (impossible)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ BUDGET SCREEN ════════════════════════════ -->
+  <div class="screen" id="sc-budget">
+    <div style="background:var(--card);flex-shrink:0;padding:0 0 12px">
+      <div class="sb"><span class="clock">09:41</span></div>
+      <div style="display:flex;align-items:center;gap:10px;padding:0 16px 10px">
+        <button class="btn-back" onclick="Router.back()"><svg><use href="#i-arr-l"/></svg></button>
+        <span class="snav-title">Budget</span>
+        <span style="margin-left:auto;font-family:var(--fm);font-size:.62rem;color:var(--appsub)">Nov. 2024</span>
+      </div>
+      <div style="padding:0 16px">
+        <div class="bud-tabs">
+          <button class="btab on" onclick="setTab(this)">Semaine</button>
+          <button class="btab" onclick="setTab(this)">Mois</button>
+          <button class="btab" onclick="setTab(this)">Année</button>
+        </div>
+      </div>
+    </div>
+    <div class="scroll">
+      <div class="pad gap12">
+        <div class="bud-summary">
+          <div class="bud-sum-card" style="background:linear-gradient(135deg,var(--forest),var(--forest2))">
+            <div><div class="bud-sum-label">Dépenses</div><div class="bud-sum-val" id="bud-out">—</div></div>
+            <div class="bud-sum-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--gold3)" stroke-width="1.9"><use href="#i-send"/></svg></div>
+          </div>
+          <div class="bud-sum-card" style="background:linear-gradient(135deg,var(--green),var(--green2))">
+            <div><div class="bud-sum-label">Revenus</div><div class="bud-sum-val" id="bud-in">—</div></div>
+            <div class="bud-sum-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.9"><use href="#i-recv"/></svg></div>
+          </div>
+        </div>
+        <div class="sec-label">Par catégorie</div>
+        <div class="gap8" id="cat-list"></div>
+        <div class="sec-label">Toutes les transactions</div>
+        <div class="card" style="overflow:hidden" id="all-tx-list"></div>
+      </div>
+    </div>
+    <div class="bnav">
+      <div class="bnt" onclick="Router.go('home')"><svg><use href="#i-home"/></svg><span class="bnt-lbl">Accueil</span></div>
+      <div class="bnt on" onclick="Router.go('budget')"><svg><use href="#i-chart"/></svg><span class="bnt-lbl">Budget</span></div>
+      <div class="bnt-qr" onclick="Router.go('qr')"><svg><use href="#i-qr"/></svg></div>
+      <div class="bnt" onclick="Router.go('coffre')"><svg><use href="#i-lock"/></svg><span class="bnt-lbl">Coffre</span></div>
+      <div class="bnt" onclick="Router.go('profil')"><svg><use href="#i-user"/></svg><span class="bnt-lbl">Profil</span></div>
+    </div>
+  </div>
+
+  <!-- ══ TONTINE SCREEN ═══════════════════════════ -->
+  <div class="screen" id="sc-tontine">
+    <div class="sb"><span class="clock">09:41</span></div>
+    <div class="snav">
+      <button class="btn-back" onclick="Router.back()"><svg><use href="#i-arr-l"/></svg></button>
+      <span class="snav-title">Tontines</span>
+      <span class="snav-action" onclick="App.success('Tontine créée','Partage le code à tes amis')">+ Nouvelle</span>
+    </div>
+    <div class="scroll">
+      <div class="pad gap12" id="tontine-list"></div>
+    </div>
+  </div>
+
+  <!-- ══ FACTURES SCREEN ══════════════════════════ -->
+  <div class="screen" id="sc-factures">
+    <div class="sb"><span class="clock">09:41</span></div>
+    <div class="snav">
+      <button class="btn-back" onclick="Router.back()"><svg><use href="#i-arr-l"/></svg></button>
+      <span class="snav-title">Factures & Paiements</span>
+    </div>
+    <div class="scroll">
+      <div class="pad gap12">
+        <div class="sec-label">En attente</div>
+        <div class="gap8" id="bills-unpaid"></div>
+        <div class="sec-label">Services disponibles</div>
+        <div class="gap8">
+          <div class="bill-item" onclick="Router.go('recharge')">
+            <div class="bill-ic" style="background:rgba(220,38,38,.1)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="1.9"><use href="#i-phone"/></svg></div>
+            <div><div class="bill-name">Recharge crédit / data</div><div class="bill-ref">Airtel, Moov — Instantané</div></div>
+            <div class="bill-right"><div class="bill-val">—</div><div class="bill-due ok">Choisir</div></div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--appsub2)" stroke-width="2"><use href="#i-arr-r"/></svg>
+          </div>
+        </div>
+        <button class="btn btn-gold" onclick="App.payAllBills()"><svg><use href="#i-check"/></svg>Tout payer maintenant</button>
+        <div class="sec-label" id="bills-paid-label" style="display:none">Payées récemment</div>
+        <div class="gap8" id="bills-paid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ RECHARGE SCREEN ══════════════════════════ -->
+  <div class="screen" id="sc-recharge">
+    <div class="sb"><span class="clock">09:41</span></div>
+    <div class="snav">
+      <button class="btn-back" onclick="Router.back()"><svg><use href="#i-arr-l"/></svg></button>
+      <span class="snav-title">Recharge mobile</span>
+    </div>
+    <div class="scroll">
+      <div class="pad gap12">
+        <div class="sec-label">Opérateur</div>
+        <div class="op-selector">
+          <div class="op-btn on" id="op-airtel" onclick="selectOp('Airtel','op-airtel','op-moov')">
+            <div class="op-name">Airtel</div><div class="op-sub">+241 06/07 XX</div>
+          </div>
+          <div class="op-btn" id="op-moov" onclick="selectOp('Moov','op-moov','op-airtel')">
+            <div class="op-name">Moov</div><div class="op-sub">+241 07 XX</div>
+          </div>
+        </div>
+        <input id="rch-op" type="hidden" value="Airtel"/>
+        <div class="sec-label">Numéro à recharger</div>
+        <input id="rch-phone" class="input" type="tel" placeholder="+241 06 XX XX XX"/>
+        <div class="sec-label">Montant</div>
+        <div class="amount-pills">
+          <div class="amount-pill on" onclick="selectAmount(this,1000)">1 000</div>
+          <div class="amount-pill" onclick="selectAmount(this,2000)">2 000</div>
+          <div class="amount-pill" onclick="selectAmount(this,5000)">5 000</div>
+          <div class="amount-pill" onclick="selectAmount(this,10000)">10 000</div>
+          <div class="amount-pill" onclick="selectAmount(this,25000)">25 000</div>
+        </div>
+        <input id="rch-amount" type="hidden" value="1000"/>
+        <input class="input" type="number" placeholder="Ou saisir un montant personnalisé..." oninput="document.getElementById('rch-amount').value=this.value"/>
+        <button class="btn btn-gold" onclick="App.doRecharge()"><svg><use href="#i-phone"/></svg>Recharger maintenant</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ NOTIFICATIONS SCREEN ══════════════════════ -->
+  <div class="screen" id="sc-notifications">
+    <div class="sb"><span class="clock">09:41</span></div>
+    <div class="snav">
+      <button class="btn-back" onclick="Router.back()"><svg><use href="#i-arr-l"/></svg></button>
+      <span class="snav-title">Notifications</span>
+      <span class="snav-action" onclick="App.markAllRead()">Tout lire</span>
+    </div>
+    <div class="scroll">
+      <div class="card" style="margin:16px;overflow:hidden" id="notif-list"></div>
+    </div>
+  </div>
+
+  <!-- ══ PROFIL SCREEN ════════════════════════════ -->
+  <div class="screen" id="sc-profil">
+    <div class="profil-hdr">
+      <div class="sb dark"><span class="clock">09:41</span></div>
+      <div class="snav dark" style="border:none;padding:6px 0 14px;background:transparent">
+        <button class="btn-back dark" onclick="Router.back()"><svg style="stroke:rgba(255,255,255,.6)"><use href="#i-arr-l"/></svg></button>
+        <span class="snav-title">Mon profil</span>
+        <span class="snav-action" onclick="App.showEditProfile()">Modifier</span>
+      </div>
+      <div class="profil-av" id="prof-av">R</div>
+      <div class="profil-name" id="prof-name">Rostand Moussavou</div>
+      <div class="profil-phone" id="prof-phone">+241 06 12 34 56</div>
+      <div class="profil-loc" id="prof-loc">Libreville, Gabon</div>
+      <div class="profil-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--gold3)" stroke-width="2.5"><use href="#i-shield"/></svg>Compte vérifié · Niveau <span id="prof-level">Gold</span></div>
+    </div>
+    <div class="scroll">
+      <div class="pad gap12">
+        <div class="pstats">
+          <div class="pstat"><div class="pstat-n" id="prof-tx-count">0</div><div class="pstat-l">Transactions</div></div>
+          <div class="pstat"><div class="pstat-n">8</div><div class="pstat-l">Amis invités</div></div>
+          <div class="pstat"><div class="pstat-n" id="prof-cashback">0</div><div class="pstat-l">Cashback FCFA</div></div>
+        </div>
+        <div class="menu-group">
+          <div class="mi" onclick="Router.go('budget')"><div class="mi-ic" style="background:rgba(99,102,241,.1)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="1.9"><use href="#i-chart"/></svg></div><div class="mi-text"><div class="mi-title">Mon budget</div><div class="mi-sub">Analyses et statistiques</div></div><div class="mi-right"><div class="mi-arr"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--appsub2)" stroke-width="2"><use href="#i-arr-r"/></svg></div></div></div>
+          <div class="mi" onclick="App.success('Limite augmentée','5 000 000 FCFA/mois désormais')"><div class="mi-ic" style="background:rgba(34,197,94,.1)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green2)" stroke-width="1.9"><use href="#i-trend"/></svg></div><div class="mi-text"><div class="mi-title">Limite de transaction</div><div class="mi-sub">2 000 000 FCFA/mois</div></div><div class="mi-right"><span class="mi-tag gold">Augmenter</span></div></div>
+          <div class="mi" onclick="App.success('Identité vérifiée','Niveau Gold · KYC complet')"><div class="mi-ic" style="background:rgba(200,150,14,.1)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold2)" stroke-width="1.9"><use href="#i-shield"/></svg></div><div class="mi-text"><div class="mi-title">Vérification identité</div><div class="mi-sub">Niveau Gold · KYC complet</div></div><div class="mi-right"><div class="mi-arr"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--appsub2)" stroke-width="2"><use href="#i-arr-r"/></svg></div></div></div>
+        </div>
+        <div class="menu-group">
+          <div class="mi" onclick="App.success('Code partagé','GP-ROSTAND · +1 000 FCFA/invitation')"><div class="mi-ic" style="background:rgba(251,146,60,.1)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="1.9"><use href="#i-gift"/></svg></div><div class="mi-text"><div class="mi-title">Parrainer un ami</div><div class="mi-sub">+1 000 FCFA par invitation</div></div><div class="mi-right"><span class="mi-tag red">8 invités</span><div class="mi-arr"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--appsub2)" stroke-width="2"><use href="#i-arr-r"/></svg></div></div></div>
+          <div class="mi" onclick="Router.go('notifications')"><div class="mi-ic" style="background:rgba(34,197,94,.1)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green2)" stroke-width="1.9"><use href="#i-bell"/></svg></div><div class="mi-text"><div class="mi-title">Notifications</div><div class="mi-sub" id="notif-sub">2 non lues</div></div><div class="mi-right"><div class="mi-arr"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--appsub2)" stroke-width="2"><use href="#i-arr-r"/></svg></div></div></div>
+        </div>
+        <div class="menu-group">
+          <div class="mi" onclick="App.toast('Sécurité : Empreinte · PIN · Face ID','info')"><div class="mi-ic" style="background:rgba(0,0,0,.05)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--appsub)" stroke-width="1.9"><use href="#i-settings"/></svg></div><div class="mi-text"><div class="mi-title">Sécurité & PIN</div><div class="mi-sub">Empreinte, Face ID, 2FA</div></div><div class="mi-right"><div class="mi-arr"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--appsub2)" stroke-width="2"><use href="#i-arr-r"/></svg></div></div></div>
+          <div class="mi" onclick="App.toast('Support GhettoPay · 24h/24','info')"><div class="mi-ic" style="background:rgba(0,0,0,.05)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--appsub)" stroke-width="1.9"><use href="#i-help"/></svg></div><div class="mi-text"><div class="mi-title">Aide & Support</div><div class="mi-sub">24h/24 · 7j/7 en français</div></div><div class="mi-right"><div class="mi-arr"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--appsub2)" stroke-width="2"><use href="#i-arr-r"/></svg></div></div></div>
+        </div>
+        <button class="btn btn-danger" onclick="App.toast('Déconnexion · PIN requis au prochain lancement','info');setTimeout(()=>Router.go(\'pin\'),1500)"><svg><use href="#i-logout"/></svg>Se déconnecter</button>
+        <div style="text-align:center;font-family:var(--fm);font-size:.54rem;color:var(--appsub2);padding-bottom:4px">GhettoPay v2.0 · Libreville, Gabon · Régulé CEMAC</div>
+      </div>
+    </div>
+    <div class="bnav">
+      <div class="bnt" onclick="Router.go('home')"><svg><use href="#i-home"/></svg><span class="bnt-lbl">Accueil</span></div>
+      <div class="bnt" onclick="Router.go('budget')"><svg><use href="#i-chart"/></svg><span class="bnt-lbl">Budget</span></div>
+      <div class="bnt-qr" onclick="Router.go('qr')"><svg><use href="#i-qr"/></svg></div>
+      <div class="bnt" onclick="Router.go('coffre')"><svg><use href="#i-lock"/></svg><span class="bnt-lbl">Coffre</span></div>
+      <div class="bnt on" onclick="Router.go('profil')"><svg><use href="#i-user"/></svg><span class="bnt-lbl">Profil</span></div>
+    </div>
+  </div>
+
+  <!-- ══ MODALS ════════════════════════════════════ -->
+  <!-- New Coffre -->
+  <div class="modal" id="new-coffre-modal" onclick="if(event.target===this)App.closeNewCoffre()">
+    <div class="modal-box">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Nouveau coffre</div>
+      <input id="nc-name" class="input" placeholder="Nom du coffre (ex: Voyage en France)"/>
+      <input id="nc-target" class="input" type="number" placeholder="Objectif en FCFA"/>
+      <div>
+        <div class="sec-label" style="margin-bottom:8px">Durée de blocage</div>
+        <div class="amount-pills">
+          <div class="amount-pill on" onclick="selectDuration(this,3)">3 mois</div>
+          <div class="amount-pill" onclick="selectDuration(this,6)">6 mois</div>
+          <div class="amount-pill" onclick="selectDuration(this,12)">1 an</div>
+          <div class="amount-pill" onclick="selectDuration(this,24)">2 ans</div>
+        </div>
+        <input id="nc-months" type="hidden" value="3"/>
+      </div>
+      <button class="btn btn-gold" onclick="App.createCoffre()"><svg><use href="#i-lock"/></svg>Créer ce coffre</button>
+      <button class="btn btn-ghost" onclick="App.closeNewCoffre()">Annuler</button>
+    </div>
+  </div>
+
+  <!-- Edit Profile -->
+  <div class="modal" id="edit-profile-modal" onclick="if(event.target===this)App.closeEditProfile()">
+    <div class="modal-box">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Modifier le profil</div>
+      <input id="ep-name" class="input" placeholder="Nom complet"/>
+      <input id="ep-phone" class="input" type="tel" placeholder="Numéro de téléphone"/>
+      <input id="ep-location" class="input" placeholder="Ville"/>
+      <button class="btn btn-gold" onclick="App.saveProfile()"><svg><use href="#i-check"/></svg>Sauvegarder</button>
+      <button class="btn btn-ghost" onclick="App.closeEditProfile()">Annuler</button>
+    </div>
+  </div>
+
+  <!-- ══ OVERLAY ══════════════════════════════════ -->
+  <div class="overlay" id="overlay">
+    <div class="ov-circle"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><use href="#i-check"/></svg></div>
+    <div class="ov-title" id="ov-title">Succès !</div>
+    <div class="ov-sub" id="ov-sub"></div>
+    <button class="ov-btn" onclick="App.closeOverlay()">Super !</button>
+  </div>
+
+  <!-- ══ TOAST ════════════════════════════════════ -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ══ INSTALL BANNER ═══════════════════════════ -->
+  <div class="install-banner" id="install-banner">
+    <div class="install-text"><strong>Installer GhettoPay</strong>Ajoute l'app sur ton téléphone pour l'utiliser hors ligne</div>
+    <button class="install-btn" id="install-btn">Installer</button>
+    <button class="install-close" onclick="document.getElementById('install-banner').classList.remove('show')">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+
+ </div><!-- /app-inner -->
+</div><!-- /app-shell -->
+
+<script>
+/* ─── HELPERS ─────────────── */
+function setTab(btn){btn.closest('.bud-tabs').querySelectorAll('.btab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');App.render('budget')}
+function selectOp(name,onId,offId){document.getElementById('rch-op').value=name;document.getElementById(onId).classList.add('on');document.getElementById(offId).classList.remove('on')}
+function selectAmount(el,val){document.querySelectorAll('.amount-pill').forEach(p=>p.classList.remove('on'));el.classList.add('on');document.getElementById('rch-amount').value=val}
+function selectDuration(el,months){document.querySelectorAll('#new-coffre-modal .amount-pill').forEach(p=>p.classList.remove('on'));el.classList.add('on');document.getElementById('nc-months').value=months}
+
+/* ─── INIT ROUTER ─────────── */
+Router.go = function(screen, data){
+  const scrId = 'sc-' + screen.replace(/-/g,'_').replace('coffre_detail','coffre-detail');
+  // map screen names to DOM ids
+  const idMap = {'coffre-detail':'sc-coffre-detail','notifications':'sc-notifications'};
+  const domId = idMap[screen] || 'sc-' + screen;
+  const prev = document.getElementById('sc-' + this.current);
+  const next = document.getElementById(domId);
+  if(!next || screen === this.current) return;
+  prev?.classList.add('leaving');
+  next.classList.add('active');
+  setTimeout(()=>{ prev?.classList.remove('leaving','active'); },400);
+  this.history.push({screen:this.current, data:App.pageData});
+  this.current = screen;
+  App.pageData = data || {};
+  App.render(screen);
+};
+
+Router.back = function(){
+  if(!this.history.length) return;
+  const {screen, data} = this.history.pop();
+  const idMap = {'coffre-detail':'sc-coffre-detail','notifications':'sc-notifications'};
+  const leavingId = idMap[this.current] || 'sc-' + this.current;
+  const arrivingId = idMap[screen] || 'sc-' + screen;
+  const leaving = document.getElementById(leavingId);
+  const arriving = document.getElementById(arrivingId);
+  if(!leaving||!arriving) return;
+  leaving.style.cssText='transition:transform .32s cubic-bezier(.32,.72,0,1),opacity .28s;transform:translateX(100%);opacity:0;';
+  arriving.classList.add('active');
+  arriving.style.cssText='transition:transform .32s cubic-bezier(.32,.72,0,1),opacity .28s;transform:translateX(-8%);opacity:0;';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{arriving.style.transform='translateX(0)';arriving.style.opacity='1'}));
+  setTimeout(()=>{leaving.classList.remove('active');leaving.style.cssText='';arriving.style.cssText='';},370);
+  this.current = screen;
+  App.pageData = data||{};
+  App.render(screen);
+};
+
+/* ─── PWA INSTALL ─────────── */
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  setTimeout(()=>document.getElementById('install-banner').classList.add('show'), 3000);
+});
+document.getElementById('install-btn').addEventListener('click', async()=>{
+  document.getElementById('install-banner').classList.remove('show');
+  if(deferredPrompt){ deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; }
+});
+</script>
+<script src="./app.js"></script>
+</body>
+</html>
