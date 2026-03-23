@@ -806,6 +806,7 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
     <div style="width:100%;display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
       <input id="reg-name" class="inp" placeholder="Ton nom complet" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.12);color:#fff" />
       <input id="reg-phone" class="inp" type="tel" placeholder="Numéro de téléphone (+241...)" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.12);color:#fff" />
+      <input id="reg-email" class="inp" type="email" placeholder="Ton adresse email" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.12);color:#fff" />
       <input id="reg-pin" class="inp" type="password" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="Choisis un code PIN (4 chiffres)" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.12);color:#fff" />
     </div>
 
@@ -820,7 +821,7 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
     <!-- Login form (caché par défaut) -->
     <div id="login-form" style="display:none;width:100%;flex-direction:column;gap:12px;margin-top:16px">
       <div style="font-size:.82rem;font-weight:800;color:#fff;text-align:center;margin-bottom:4px">Connexion</div>
-      <input id="login-phone" class="inp" type="tel" placeholder="Numéro de téléphone" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.12);color:#fff" />
+      <input id="login-email" class="inp" type="email" placeholder="Ton adresse email" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.12);color:#fff" />
       <input id="login-pin" class="inp" type="password" maxlength="4" inputmode="numeric" placeholder="Code PIN" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.12);color:#fff" />
       <button class="btn btn-gold" onclick="G.login()" style="width:100%">Se connecter</button>
       <button class="btn btn-ghost" onclick="G.hideLogin()" style="width:100%;color:rgba(255,255,255,.5)">Annuler</button>
@@ -1303,6 +1304,7 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 
 </div></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 // ════════════════════════════════════════════════
 // GHETTOPAY — Connecté à Supabase
@@ -1310,18 +1312,12 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 
 // ── SUPABASE CONFIG ──
 const SUPA_URL = 'https://qzazkxlamuylurhjquzu.supabase.co';
-const SUPA_KEY = 'sb_publishable_LX2i_9tAaZ6Pbajvdl1SEg_qTvEWIcy';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6YXpreGxhbXV5bHVyaGpxdXp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyNjM0NzYsImV4cCI6MjA4OTgzOTQ3Nn0.ow7l6dQZqsl5j8UFMrMY0JgIWR65gBFuMLn6MdI7SzQ';
 
-// Charger le SDK Supabase depuis CDN
-const supabaseScript = document.createElement('script');
-supabaseScript.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
-document.head.appendChild(supabaseScript);
+// Initialiser le client Supabase (SDK chargé via CDN juste avant)
+const db = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
-let db = null;
-supabaseScript.onload = () => {
-  db = supabase.createClient(SUPA_URL, SUPA_KEY);
-  appStart();
-};
+appStart();
 
 // ── STATE ──
 let cur = 'loading', hist = [], pD = {}, selC = null, aStr = '', pinBuf = '', balVis = true;
@@ -1964,55 +1960,55 @@ const G = {
   async register() {
     const name = $('reg-name')?.value.trim();
     const phone = $('reg-phone')?.value.trim();
+    const email = $('reg-email')?.value.trim();
     const pin = $('reg-pin')?.value.trim();
 
     if (!name || name.length < 2) { G.toast('Nom complet requis', 'err'); return; }
     if (!phone || phone.length < 8) { G.toast('Numéro de téléphone requis', 'err'); return; }
+    if (!email || !email.includes('@') || !email.includes('.')) { G.toast('Adresse email valide requise', 'err'); return; }
     if (!pin || pin.length !== 4 || !/^\d{4}$/.test(pin)) { G.toast('PIN de 4 chiffres requis', 'err'); return; }
 
     G.toast('Création du compte...', 'inf');
 
-    // Créer un compte auth avec email fictif basé sur le téléphone
-    const email = phone.replace(/[^0-9]/g, '') + '@ghettopay.ga';
-    const password = pin + phone.replace(/[^0-9]/g, '').slice(-6); // mot de passe robuste
+    const password = pin + 'GhettoPay2024';
 
     const { data: authData, error: authError } = await db.auth.signUp({ email, password });
-    if (authError && !authError.message.includes('already registered')) {
+    if (authError) {
       G.toast('Erreur: ' + authError.message, 'err'); return;
     }
 
-    // Si déjà inscrit, essayer de se connecter
-    if (authError?.message.includes('already registered')) {
-      const { error: loginError } = await db.auth.signInWithPassword({ email, password });
-      if (loginError) { G.toast('Ce numéro est déjà utilisé', 'err'); return; }
+    // Email de confirmation requis — pas encore de session
+    if (!authData.session) {
+      G.ok(
+        'Vérifie ton email !',
+        `Un lien de confirmation a été envoyé à ${email}. Clique dessus puis reviens te connecter.`,
+        () => G.showLogin()
+      );
+      return;
     }
 
-    const { data: { session } } = await db.auth.getSession();
-    if (!session) { G.toast("Erreur d'authentification", 'err'); return; }
-
+    const session = authData.session;
     const avatar = name[0].toUpperCase();
-    // Vérifier si user existe déjà
+
+    // Vérifier si profil existe déjà (inscription partielle)
     const { data: existingUser } = await db.from('users').select('id').eq('phone', phone).single();
-    
+
     let userId;
     if (!existingUser) {
       const { data: newUser, error: userError } = await db.from('users').insert({
-        auth_id: session.user.id, phone, name, avatar, pin_code: pin, location: 'Libreville, Gabon', level: 'Silver'
+        auth_id: session.user.id, phone, name, avatar, pin_code: pin, email, location: 'Libreville, Gabon', level: 'Silver'
       }).select().single();
-      if (userError) { G.toast('Erreur création compte: ' + userError.message, 'err'); return; }
+      if (userError) { G.toast('Erreur création profil: ' + userError.message, 'err'); return; }
       userId = newUser.id;
-
-      // Créer le wallet avec solde de démarrage
       await db.from('wallets').insert({ user_id: userId, balance: 10000, coffre_balance: 0, cashback: 0 });
     } else {
       userId = existingUser.id;
     }
 
-    // Charger les données
     await loadUserData(session.user.id);
 
     // Initialiser les données locales
-    S.set('user', { name, phone, pin, avatar, loc: 'Libreville, Gabon', level: 'Silver' });
+    S.set('user', { name, phone, email, pin, avatar, loc: 'Libreville, Gabon', level: 'Silver' });
     S.set('bills', [
       { id: 1, name: 'SEEG Eau', ref: 'Réf: EAU-2024', amount: 28000, due: '31 déc.' },
       { id: 2, name: 'SEEG Électricité', ref: 'Réf: ELEC-2024', amount: 35000, due: '31 déc.' }
@@ -2058,17 +2054,28 @@ const G = {
     document.getElementById('login-form').style.display = 'none';
   },
   async login() {
-    const phone = document.getElementById('login-phone')?.value.trim();
+    const email = document.getElementById('login-email')?.value.trim();
     const pin = document.getElementById('login-pin')?.value.trim();
-    if (!phone || !pin) { G.toast('Numéro et PIN requis', 'err'); return; }
-    
+    if (!email || !pin) { G.toast('Email et PIN requis', 'err'); return; }
+
     G.toast('Connexion...', 'inf');
-    const email = phone.replace(/[^0-9]/g, '') + '@ghettopay.ga';
-    const password = pin + phone.replace(/[^0-9]/g, '').slice(-6);
-    
+    const password = pin + 'GhettoPay2024';
+
     const { data, error } = await db.auth.signInWithPassword({ email, password });
-    if (error) { G.toast('Numéro ou PIN incorrect', 'err'); return; }
-    
+    if (error) {
+      if (error.message.includes('Email not confirmed') || error.message.includes('email_not_confirmed')) {
+        G.toast('Confirme ton email avant de te connecter', 'err');
+      } else {
+        G.toast('Email ou PIN incorrect', 'err');
+      }
+      return;
+    }
+
+    if (!data?.user) {
+      G.toast('Confirme ton email avant de te connecter', 'err');
+      return;
+    }
+
     await loadUserData(data.user.id);
     G.go('pin');
   },
