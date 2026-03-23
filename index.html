@@ -401,8 +401,8 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 .qa-primary{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:7px;
-  margin-bottom:8px;
+  gap:10px;
+  margin-bottom:12px;
 }
 
 .qa-cta{
@@ -410,15 +410,15 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:4px;
-  padding:8px 6px 6px;
-  border-radius:12px;
+  gap:10px;
+  padding:18px 12px 16px;
+  border-radius:18px;
   cursor:pointer;
   transition:.18s;
   border:none;
   position:relative;
   overflow:hidden;
-  min-height:38px;
+  min-height:90px;
 }
 .qa-cta:active{transform:scale(.96)}
 
@@ -443,32 +443,32 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 }
 
 .qa-cta-ic{
-  width:20px;height:20px;border-radius:7px;
+  width:46px;height:46px;border-radius:14px;
   display:flex;align-items:center;justify-content:center;
   flex-shrink:0;
 }
 .qa-cta-send .qa-cta-ic{background:rgba(0,0,0,.12)}
 .qa-cta-recv .qa-cta-ic{background:rgba(255,255,255,.15)}
 
-.qa-cta-ic svg{width:14px;height:14px;stroke-width:2.4;fill:none}
+.qa-cta-ic svg{width:22px;height:22px;stroke-width:2.2;fill:none}
 .qa-cta-send .qa-cta-ic svg{stroke:var(--forest)}
 .qa-cta-recv .qa-cta-ic svg{stroke:#fff}
 
 .qa-cta-lbl{
-  font-size:.6rem;
+  font-size:.82rem;
   font-weight:900;
-  letter-spacing:.03em;
+  letter-spacing:.02em;
   text-transform:uppercase;
 }
 .qa-cta-send .qa-cta-lbl{color:var(--forest)}
 .qa-cta-recv .qa-cta-lbl{color:#fff}
 
 .qa-cta-sub{
-  font-size:.44rem;
+  font-size:.58rem;
   font-weight:600;
   font-family:var(--fm);
   opacity:.6;
-  margin-top:-2px;
+  margin-top:-4px;
 }
 .qa-cta-send .qa-cta-sub{color:rgba(0,0,0,.6)}
 .qa-cta-recv .qa-cta-sub{color:rgba(255,255,255,.7)}
@@ -477,19 +477,19 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 .qa-secondary{
   display:grid;
   grid-template-columns:repeat(3,1fr);
-  gap:6px;
-  padding:0 0 12px;
+  gap:8px;
+  padding:0 0 14px;
   border-top:1px solid var(--border);
-  padding-top:10px;
+  padding-top:12px;
 }
 
 .qa-sec-btn{
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:3px;
-  padding:5px 3px;
-  border-radius:10px;
+  gap:7px;
+  padding:10px 6px;
+  border-radius:14px;
   cursor:pointer;
   transition:.15s;
   background:var(--bg2);
@@ -497,13 +497,13 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 .qa-sec-btn:active{transform:scale(.92);background:var(--bg3)}
 
 .qa-sec-ic{
-  width:17px;height:17px;border-radius:6px;
+  width:40px;height:40px;border-radius:12px;
   display:flex;align-items:center;justify-content:center;
 }
-.qa-sec-ic svg{width:12px;height:12px;stroke-width:2.2;fill:none}
+.qa-sec-ic svg{width:19px;height:19px;stroke-width:1.9;fill:none}
 
 .qa-sec-lbl{
-  font-size:.5rem;
+  font-size:.56rem;
   font-weight:800;
   color:var(--txt2);
   text-align:center;
@@ -738,105 +738,7 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 .mi-tag.gold{background:rgba(212,160,23,.12);color:var(--gold)}
 .mi-tag.red{background:rgba(220,38,38,.1);color:#dc2626}
 
-/* ── RESPONSIVE AMÉLIORÉ ─────────────── */
-
-/* Très petits écrans (≤ 360px) */
-@media(max-width:360px){
-  .home-hdr{padding:0 14px 14px}
-  .bal-amt{font-size:1.75rem}
-  .bal-card{padding:14px 16px}
-  .qa-section{padding:10px 10px 0}
-  .cstrip{margin:10px 12px 0;padding:12px 14px;gap:10px}
-  .btn{padding:13px 16px;font-size:.88rem}
-  .inp{padding:12px 13px;font-size:.84rem}
-  .pin-k{height:58px;font-size:1.25rem;border-radius:14px}
-  .pin-wrap{padding:26px 18px;gap:26px}
-  .pin-pad{gap:9px}
-  .amt-val{font-size:2.4rem}
-  .numpad{gap:8px}
-  .nk{height:56px;font-size:1.1rem}
-  .p16{padding:12px}
-  .p18{padding:14px}
-  .card-p{padding:13px 15px}
-  .snav{padding:10px 14px 12px;gap:11px}
-  .bnav{padding:8px 4px calc(10px + var(--sab))}
-  .bt{padding:4px 8px;min-width:44px}
-  .bt-lbl{font-size:.48rem}
-  .profil-av{width:68px;height:68px;font-size:1.7rem}
-  .coffre-total-val{font-size:1.85rem}
-  .pstat-n{font-size:1rem}
-  .pstats{border-radius:12px}
-  .row-hdr{padding:12px 14px 6px}
-  .tx{padding:11px 14px;gap:11px}
-  .tx-av{width:38px;height:38px}
-  .bill-ic{width:38px;height:38px;border-radius:12px}
-  .notif-ic{width:36px;height:36px;border-radius:11px}
-  .back-btn{width:34px;height:34px}
-  .modal-box{padding:18px 16px calc(22px + var(--sab))}
-  .mi{padding:13px 14px;gap:11px}
-  .mi-ic{width:34px;height:34px;border-radius:10px}
-}
-
-/* Mode paysage mobile (hauteur ≤ 500px) */
-@media(orientation:landscape) and (max-height:500px){
-  body{align-items:stretch;justify-content:stretch;background:var(--bg)}
-  .shell{width:100%;height:100%;border-radius:0;padding:0;box-shadow:none}
-  .shell-inner{border-radius:0}
-  .island{display:none}
-
-  .sbar{padding:calc(var(--sat) + 5px) 16px 3px}
-  .home-hdr{padding:0 16px 12px}
-  .home-topbar{padding:4px 0 10px}
-  .bal-card{padding:12px 16px}
-  .bal-amt{font-size:1.55rem;margin:5px 0 3px}
-  .bal-card::before,.bal-card::after{display:none}
-  .home-hdr::after{display:none}
-  .cstrip{margin:10px 14px 0;padding:10px 14px}
-
-  .qa-section{padding:8px 12px 0}
-  .qa-cta{min-height:32px;padding:6px}
-  .qa-secondary{padding-top:8px;padding-bottom:8px}
-
-  .bnav{padding:5px 6px calc(5px + var(--sab))}
-  .bt{padding:3px 10px}
-  .bt svg{width:20px;height:20px}
-
-  .pin-wrap{padding:16px 28px;gap:20px;flex-direction:row;flex-wrap:wrap;justify-content:center}
-  .pin-logo{width:56px;height:56px;border-radius:16px}
-  .pin-logo svg{width:26px;height:26px}
-  .pin-brand{order:-1;flex:0 0 100%;text-align:center}
-  .pin-title{font-size:1.3rem}
-  .pin-k{height:52px;font-size:1.2rem;border-radius:14px}
-  .pin-pad{gap:8px;max-width:300px}
-
-  .amt-box{padding:12px 16px}
-  .amt-val{font-size:2rem;margin:0}
-
-  .coffre-hdr{padding:0 16px 12px}
-  .coffre-total-val{font-size:1.75rem}
-  .coffre-hdr-top{padding:6px 0 12px}
-
-  .profil-hdr{padding:0 16px 14px}
-  .profil-av{width:60px;height:60px;font-size:1.4rem;margin-bottom:8px}
-  .profil-name{font-size:.9rem}
-
-  .modal-box{padding:14px 18px calc(14px + var(--sab));gap:10px}
-  .snav{padding:8px 16px 10px}
-  .row-hdr{padding:10px 16px 6px}
-  .tx{padding:10px 16px}
-}
-
-/* Tablettes et grands écrans */
-@media(min-width:768px) and (min-height:700px){
-  .shell{
-    width:min(430px,94vw);
-    height:min(932px,96vh);
-    border-radius:clamp(0px,calc((100vw - 430px)*100),52px);
-  }
-  .shell-inner{
-    border-radius:clamp(0px,calc((100vw - 430px)*100),43px);
-  }
-}
+@keyframes loadbar{0%{transform:translateX(-100%)}100%{transform:translateX(300%)}}
 </style>
 </head>
 <body>
@@ -878,8 +780,58 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 <symbol id="edit" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></symbol>
 </defs></svg>
 
-<!-- PIN -->
-<div class="sc on" id="sc-pin">
+
+<!-- LOADING -->
+<div class="sc on" id="sc-loading" style="background:linear-gradient(155deg,var(--forest) 0%,var(--ink) 70%);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px">
+  <div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(212,160,23,.4)">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--forest)" stroke-width="2.5"><use href="#z"/></svg>
+  </div>
+  <div style="font-family:var(--fd);font-size:1.4rem;font-weight:900;font-style:italic;color:#fff">GhettoPay</div>
+  <div style="width:36px;height:3px;background:rgba(255,255,255,.15);border-radius:100px;overflow:hidden">
+    <div style="height:100%;background:var(--gold2);border-radius:100px;animation:loadbar 1.5s ease-in-out infinite"></div>
+  </div>
+</div>
+
+<!-- ONBOARDING / INSCRIPTION -->
+<div class="sc" id="sc-onboard" style="background:linear-gradient(155deg,var(--forest) 0%,var(--ink) 70%)">
+  <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:0">
+    <!-- Logo -->
+    <div style="width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;box-shadow:0 8px 28px rgba(212,160,23,.4);margin-bottom:20px">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--forest)" stroke-width="2.5"><use href="#z"/></svg>
+    </div>
+    <div style="font-family:var(--fd);font-size:2rem;font-weight:900;font-style:italic;color:#fff;margin-bottom:6px">GhettoPay</div>
+    <div style="font-family:var(--fm);font-size:.6rem;color:rgba(255,255,255,.4);letter-spacing:.18em;text-transform:uppercase;margin-bottom:32px">LIBREVILLE · GABON</div>
+
+    <!-- Form -->
+    <div style="width:100%;display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
+      <input id="reg-name" class="inp" placeholder="Ton nom complet" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.12);color:#fff" />
+      <input id="reg-phone" class="inp" type="tel" placeholder="Numéro de téléphone (+241...)" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.12);color:#fff" />
+      <input id="reg-pin" class="inp" type="password" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="Choisis un code PIN (4 chiffres)" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.12);color:#fff" />
+    </div>
+
+    <button class="btn btn-gold" onclick="G.register()" style="width:100%;margin-bottom:12px">
+      <svg><use href="#ar"/></svg>Créer mon compte gratuit
+    </button>
+
+    <div style="font-size:.72rem;color:rgba(255,255,255,.35);text-align:center;line-height:1.7">
+      Déjà un compte ? <span onclick="G.showLogin()" style="color:var(--gold2);cursor:pointer;font-weight:700">Se connecter</span>
+    </div>
+
+    <!-- Login form (caché par défaut) -->
+    <div id="login-form" style="display:none;width:100%;flex-direction:column;gap:12px;margin-top:16px">
+      <div style="font-size:.82rem;font-weight:800;color:#fff;text-align:center;margin-bottom:4px">Connexion</div>
+      <input id="login-phone" class="inp" type="tel" placeholder="Numéro de téléphone" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.12);color:#fff" />
+      <input id="login-pin" class="inp" type="password" maxlength="4" inputmode="numeric" placeholder="Code PIN" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.12);color:#fff" />
+      <button class="btn btn-gold" onclick="G.login()" style="width:100%">Se connecter</button>
+      <button class="btn btn-ghost" onclick="G.hideLogin()" style="width:100%;color:rgba(255,255,255,.5)">Annuler</button>
+    </div>
+
+    <div style="font-family:var(--fm);font-size:.52rem;color:rgba(255,255,255,.2);text-align:center;margin-top:20px">
+      Certifié CEMAC · 100% Gabonais · Chiffrement 256-bit
+    </div>
+  </div>
+</div>
+<div class="sc" id="sc-pin">
   <div class="pin-wrap">
     <div class="pin-logo"><svg><use href="#z"/></svg></div>
     <div class="pin-brand">
@@ -1352,326 +1304,805 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 </div></div>
 
 <script>
-const S={
-  get(k,d){try{const v=localStorage.getItem('gp3_'+k);return v!==null?JSON.parse(v):d}catch{return d}},
-  set(k,v){try{localStorage.setItem('gp3_'+k,JSON.stringify(v))}catch{}}
+// ════════════════════════════════════════════════
+// GHETTOPAY — Connecté à Supabase
+// ════════════════════════════════════════════════
+
+// ── SUPABASE CONFIG ──
+const SUPA_URL = 'https://qzazkxlamuylurhjquzu.supabase.co';
+const SUPA_KEY = 'sb_publishable_LX2i_9tAaZ6Pbajvdl1SEg_qTvEWIcy';
+
+// Charger le SDK Supabase depuis CDN
+const supabaseScript = document.createElement('script');
+supabaseScript.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+document.head.appendChild(supabaseScript);
+
+let db = null;
+supabaseScript.onload = () => {
+  db = supabase.createClient(SUPA_URL, SUPA_KEY);
+  appStart();
 };
-function initData(){
-  if(S.get('ok'))return;
-  S.set('user',{name:'Rostand Moussavou',phone:'+241 06 12 34 56',pin:'1234',avatar:'R',loc:'Libreville, Gabon',level:'Gold'});
-  S.set('bal',680000);S.set('coffre',245000);S.set('cash',8200);
-  S.set('contacts',[
-    {id:1,name:'Amina Nzamba',phone:'+241 06 11 22 33',av:'A',color:'linear-gradient(135deg,#d4a017,#0a4a2e)'},
-    {id:2,name:'Jean-Paul Ekang',phone:'+241 07 44 55 66',av:'J',color:'linear-gradient(135deg,#4f46e5,#818cf8)'},
-    {id:3,name:'Mireille Obame',phone:'+241 06 77 88 99',av:'M',color:'linear-gradient(135deg,#059669,#34d399)'},
-    {id:4,name:'Serge Koumba',phone:'+241 07 33 22 11',av:'S',color:'linear-gradient(135deg,#7c3aed,#a78bfa)'},
-    {id:5,name:'Patricia Moanda',phone:'+241 06 55 44 33',av:'P',color:'linear-gradient(135deg,#0284c7,#38bdf8)'},
-  ]);
-  S.set('txs',[
-    {id:1,type:'cr',cat:'transfer',icon:'recv',name:'Amina Nzamba',amt:25000,date:'2024-11-25T09:30:00'},
-    {id:2,type:'db',cat:'shopping',icon:'pay',name:'Market Mbolo',amt:12000,date:'2024-11-25T11:15:00'},
-    {id:3,type:'db',cat:'mobile',icon:'phone',name:'Airtel Recharge',amt:5000,date:'2024-11-24T18:30:00'},
-    {id:4,type:'cr',cat:'tontine',icon:'users',name:'Jean-Paul Ekang',amt:50000,date:'2024-11-24T09:00:00'},
-    {id:5,type:'db',cat:'bills',icon:'drop',name:'SEEG Électricité',amt:28000,date:'2024-11-22T14:00:00'},
-    {id:6,type:'cr',cat:'cashback',icon:'star',name:'Cashback Gabon Vert',amt:1200,date:'2024-11-22T14:01:00'},
-    {id:7,type:'db',cat:'transfer',icon:'send',name:'Mireille Obame',amt:15000,date:'2024-11-21T16:00:00'},
-    {id:8,type:'db',cat:'bills',icon:'drop',name:'SEEG Eau',amt:18500,date:'2024-11-20T10:00:00'},
-  ]);
-  S.set('coffres',[
-    {id:1,name:'Voyage en France',icon:'target',color:'#D4A017',target:250000,saved:180000,deadline:'2024-12-15',rate:5.5},
-    {id:2,name:"Fond d'urgence",icon:'shield',color:'#16A34A',target:150000,saved:65000,deadline:'2025-03-01',rate:5.5},
-  ]);
-  S.set('tontines',[
-    {id:1,name:'Famille Moussavou',av:'F',color:'linear-gradient(135deg,#7c3aed,#a78bfa)',members:8,paid:5,amount:400000,cycle:'Mensuel',deadline:'2024-12-15',myTurn:true},
-    {id:2,name:'Amis Lycée Omar Bongo',av:'A',color:'linear-gradient(135deg,#0284c7,#38bdf8)',members:5,paid:4,amount:250000,cycle:'Mensuel',deadline:'2024-11-30',myTurn:false},
-    {id:3,name:'Collègues GhettoCorp',av:'C',color:'linear-gradient(135deg,#d97706,#fbbf24)',members:12,paid:4,amount:60000,cycle:'Hebdo',deadline:'2024-11-29',myTurn:false},
-  ]);
-  S.set('bills',[
-    {id:1,name:'SEEG — Eau',icon:'drop',color:'#3b82f6',ref:'0241-4521',amount:18500,due:'2024-11-30',paid:false},
-    {id:2,name:'SEEG — Électricité',icon:'z',color:'#d4a017',ref:'0241-7823',amount:28000,due:'2024-12-05',paid:false},
-    {id:3,name:'Internet Moov',icon:'wifi',color:'#16a34a',ref:'AUTO-3312',amount:15000,due:'2024-12-01',paid:false},
-  ]);
-  S.set('notifs',[
-    {id:1,icon:'recv',color:'#16a34a',bg:'rgba(22,163,74,.1)',title:'+25 000 FCFA reçus',desc:"Amina Nzamba t'a envoyé 25 000 FCFA",time:'Il y a 2h',read:false},
-    {id:2,icon:'lock',color:'#d4a017',bg:'rgba(212,160,23,.1)',title:'Coffre — Objectif 72%',desc:'Ton coffre "Voyage en France" est à 72%',time:'Il y a 5h',read:false},
-    {id:3,icon:'users',color:'#818cf8',bg:'rgba(129,140,248,.1)',title:'Jean-Paul a cotisé',desc:'50 000 FCFA · Tontine Famille Moussavou',time:'Lun 09h14',read:true},
-    {id:4,icon:'star',color:'#fb923c',bg:'rgba(251,146,60,.1)',title:'Cashback +1 200 FCFA',desc:'Achat chez un partenaire Gabon Vert',time:'Lun 08h02',read:true},
-    {id:5,icon:'bell',color:'#dc2626',bg:'rgba(220,38,38,.08)',title:'Facture SEEG à payer',desc:'Eau : 18 500 FCFA due le 30 novembre',time:'Dimanche',read:true},
-  ]);
-  S.set('ok',true);
+
+// ── STATE ──
+let cur = 'loading', hist = [], pD = {}, selC = null, aStr = '', pinBuf = '', balVis = true;
+let currentUser = null; // utilisateur connecté
+let isNewUser = false;  // mode inscription
+
+// ── HELPERS ──
+const f = n => new Intl.NumberFormat('fr-FR').format(Math.round(n));
+const $ = id => document.getElementById(id);
+const si = (ic, col, sz=18) => `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="${col}" stroke-width="2"><use href="#${ic}"/></svg>`;
+
+// ── DÉMARRAGE ──
+async function appStart() {
+  // Vérifier si session existante
+  const { data: { session } } = await db.auth.getSession();
+  if (session) {
+    await loadUserData(session.user.id);
+    G.go('pin');
+  } else {
+    G.go('onboard');
+  }
+  $('sc-loading').classList.remove('on');
 }
 
-const f=n=>Number(n).toLocaleString('fr-FR');
-function ago(d){
-  const s=(Date.now()-new Date(d))/1000;
-  if(s<60)return"À l'instant";if(s<3600)return`${Math.floor(s/60)}min`;
-  if(s<86400)return`${Math.floor(s/3600)}h`;
-  const day=Math.floor(s/86400);return day===1?'Hier':new Date(d).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+// ── CHARGER LES DONNÉES UTILISATEUR ──
+async function loadUserData(authId) {
+  // Chercher l'utilisateur par auth_id
+  const { data: user } = await db.from('users').select('*').eq('auth_id', authId).single();
+  if (!user) return;
+  
+  const { data: wallet } = await db.from('wallets').select('*').eq('user_id', user.id).single();
+  
+  currentUser = { ...user, wallet };
+  
+  // Mettre en cache local pour affichage rapide
+  S.set('user', { name: user.name, phone: user.phone, pin: user.pin_code, avatar: user.avatar, loc: user.location, level: user.level });
+  S.set('bal', wallet?.balance || 0);
+  S.set('coffre', wallet?.coffre_balance || 0);
+  S.set('cash', wallet?.cashback || 0);
 }
-function fmtD(s){return s?new Date(s).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}):'—'}
-const txC={transfer:'linear-gradient(135deg,#d4a017,#0a4a2e)',shopping:'linear-gradient(135deg,#4f46e5,#818cf8)',mobile:'linear-gradient(135deg,#dc2626,#f59e0b)',tontine:'linear-gradient(135deg,#0284c7,#38bdf8)',bills:'linear-gradient(135deg,#059669,#34d399)',cashback:'linear-gradient(135deg,#d97706,#fcd34d)',coffre:'linear-gradient(135deg,#d4a017,#fcd34d)'};
-const txL={transfer:'Transfert',shopping:'Paiement QR',mobile:'Recharge',tontine:'Tontine',bills:'Facture',cashback:'Cashback',coffre:'Coffre'};
-const si=(id,c,s)=>`<svg width="${s||18}" height="${s||18}" viewBox="0 0 24 24" fill="none" stroke="${c||'currentColor'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#${id}"/></svg>`;
 
-let cur='pin',hist=[],pD={},selC=null,aStr='',pinBuf='',balVis=true;
+// ── CACHE LOCAL (fallback rapide) ──
+const S = {
+  get(k, d) { try { const v = localStorage.getItem('gp3_' + k); return v !== null ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('gp3_' + k, JSON.stringify(v)); } catch {} }
+};
 
-const G={
-  go(scr,data){
-    if(scr===cur)return;
-    const p=document.getElementById('sc-'+cur),n=document.getElementById('sc-'+scr);
-    if(!n)return;p?.classList.add('out');n.classList.add('on');
-    setTimeout(()=>p?.classList.remove('out','on'),400);
-    hist.push({scr:cur,data:pD});cur=scr;pD=data||{};G.render(scr);
-  },
-  back(){
-    if(!hist.length)return;
-    const{scr,data}=hist.pop();
-    const lv=document.getElementById('sc-'+cur),ar=document.getElementById('sc-'+scr);
-    if(!lv||!ar)return;
-    Object.assign(lv.style,{transition:'transform .34s cubic-bezier(.25,.8,.25,1),opacity .28s',transform:'translateX(100%)',opacity:'0'});
-    ar.classList.add('on');Object.assign(ar.style,{transition:'transform .34s cubic-bezier(.25,.8,.25,1),opacity .28s',transform:'translateX(-10%)',opacity:'0'});
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{ar.style.transform='translateX(0)';ar.style.opacity='1'}));
-    setTimeout(()=>{lv.classList.remove('on');lv.style.cssText='';ar.style.cssText=''},360);
-    cur=scr;pD=data||{};G.render(scr);
-  },
-  render(scr){const fn=G['r_'+scr];if(fn)fn.call(G)},
-
-  r_home(){
-    const bal=S.get('bal',0),cbal=S.get('coffre',0),u=S.get('user',{});
-    document.getElementById('home-name').textContent=u.name?.split(' ')[0]+' M.';
-    document.getElementById('home-av').textContent=u.avatar||'R';
-    document.getElementById('cstrip-val').textContent=f(cbal);
-    if(balVis){document.getElementById('bal-amt').innerHTML=`<span class="cur">FCFA </span>${f(bal)}`;document.getElementById('bal-sub').textContent=`+ Coffre : ${f(cbal)} FCFA`}
-    const un=S.get('notifs',[]).filter(n=>!n.read).length;
-    document.getElementById('notif-dot').style.display=un?'block':'none';
-    document.getElementById('tx-list').innerHTML=S.get('txs',[]).slice(0,6).map(t=>`
-      <div class="tx"><div class="tx-av" style="background:${txC[t.cat]||txC.transfer}">${si(t.icon,'white',16)}</div>
-      <div class="tx-info"><div class="tx-name">${t.name}</div><div class="tx-meta">${txL[t.cat]||t.cat} · ${ago(t.date)}</div></div>
-      <div class="tx-right"><div class="tx-amt ${t.type}">${t.type==='cr'?'+':'-'}${f(t.amt)}</div><div class="tx-tag">FCFA</div></div></div>`).join('');
-  },
-  toggleBal(){
-    balVis=!balVis;const bal=S.get('bal',0),cbal=S.get('coffre',0);
-    document.getElementById('bal-amt').innerHTML=balVis?`<span class="cur">FCFA </span>${f(bal)}`:`<span class="cur">FCFA </span>••• •••`;
-    document.getElementById('bal-sub').textContent=balVis?`+ Coffre : ${f(cbal)} FCFA`:`+ Coffre : ••• •••`;
-    document.getElementById('eye-ic').innerHTML=balVis?'<use href="#eye"/>':'<use href="#eyeo"/>';
+// ── NAVIGATION ──
+const G = {
+  go(scr) {
+    const p = $('sc-' + cur), n = $('sc-' + scr);
+    if (!n) return;
+    if (p) p.classList.remove('on');
+    n.classList.add('on');
+    if (cur !== scr) hist.push(cur);
+    cur = scr;
+    G.render(scr);
+    // Mettre à jour navbar
+    document.querySelectorAll('.bt').forEach(b => b.classList.remove('on'));
+    const map = { home: 0, budget: 1, coffre: 3, profil: 4 };
+    if (map[scr] !== undefined) {
+      document.querySelectorAll('.bt')[map[scr]]?.classList.add('on');
+    }
   },
 
-  r_send(){
-    aStr='';selC=null;document.getElementById('amt-disp').textContent='0';
-    document.getElementById('rec-row').style.display='none';document.getElementById('send-note').value='';
-    document.getElementById('contact-grid').innerHTML=S.get('contacts',[]).map(c=>`
-      <div class="contact" onclick="G.pickC(${c.id})">
-        <div class="c-av" id="cav-${c.id}" style="background:${c.color}">${c.av}</div>
-        <div class="c-name">${c.name.split(' ')[0]}</div>
-      </div>`).join('');
-  },
-  pickC(id){
-    const c=S.get('contacts',[]).find(x=>x.id===id);if(!c)return;selC=c;
-    document.querySelectorAll('.c-av').forEach(a=>a.classList.remove('sel'));
-    document.getElementById('cav-'+id)?.classList.add('sel');
-    const r=document.getElementById('rec-row');r.style.display='flex';
-    document.getElementById('rec-av').style.background=c.color;document.getElementById('rec-av').textContent=c.av;
-    document.getElementById('rec-name').textContent=c.name;document.getElementById('rec-phone').textContent=c.phone;
-  },
-  kp(v){
-    if(v==='del')aStr=aStr.slice(0,-1);else if(aStr.length<8)aStr+=v;
-    document.getElementById('amt-disp').textContent=f(parseInt(aStr)||0);
-  },
-  doSend(){
-    const n=parseInt(aStr)||0;
-    if(!selC){G.toast('Choisis un destinataire','err');return}
-    if(n<=0){G.toast('Saisis un montant','err');return}
-    const bal=S.get('bal',0);if(n>bal){G.toast('Solde insuffisant','err');return}
-    S.set('bal',bal-n);const txs=S.get('txs',[]);
-    txs.unshift({id:Date.now(),type:'db',cat:'transfer',icon:'send',name:selC.name,amt:n,date:new Date().toISOString()});
-    S.set('txs',txs);G.ok(`${f(n)} FCFA envoyés`,`À ${selC.name} · Confirmé`,()=>G.go('home'));
+  back() {
+    if (hist.length) G.go(hist.pop());
+    else G.go('home');
   },
 
-  r_qr(){const u=S.get('user',{});document.getElementById('qr-name').textContent=u.name;document.getElementById('qr-phone').textContent=u.phone},
-  doQR(){
-    const m=document.getElementById('qr-merchant').value.trim()||'Commerçant',n=parseInt(document.getElementById('qr-amount').value)||0;
-    if(n<=0){G.toast('Saisis un montant','err');return}
-    const bal=S.get('bal',0);if(n>bal){G.toast('Solde insuffisant','err');return}
-    S.set('bal',bal-n);const txs=S.get('txs',[]);
-    txs.unshift({id:Date.now(),type:'db',cat:'shopping',icon:'pay',name:m,amt:n,date:new Date().toISOString()});
-    S.set('txs',txs);G.ok('Paiement confirmé',`${f(n)} FCFA · ${m}`,()=>G.go('home'));
+  render(scr) {
+    const renders = {
+      home: () => G.r_home(),
+      send: () => G.r_send(),
+      coffre: () => G.r_coffre(),
+      budget: () => G.r_budget(),
+      tontine: () => G.r_tontine(),
+      factures: () => G.r_factures(),
+      notifs: () => G.r_notifs(),
+      profil: () => G.r_profil(),
+      qr: () => G.r_qr(),
+    };
+    renders[scr]?.();
   },
 
-  r_coffre(){
-    const cs=S.get('coffres',[]);
-    document.getElementById('coffre-total').textContent=f(cs.reduce((s,c)=>s+c.saved,0))+' FCFA';
-    document.getElementById('coffre-list').innerHTML=cs.map(c=>{
-      const pct=Math.round(c.saved/c.target*100);
-      return`<div class="coffre-item" onclick="G.ok('${c.name}','${f(c.saved)} / ${f(c.target)} FCFA · ${pct}% atteint')">
-        <div class="ci-head">
-          <div class="ci-ic" style="background:${c.color}22;border:1px solid ${c.color}33">${si(c.icon,c.color,19)}</div>
-          <div><div class="ci-name">${c.name}</div><div class="ci-dl">Déblocage · ${fmtD(c.deadline)}</div></div>
-          <div class="ci-right"><div class="ci-val">${f(c.saved)}</div><div class="ci-rate">+${c.rate}%/an</div></div>
-        </div>
-        <div class="ci-bar-bg"><div class="ci-bar" style="width:${pct}%;background:${c.color}"></div></div>
-        <div class="ci-bar-lbls"><span>${f(c.saved)} / ${f(c.target)} FCFA</span><span style="color:${c.color};font-weight:800">${pct}%</span></div>
-      </div>`;
-    }).join('')+`<button class="coffre-new" onclick="G.showModal('mc')">${si('plus','var(--txt3)',17)}<span>Créer un nouveau coffre</span></button>`;
-  },
-  createCoffre(){
-    const name=document.getElementById('nc-name').value.trim(),target=parseInt(document.getElementById('nc-target').value)||0,months=parseInt(document.getElementById('nc-months').value)||6;
-    if(!name){G.toast('Donne un nom au coffre','err');return}if(target<=0){G.toast('Définis un objectif','err');return}
-    const dl=new Date();dl.setMonth(dl.getMonth()+months);
-    const cs=S.get('coffres',[]);cs.push({id:Date.now(),name,icon:'target',color:'#D4A017',target,saved:0,deadline:dl.toISOString().split('T')[0],rate:5.5});
-    S.set('coffres',cs);G.closeModal('mc');G.ok('Coffre créé !',`"${name}" · ${f(target)} FCFA`,()=>G.go('coffre'));
+  // ── HOME ──
+  r_home() {
+    const bal = S.get('bal', 0), cbal = S.get('coffre', 0), u = S.get('user', {});
+    $('home-name').textContent = (u.name || 'Utilisateur').split(' ')[0] + ' ' + ((u.name || '').split(' ')[1]?.[0] || '') + '.';
+    $('home-av').textContent = u.avatar || '?';
+    $('bal-amt').innerHTML = `<span class="cur">FCFA </span>${balVis ? f(bal) : '• • • •'}`;
+    $('bal-sub').textContent = `+ Coffre : ${f(cbal)} FCFA`;
+    $('cstrip-val').textContent = f(cbal);
+    const unread = S.get('notifs', []).filter(n => !n.read).length;
+    $('notif-dot').style.display = unread ? 'block' : 'none';
+    G.r_txList();
   },
 
-  r_budget(){
-    const txs=S.get('txs',[]),now=new Date();
-    const mo=txs.filter(t=>{const d=new Date(t.date);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear()});
-    const out=mo.filter(t=>t.type==='db').reduce((s,t)=>s+t.amt,0),inc=mo.filter(t=>t.type==='cr').reduce((s,t)=>s+t.amt,0);
-    document.getElementById('bud-out').textContent=f(out)+' F';document.getElementById('bud-in').textContent=f(inc)+' F';
-    const cats={};mo.filter(t=>t.type==='db').forEach(t=>{cats[t.cat]=(cats[t.cat]||0)+t.amt});
-    const cd={bills:{lbl:'Logement',icon:'home',color:'#16a34a'},shopping:{lbl:'Courses',icon:'pay',color:'#d4a017'},mobile:{lbl:'Mobile',icon:'phone',color:'#818cf8'},transfer:{lbl:'Transferts',icon:'send',color:'#fb923c'},tontine:{lbl:'Tontines',icon:'users',color:'#a855f7'}};
-    const tot=out||1;
-    document.getElementById('cat-list').innerHTML=Object.entries(cats).map(([k,a])=>{
-      const d=cd[k]||{lbl:k,icon:'star',color:'#888'},p=Math.round(a/tot*100);
-      return`<div class="cat-item"><div class="cat-ic" style="background:${d.color}18">${si(d.icon,d.color,17)}</div><div class="cat-name">${d.lbl}</div><div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:${p}%;background:${d.color}"></div></div><div class="cat-right"><div class="cat-val">${f(a)}</div><div class="cat-pct">${p}%</div></div></div>`;
-    }).join('')||'<p style="text-align:center;padding:20px;color:var(--txt3);font-size:.82rem">Aucune dépense ce mois</p>';
-    document.getElementById('all-tx').innerHTML=txs.slice(0,15).map(t=>`
-      <div class="tx"><div class="tx-av" style="background:${txC[t.cat]||txC.transfer}">${si(t.icon,'white',16)}</div>
-      <div class="tx-info"><div class="tx-name">${t.name}</div><div class="tx-meta">${txL[t.cat]||t.cat} · ${ago(t.date)}</div></div>
-      <div class="tx-right"><div class="tx-amt ${t.type}">${t.type==='cr'?'+':'-'}${f(t.amt)}</div><div class="tx-tag">FCFA</div></div></div>`).join('');
-  },
-
-  r_tontine(){
-    document.getElementById('tontine-list').innerHTML=S.get('tontines',[]).map(t=>{
-      const p=Math.round(t.paid/t.members*100);
-      return`<div class="tontine-item">
-        <div class="tnt-head"><div class="tnt-av" style="background:${t.color}">${t.av}</div>
-        <div><div class="tnt-name">${t.name}</div><div class="tnt-members">${t.members} membres · ${t.cycle}</div></div>
-        <div class="tnt-amount"><div class="tnt-val">${f(t.amount)}</div><div class="tnt-cycle">FCFA/cycle</div></div></div>
-        ${t.myTurn?`<div class="tnt-turn">C'est ton tour de recevoir !</div>`:''}
-        <div class="tnt-bar-bg"><div class="tnt-bar" style="width:${p}%;background:linear-gradient(90deg,var(--forest),var(--green2))"></div></div>
-        <div class="tnt-footer"><span>${t.paid} / ${t.members} ont cotisé</span><span>Échéance : ${fmtD(t.deadline)}</span></div>
-        <button class="tnt-btn" onclick="G.cotiser(${t.id})">Cotiser maintenant</button></div>`;
+  async r_txList() {
+    if (!currentUser) {
+      // Afficher transactions locales
+      const txs = S.get('txs', []);
+      $('tx-list').innerHTML = txs.slice(0, 6).map(t => G._txHTML(t)).join('');
+      return;
+    }
+    const { data: txs } = await db.from('transactions')
+      .select('*, from_user:from_user_id(name,avatar), to_user:to_user_id(name,avatar)')
+      .or(`from_user_id.eq.${currentUser.id},to_user_id.eq.${currentUser.id}`)
+      .order('created_at', { ascending: false })
+      .limit(8);
+    
+    if (!txs?.length) { $('tx-list').innerHTML = '<div style="padding:24px;text-align:center;color:var(--txt3);font-size:.82rem">Aucune transaction</div>'; return; }
+    
+    $('tx-list').innerHTML = txs.map(t => {
+      const isCredit = t.to_user_id === currentUser.id;
+      const other = isCredit ? t.from_user : t.to_user;
+      const name = other?.name || t.merchant_name || 'GhettoPay';
+      const av = other?.avatar || name[0].toUpperCase();
+      const ico = { transfer: isCredit ? 'recv' : 'send', qr: 'qric', recharge: 'phone', bill: 'pay', coffre_deposit: 'lock', tontine: 'users' }[t.type] || 'send';
+      const col = isCredit ? '#16A34A' : '#DC2626';
+      const bg = isCredit ? 'rgba(22,163,74,.12)' : 'rgba(212,160,23,.12)';
+      const sign = isCredit ? '+' : '-';
+      const cat = { transfer: 'Transfert', qr: 'QR Pay', recharge: 'Recharge', bill: 'Facture', coffre_deposit: 'Coffre', tontine: 'Tontine' }[t.type] || t.type;
+      const time = new Date(t.created_at).toLocaleDateString('fr-FR', { day:'numeric', month:'short' });
+      return `<div class="tx-row"><div class="tx-av" style="background:${bg}">${si(ico, col, 15)}</div><div class="tx-body"><div class="tx-name">${name}</div><div class="tx-cat">${cat} · ${time}</div></div><div class="tx-val ${isCredit?'cr':'db'}">${sign}${f(t.amount)}</div></div>`;
     }).join('');
   },
-  cotiser(id){
-    const ts=S.get('tontines',[]),t=ts.find(x=>x.id===id);if(!t)return;
-    const per=Math.round(t.amount/t.members),bal=S.get('bal',0);if(per>bal){G.toast('Solde insuffisant','err');return}
-    S.set('bal',bal-per);t.paid=Math.min(t.paid+1,t.members);S.set('tontines',ts);
-    S.get('txs',[]).unshift({id:Date.now(),type:'db',cat:'tontine',icon:'users',name:'Tontine — '+t.name,amt:per,date:new Date().toISOString()});
-    G.ok('Cotisation envoyée',`${f(per)} FCFA · ${t.name}`,()=>G.go('tontine'));
+
+  toggleBal() {
+    balVis = !balVis;
+    const bal = S.get('bal', 0), cbal = S.get('coffre', 0);
+    $('bal-amt').innerHTML = `<span class="cur">FCFA </span>${balVis ? f(bal) : '• • • •'}`;
+    $('bal-sub').textContent = balVis ? `+ Coffre : ${f(cbal)} FCFA` : '••••••••';
+    $('eye-ic').innerHTML = balVis ? '<use href="#eye"/>' : '<use href="#eyeoff"/>';
   },
 
-  r_factures(){
-    const bills=S.get('bills',[]),todo=bills.filter(b=>!b.paid),done=bills.filter(b=>b.paid);
-    const mk=(b,pay)=>`<div class="bill-item ${b.paid?'paid':''}">
-      <div class="bill-ic" style="background:${b.color}18">${si(b.icon,b.color,20)}</div>
-      <div><div class="bill-name">${b.name}</div><div class="bill-ref">Réf : ${b.ref}</div></div>
-      <div class="bill-right"><div class="bill-val">${f(b.amount)}</div><div class="bill-due ${b.paid?'ok':''}">${b.paid?'Payée':'Dû le '+fmtD(b.due)}</div></div>
-      ${pay&&!b.paid?`<button class="bill-pay" onclick="G.payBill(${b.id})">Payer</button>`:''}
-    </div>`;
-    document.getElementById('bills-todo').innerHTML=todo.length?todo.map(b=>mk(b,true)).join(''):`<p class="bills-empty">Aucune facture en attente 🎉</p>`;
-    document.getElementById('bills-done').innerHTML=done.map(b=>mk(b,false)).join('');
-  },
-  payBill(id){
-    const bills=S.get('bills',[]),b=bills.find(x=>x.id===id&&!x.paid);if(!b)return;
-    const bal=S.get('bal',0);if(b.amount>bal){G.toast('Solde insuffisant','err');return}
-    S.set('bal',bal-b.amount);b.paid=true;S.set('bills',bills);
-    G.ok('Facture payée',`${b.name} · ${f(b.amount)} FCFA`,()=>G.go('factures'));
-  },
-  payAll(){
-    const u=S.get('bills',[]).filter(b=>!b.paid);if(!u.length){G.toast('Aucune facture en attente','inf');return}
-    let bal=S.get('bal',0);const bills=S.get('bills',[]);
-    for(const b of u){if(b.amount>bal){G.toast('Solde insuffisant','err');return}bal-=b.amount;b.paid=true}
-    S.set('bal',bal);S.set('bills',bills);G.ok(`${u.length} factures payées`,`Total : ${f(u.reduce((s,b)=>s+b.amount,0))} FCFA`,()=>G.go('factures'));
+  // ── SEND ──
+  r_send() {
+    aStr = '';
+    $('amt-disp').textContent = '0';
+    $('rec-row').style.display = 'none';
+    selC = null;
+    G.r_contacts();
   },
 
-  setOp(n,on,off){document.getElementById('rch-op').value=n;document.getElementById(on).classList.add('on');document.getElementById(off).classList.remove('on')},
-  setPill(el,v){document.querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));el.classList.add('on');document.getElementById('rch-amt').value=v},
-  setDur(el,m){document.querySelectorAll('#mc .pill').forEach(p=>p.classList.remove('on'));el.classList.add('on');document.getElementById('nc-months').value=m},
-  doRecharge(){
-    const op=document.getElementById('rch-op').value,ph=document.getElementById('rch-phone').value.trim(),n=parseInt(document.getElementById('rch-amt').value)||0;
-    if(!ph){G.toast('Saisis un numéro','err');return}if(n<=0){G.toast('Choisis un montant','err');return}
-    const bal=S.get('bal',0);if(n>bal){G.toast('Solde insuffisant','err');return}
-    S.set('bal',bal-n);G.ok('Recharge effectuée',`${f(n)} FCFA de crédit ${op}`,()=>G.go('home'));
+  async r_contacts() {
+    if (!currentUser) {
+      const contacts = S.get('contacts', []);
+      $('contact-grid').innerHTML = contacts.map(c => `<div class="c-item" onclick="G.selContact('${c.id}')"><div class="c-av" style="background:${c.bg||'linear-gradient(135deg,#0A4A2E,#16A34A)'}">${c.av}</div><div class="c-name">${c.name.split(' ')[0]}</div></div>`).join('');
+      return;
+    }
+    // Chercher tous les utilisateurs sauf soi-même
+    const { data: users } = await db.from('users').select('id,name,avatar,phone').neq('id', currentUser.id).limit(20);
+    if (!users?.length) { $('contact-grid').innerHTML = '<div style="color:var(--txt3);font-size:.78rem">Aucun contact</div>'; return; }
+    $('contact-grid').innerHTML = users.map(u => `<div class="c-item" onclick="G.selContact('${u.id}')"><div class="c-av" style="background:linear-gradient(135deg,#0A4A2E,#16A34A)">${u.avatar || u.name[0]}</div><div class="c-name">${u.name.split(' ')[0]}</div></div>`).join('');
+    // Stocker pour référence
+    G._contactMap = {};
+    users.forEach(u => G._contactMap[u.id] = u);
   },
 
-  r_notifs(){
-    document.getElementById('notif-list').innerHTML=S.get('notifs',[]).map(n=>`
-      <div class="notif-item ${n.read?'':'unread'}">
-        <div class="notif-ic" style="background:${n.bg}">${si(n.icon,n.color,17)}</div>
-        <div><div class="notif-title">${n.title}</div><div class="notif-desc">${n.desc}</div><div class="notif-time">${n.time}</div></div>
-      </div>`).join('');
+  selContact(id) {
+    if (currentUser && G._contactMap) {
+      const c = G._contactMap[id];
+      if (!c) return;
+      selC = { id: c.id, name: c.name, phone: c.phone, av: c.avatar || c.name[0] };
+    } else {
+      selC = S.get('contacts', []).find(x => x.id === id);
+    }
+    if (!selC) return;
+    $('rec-av').textContent = selC.av || selC.name[0];
+    $('rec-name').textContent = selC.name;
+    $('rec-phone').textContent = selC.phone;
+    $('rec-row').style.display = 'flex';
   },
-  readAll(){const ns=S.get('notifs',[]);ns.forEach(n=>n.read=true);S.set('notifs',ns);G.render('notifs');G.toast('Toutes lues','inf');document.getElementById('notif-dot').style.display='none'},
 
-  r_profil(){
-    const u=S.get('user',{});
-    document.getElementById('prof-av').textContent=u.avatar||'R';
-    document.getElementById('prof-name').textContent=u.name||'';
-    document.getElementById('prof-phone').textContent=u.phone||'';
-    document.getElementById('prof-loc').textContent=u.loc||'';
-    document.getElementById('prof-level').textContent=u.level||'Gold';
-    document.getElementById('prof-txc').textContent=S.get('txs',[]).length;
-    document.getElementById('prof-cash').textContent=f(S.get('cash',0));
+  kp(v) {
+    if (v === 'del') { aStr = aStr.slice(0, -1); }
+    else if (aStr.length < 9) { aStr += v; }
+    const n = parseInt(aStr) || 0;
+    $('amt-disp').textContent = f(n);
   },
-  saveProfile(){
-    const name=document.getElementById('ep-name').value.trim();if(!name){G.toast('Nom requis','err');return}
-    const u=S.get('user',{});u.name=name;u.phone=document.getElementById('ep-phone').value.trim();
-    u.loc=document.getElementById('ep-loc').value.trim();u.avatar=name[0].toUpperCase();
-    S.set('user',u);G.closeModal('mp');G.render('profil');G.toast('Profil mis à jour','inf');
-  },
-  logout(){G.toast('Déconnexion en cours...','inf');setTimeout(()=>G.go('pin'),1500)},
 
-  r_pin(){pinBuf='';document.querySelectorAll('.pin-dot').forEach(d=>d.classList.remove('fill','err'))},
-  pinKey(v){
-    if(pinBuf.length>=4)return;pinBuf+=v;
-    document.querySelectorAll('.pin-dot').forEach((d,i)=>d.classList.toggle('fill',i<pinBuf.length));
-    if(pinBuf.length===4)G._checkPin();
-  },
-  pinDel(){pinBuf=pinBuf.slice(0,-1);document.querySelectorAll('.pin-dot').forEach((d,i)=>d.classList.toggle('fill',i<pinBuf.length))},
-  _checkPin(){
-    const u=S.get('user',{pin:'1234'});
-    setTimeout(()=>{
-      if(pinBuf===u.pin){hist=[];G.go('home')}
-      else{
-        pinBuf='';
-        document.querySelectorAll('.pin-dot').forEach(d=>{d.classList.remove('fill');d.classList.add('err');setTimeout(()=>d.classList.remove('err'),600)});
-        G.toast('PIN incorrect','err');
+  async doSend() {
+    if (!selC) { G.toast('Choisis un destinataire', 'err'); return; }
+    const n = parseInt(aStr) || 0;
+    if (n <= 0) { G.toast('Saisis un montant', 'err'); return; }
+    const bal = S.get('bal', 0);
+    if (n > bal) { G.toast('Solde insuffisant', 'err'); return; }
+    const note = $('send-note')?.value || '';
+
+    if (currentUser) {
+      // Vrai transfert via Supabase
+      G.toast('Envoi en cours...', 'inf');
+      const { data, error } = await db.rpc('transfer_money', {
+        p_from_user_id: currentUser.id,
+        p_to_user_id: selC.id,
+        p_amount: n,
+        p_note: note
+      });
+      if (error || !data?.success) {
+        G.toast(data?.error || 'Erreur de transfert', 'err'); return;
       }
-    },200);
+      // Mettre à jour le solde local
+      const newBal = bal - n;
+      S.set('bal', newBal);
+      currentUser.wallet.balance = newBal;
+    } else {
+      // Mode démo localStorage
+      S.set('bal', bal - n);
+      const txs = S.get('txs', []);
+      txs.unshift({ id: Date.now(), name: selC.name, av: selC.av, amount: n, type: 'send', cat: 'Transfert', time: "À l'instant" });
+      S.set('txs', txs);
+    }
+    G.ok(`${f(n)} FCFA envoyés`, `À ${selC.name} · Confirmé ✓`, () => G.go('home'));
   },
 
-  _okCb:null,
-  ok(title,sub,cb){
-    document.getElementById('ov-title').textContent=title;document.getElementById('ov-sub').textContent=sub||'';
-    document.getElementById('overlay').classList.add('on');G._okCb=cb||null;
+  // ── QR ──
+  r_qr() {
+    const u = S.get('user', {});
+    if ($('qr-name')) $('qr-name').textContent = u.name || 'Utilisateur';
+    if ($('qr-phone')) $('qr-phone').textContent = u.phone || '';
   },
-  closeOk(){document.getElementById('overlay').classList.remove('on');if(G._okCb){G._okCb();G._okCb=null}else G.render(cur)},
 
-  toast(msg,type){
-    const t=document.getElementById('toast-el');t.textContent=msg;t.className='toast '+(type||'')+' on';
-    clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),3000);
+  doQR() {
+    const merchant = $('qr-merchant')?.value.trim();
+    const amount = parseInt($('qr-amount')?.value) || 0;
+    if (!merchant) { G.toast('Nom du commerçant requis', 'err'); return; }
+    if (amount <= 0) { G.toast('Montant requis', 'err'); return; }
+    const bal = S.get('bal', 0);
+    if (amount > bal) { G.toast('Solde insuffisant', 'err'); return; }
+
+    if (currentUser) {
+      // Enregistrer le paiement QR
+      db.from('transactions').insert({
+        from_user_id: currentUser.id,
+        amount,
+        type: 'qr',
+        merchant_name: merchant,
+        status: 'completed'
+      }).then(({ error }) => {
+        if (error) { G.toast('Erreur paiement', 'err'); return; }
+        S.set('bal', bal - amount);
+        G.ok(`${f(amount)} FCFA payés`, `${merchant} · Confirmé ✓`, () => G.go('home'));
+      });
+    } else {
+      S.set('bal', bal - amount);
+      G.ok(`${f(amount)} FCFA payés`, `${merchant} · Confirmé ✓`, () => G.go('home'));
+    }
   },
-  showModal(id){document.getElementById(id).classList.add('on')},
-  closeModal(id){document.getElementById(id).classList.remove('on')},
+
+  // ── COFFRE ──
+  r_coffre() {
+    const cbal = S.get('coffre', 0);
+    $('coffre-total').textContent = f(cbal) + ' FCFA';
+    G.r_coffreList();
+  },
+
+  async r_coffreList() {
+    let coffres = [];
+    if (currentUser) {
+      const { data } = await db.from('coffres').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+      coffres = data || [];
+    } else {
+      coffres = S.get('coffres', []);
+    }
+
+    if (!coffres.length) {
+      $('coffre-list').innerHTML = '<div style="text-align:center;padding:32px 16px;color:var(--txt3);font-size:.82rem">Aucun coffre. Crée le tien !</div>';
+      return;
+    }
+
+    $('coffre-list').innerHTML = coffres.map(c => {
+      const pct = c.target > 0 ? Math.round((c.saved / c.target) * 100) : 0;
+      const unlockStr = c.unlock_date ? new Date(c.unlock_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+      return `<div class="coffre-item">
+        <div class="ci-top">
+          <div class="ci-ic"><svg><use href="#target"/></svg></div>
+          <div><div class="ci-name">${c.name}</div><div class="ci-unlock">Déblocage : ${unlockStr}</div></div>
+          <div style="margin-left:auto;text-align:right"><div class="ci-val">${f(c.saved)}</div><div class="ci-rate">+${c.rate}%/an</div></div>
+        </div>
+        <div class="ci-bar-bg"><div class="ci-bar" style="width:${pct}%"></div></div>
+        <div class="ci-foot"><span>${f(c.saved)} / ${f(c.target)} FCFA</span><span>${pct}%</span></div>
+        <button class="btn btn-ghost" style="margin-top:8px;font-size:.75rem" onclick="G.depositCoffre('${c.id}','${c.name}')">
+          <svg><use href="#plus"/></svg>Ajouter des fonds
+        </button>
+      </div>`;
+    }).join('');
+  },
+
+  async createCoffre() {
+    const name = $('nc-name')?.value.trim();
+    const target = parseInt($('nc-target')?.value) || 0;
+    const months = parseInt($('nc-months')?.value) || 6;
+    if (!name) { G.toast('Nom requis', 'err'); return; }
+    if (target <= 0) { G.toast('Objectif requis', 'err'); return; }
+
+    const unlockDate = new Date();
+    unlockDate.setMonth(unlockDate.getMonth() + months);
+
+    if (currentUser) {
+      const { error } = await db.from('coffres').insert({
+        user_id: currentUser.id, name, target, saved: 0,
+        rate: 5.5, unlock_date: unlockDate.toISOString().split('T')[0]
+      });
+      if (error) { G.toast('Erreur création coffre', 'err'); return; }
+    } else {
+      const coffres = S.get('coffres', []);
+      coffres.unshift({ id: Date.now().toString(), name, target, saved: 0, rate: 5.5, unlock_date: unlockDate.toISOString().split('T')[0] });
+      S.set('coffres', coffres);
+    }
+
+    G.closeModal('mc');
+    $('nc-name').value = ''; $('nc-target').value = '';
+    G.r_coffre();
+    G.toast('Coffre créé !', 'ok');
+  },
+
+  async depositCoffre(coffreId, coffreName) {
+    const amount = parseInt(prompt(`Combien veux-tu déposer dans "${coffreName}" ? (FCFA)`)) || 0;
+    if (amount <= 0) return;
+    const bal = S.get('bal', 0);
+    if (amount > bal) { G.toast('Solde insuffisant', 'err'); return; }
+
+    if (currentUser) {
+      // Débiter wallet, créditer coffre
+      await db.from('wallets').update({ balance: bal - amount }).eq('user_id', currentUser.id);
+      await db.from('coffres').update({ saved: db.rpc('increment', { row_id: coffreId, x: amount }) }).eq('id', coffreId);
+      // Plus simple : fetch saved actuel puis update
+      const { data: cof } = await db.from('coffres').select('saved').eq('id', coffreId).single();
+      await db.from('coffres').update({ saved: (cof?.saved || 0) + amount }).eq('id', coffreId);
+      await db.from('transactions').insert({ from_user_id: currentUser.id, amount, type: 'coffre_deposit', merchant_name: coffreName, status: 'completed' });
+      S.set('bal', bal - amount);
+      S.set('coffre', S.get('coffre', 0) + amount);
+    } else {
+      S.set('bal', bal - amount);
+      S.set('coffre', S.get('coffre', 0) + amount);
+      const coffres = S.get('coffres', []);
+      const c = coffres.find(x => x.id == coffreId);
+      if (c) c.saved += amount;
+      S.set('coffres', coffres);
+    }
+
+    G.r_coffre();
+    G.toast(`${f(amount)} FCFA déposés`, 'ok');
+  },
+
+  // ── BUDGET ──
+  r_budget() {
+    const txs = S.get('txs', []);
+    const out = txs.filter(t => t.type === 'send' || t.type === 'qr' || t.type === 'bill' || t.type === 'recharge' || t.type === 'coffre_deposit');
+    const inp = txs.filter(t => t.type === 'recv' || t.type === 'transfer_in');
+    const totalOut = out.reduce((s, t) => s + (t.amount || 0), 0);
+    const totalIn = inp.reduce((s, t) => s + (t.amount || 0), 0);
+    $('bud-out').textContent = f(totalOut) + ' F';
+    $('bud-in').textContent = f(totalIn) + ' F';
+    
+    // Catégories
+    const cats = [
+      { name: 'Transferts', ico: 'send', col: '#D4A017', bg: 'rgba(212,160,23,.12)', types: ['send', 'transfer'] },
+      { name: 'Paiements', ico: 'pay', col: '#3b82f6', bg: 'rgba(59,130,246,.12)', types: ['qr', 'bill'] },
+      { name: 'Recharges', ico: 'phone', col: '#dc2626', bg: 'rgba(220,38,38,.12)', types: ['recharge'] },
+      { name: 'Coffre', ico: 'lock', col: '#0A4A2E', bg: 'rgba(10,74,46,.12)', types: ['coffre_deposit'] },
+    ];
+    $('cat-list').innerHTML = cats.map(cat => {
+      const total = txs.filter(t => cat.types.includes(t.type)).reduce((s, t) => s + (t.amount || 0), 0);
+      const pct = totalOut > 0 ? Math.round(total / totalOut * 100) : 0;
+      return `<div class="cat-row"><div class="cat-ic" style="background:${cat.bg}">${si(cat.ico, cat.col, 15)}</div><div style="flex:1"><div class="cat-name">${cat.name}</div><div class="cat-bar-bg"><div class="cat-bar" style="width:${pct}%;background:${cat.col}"></div></div></div><div class="cat-val">${f(total)} F</div></div>`;
+    }).join('');
+
+    // All transactions
+    if (currentUser) {
+      db.from('transactions')
+        .select('*, from_user:from_user_id(name,avatar), to_user:to_user_id(name,avatar)')
+        .or(`from_user_id.eq.${currentUser.id},to_user_id.eq.${currentUser.id}`)
+        .order('created_at', { ascending: false })
+        .limit(50)
+        .then(({ data: txs2 }) => {
+          if (!txs2?.length) { $('all-tx').innerHTML = '<div style="padding:16px;text-align:center;color:var(--txt3);font-size:.8rem">Aucune transaction</div>'; return; }
+          $('all-tx').innerHTML = txs2.map(t => {
+            const isCredit = t.to_user_id === currentUser.id;
+            const other = isCredit ? t.from_user : t.to_user;
+            const name = other?.name || t.merchant_name || 'GhettoPay';
+            const av = other?.avatar || name[0];
+            const col = isCredit ? '#16A34A' : '#DC2626';
+            const time = new Date(t.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+            return `<div class="tx-row"><div class="tx-av" style="background:rgba(0,0,0,.06);color:var(--txt)">${av}</div><div class="tx-body"><div class="tx-name">${name}</div><div class="tx-cat">${t.type} · ${time}</div></div><div class="tx-val ${isCredit?'cr':'db'}">${isCredit?'+':'-'}${f(t.amount)}</div></div>`;
+          }).join('');
+        });
+    } else {
+      $('all-tx').innerHTML = txs.map(t => `<div class="tx-row"><div class="tx-av" style="background:rgba(0,0,0,.06);color:var(--txt)">${t.av||'?'}</div><div class="tx-body"><div class="tx-name">${t.name}</div><div class="tx-cat">${t.cat||t.type} · ${t.time}</div></div><div class="tx-val ${t.type==='recv'?'cr':'db'}">${t.type==='recv'?'+':'-'}${f(t.amount)}</div></div>`).join('');
+    }
+  },
+
+  // ── TONTINE ──
+  r_tontine() { G._loadTontines(); },
+
+  async _loadTontines() {
+    let tontines = [];
+    if (currentUser) {
+      const { data: memberships } = await db.from('tontine_members').select('tontine_id').eq('user_id', currentUser.id);
+      if (memberships?.length) {
+        const ids = memberships.map(m => m.tontine_id);
+        const { data } = await db.from('tontines').select('*, tontine_members(count)').in('id', ids);
+        tontines = data || [];
+      }
+    } else {
+      tontines = S.get('tontines', []);
+    }
+
+    if (!tontines.length) {
+      $('tontine-list').innerHTML = '<div style="text-align:center;padding:32px;color:var(--txt3);font-size:.82rem">Aucune tontine. Crée ou rejoins-en une !</div><button class="btn btn-gold" onclick="G.createTontine()" style="margin:0 16px"><svg><use href="#plus"/></svg>Créer une tontine</button>';
+      return;
+    }
+
+    const colors = ['linear-gradient(135deg,#7c3aed,#a78bfa)', 'linear-gradient(135deg,#0284c7,#38bdf8)', 'linear-gradient(135deg,var(--forest),var(--forest2))'];
+    $('tontine-list').innerHTML = tontines.map((t, i) => {
+      const paid = t.members_paid || 0;
+      const total = t.tontine_members?.[0]?.count || t.members_count || 5;
+      const pct = total > 0 ? Math.round(paid / total * 100) : 0;
+      return `<div class="tontine-card" style="background:${colors[i % colors.length]};border-radius:18px;padding:18px;margin-bottom:12px;position:relative;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <div style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.9rem;color:#fff">${t.name[0]}</div>
+          <div style="flex:1"><div style="font-size:.82rem;font-weight:800;color:#fff">${t.name}</div><div style="font-size:.6rem;color:rgba(255,255,255,.55);font-family:var(--fm)">${total} membres · ${t.frequency === 'weekly' ? 'Hebdo' : 'Mensuel'}</div></div>
+          <div style="text-align:right"><div style="font-family:var(--fd);font-size:.88rem;font-weight:900;color:#fff">${f(t.amount_per_cycle)}</div><div style="font-size:.54rem;color:rgba(255,255,255,.5)">FCFA/cycle</div></div>
+        </div>
+        <div style="background:rgba(255,255,255,.15);border-radius:100px;height:6px;overflow:hidden;margin-bottom:6px"><div style="width:${pct}%;height:100%;border-radius:100px;background:var(--gold2)"></div></div>
+        <div style="display:flex;justify-content:space-between;font-family:var(--fm);font-size:.56rem;color:rgba(255,255,255,.5);margin-bottom:12px"><span>${paid} / ${total} ont cotisé</span><span>Cycle en cours</span></div>
+        <button style="width:100%;padding:10px;border:1.5px solid rgba(255,255,255,.25);border-radius:10px;background:rgba(255,255,255,.12);color:#fff;font-size:.78rem;font-weight:800;font-family:var(--f);cursor:pointer" onclick="G.payTontine('${t.id}','${t.amount_per_cycle}','${t.name}')">Cotiser maintenant</button>
+      </div>`;
+    }).join('') + `<button class="btn btn-ghost" onclick="G.createTontine()"><svg><use href="#plus"/></svg>Créer une tontine</button>`;
+  },
+
+  async createTontine() {
+    const name = prompt('Nom de la tontine ?');
+    if (!name) return;
+    const amount = parseInt(prompt('Montant par cycle (FCFA) ?')) || 0;
+    if (amount <= 0) return;
+
+    if (currentUser) {
+      const { data: t, error } = await db.from('tontines').insert({
+        name, creator_id: currentUser.id,
+        amount_per_cycle: amount, frequency: 'monthly',
+        current_turn_user_id: currentUser.id
+      }).select().single();
+      if (error) { G.toast('Erreur création', 'err'); return; }
+      await db.from('tontine_members').insert({ tontine_id: t.id, user_id: currentUser.id, turn_order: 1, has_paid: false });
+    } else {
+      const tontines = S.get('tontines', []);
+      tontines.unshift({ id: Date.now().toString(), name, amount_per_cycle: amount, frequency: 'monthly', members: 1, members_paid: 0 });
+      S.set('tontines', tontines);
+    }
+    G.r_tontine();
+    G.toast('Tontine créée !', 'ok');
+  },
+
+  async payTontine(tontineId, amount, name) {
+    const n = parseInt(amount) || 0;
+    const bal = S.get('bal', 0);
+    if (n > bal) { G.toast('Solde insuffisant', 'err'); return; }
+
+    if (currentUser) {
+      await db.from('wallets').update({ balance: bal - n }).eq('user_id', currentUser.id);
+      await db.from('tontine_members').update({ has_paid: true }).eq('tontine_id', tontineId).eq('user_id', currentUser.id);
+      await db.from('transactions').insert({ from_user_id: currentUser.id, amount: n, type: 'tontine', merchant_name: name, status: 'completed' });
+      S.set('bal', bal - n);
+    } else {
+      S.set('bal', bal - n);
+    }
+
+    G.r_tontine();
+    G.ok(`${f(n)} FCFA cotisés`, `${name} · Confirmé ✓`, () => G.go('tontine'));
+  },
+
+  // ── FACTURES ──
+  r_factures() {
+    const bills = S.get('bills', []);
+    const todo = bills.filter(b => !b.paid);
+    const done = bills.filter(b => b.paid);
+    $('bills-todo').innerHTML = todo.map(b => `
+      <div class="bill-item">
+        <div class="bill-ic" style="background:rgba(220,38,38,.1)">${si('pay', '#dc2626', 20)}</div>
+        <div><div class="bill-name">${b.name}</div><div class="bill-ref">${b.ref || 'Réf: —'}</div></div>
+        <div class="bill-right"><div class="bill-val">${f(b.amount)} F</div><div class="bill-due">${b.due || '—'}</div></div>
+        <button onclick="G.payBill('${b.id}')" style="margin-left:8px;padding:6px 12px;background:var(--forest);color:#fff;border:none;border-radius:8px;font-size:.72rem;font-weight:700;cursor:pointer">Payer</button>
+      </div>`).join('') || '<div style="padding:12px;color:var(--txt3);font-size:.8rem">Aucune facture en attente 🎉</div>';
+    $('bills-done').innerHTML = done.length ? `<div class="lbl">Payées</div>` + done.map(b => `<div class="bill-item" style="opacity:.55"><div class="bill-ic" style="background:rgba(22,163,74,.1)">${si('chk', '#16a34a', 20)}</div><div><div class="bill-name">${b.name}</div><div class="bill-ref">Payé</div></div><div class="bill-right"><div class="bill-val">${f(b.amount)} F</div></div></div>`).join('') : '';
+  },
+
+  payBill(id) {
+    const bills = S.get('bills', []);
+    const b = bills.find(x => x.id == id);
+    if (!b) return;
+    const bal = S.get('bal', 0);
+    if (b.amount > bal) { G.toast('Solde insuffisant', 'err'); return; }
+    b.paid = true;
+    S.set('bal', bal - b.amount);
+    S.set('bills', bills);
+    if (currentUser) {
+      db.from('transactions').insert({ from_user_id: currentUser.id, amount: b.amount, type: 'bill', merchant_name: b.name, status: 'completed' });
+      db.from('wallets').update({ balance: bal - b.amount }).eq('user_id', currentUser.id);
+    }
+    G.ok('Facture payée', `${b.name} · ${f(b.amount)} FCFA`, () => G.go('factures'));
+  },
+
+  payAll() {
+    const bills = S.get('bills', []).filter(b => !b.paid);
+    if (!bills.length) { G.toast('Aucune facture en attente', 'inf'); return; }
+    let bal = S.get('bal', 0);
+    const allBills = S.get('bills', []);
+    for (const b of bills) {
+      if (b.amount > bal) { G.toast('Solde insuffisant', 'err'); return; }
+      bal -= b.amount;
+      b.paid = true;
+    }
+    S.set('bal', bal);
+    S.set('bills', allBills);
+    G.ok(`${bills.length} factures payées`, `Total : ${f(bills.reduce((s, b) => s + b.amount, 0))} FCFA`, () => G.go('factures'));
+  },
+
+  // ── RECHARGE ──
+  setOp(n, on, off) { $('rch-op').value = n; $(on).classList.add('on'); $(off).classList.remove('on'); },
+  setPill(el, v) { document.querySelectorAll('.pill').forEach(p => p.classList.remove('on')); el.classList.add('on'); $('rch-amt').value = v; },
+  setDur(el, m) { document.querySelectorAll('#mc .pill').forEach(p => p.classList.remove('on')); el.classList.add('on'); $('nc-months').value = m; },
+
+  doRecharge() {
+    const op = $('rch-op')?.value, ph = $('rch-phone')?.value.trim(), n = parseInt($('rch-amt')?.value) || 0;
+    if (!ph) { G.toast('Saisis un numéro', 'err'); return; }
+    if (n <= 0) { G.toast('Choisis un montant', 'err'); return; }
+    const bal = S.get('bal', 0);
+    if (n > bal) { G.toast('Solde insuffisant', 'err'); return; }
+    S.set('bal', bal - n);
+    if (currentUser) {
+      db.from('wallets').update({ balance: bal - n }).eq('user_id', currentUser.id);
+      db.from('transactions').insert({ from_user_id: currentUser.id, amount: n, type: 'recharge', merchant_name: `Recharge ${op}`, status: 'completed' });
+    }
+    G.ok('Recharge effectuée', `${f(n)} FCFA de crédit ${op}`, () => G.go('home'));
+  },
+
+  // ── NOTIFS ──
+  r_notifs() {
+    const notifs = S.get('notifs', []);
+    $('notif-list').innerHTML = notifs.map(n => `
+      <div class="notif-item ${n.read ? '' : 'unread'}">
+        <div class="notif-ic" style="background:${n.bg}">${si(n.icon, n.color, 17)}</div>
+        <div><div class="notif-title">${n.title}</div><div class="notif-desc">${n.desc}</div><div class="notif-time">${n.time}</div></div>
+      </div>`).join('') || '<div style="padding:24px;text-align:center;color:var(--txt3);font-size:.82rem">Aucune notification</div>';
+  },
+
+  readAll() {
+    const ns = S.get('notifs', []);
+    ns.forEach(n => n.read = true);
+    S.set('notifs', ns);
+    G.render('notifs');
+    G.toast('Toutes lues', 'inf');
+    $('notif-dot').style.display = 'none';
+  },
+
+  // ── PROFIL ──
+  r_profil() {
+    const u = S.get('user', {});
+    $('prof-av').textContent = u.avatar || '?';
+    $('prof-name').textContent = u.name || '';
+    $('prof-phone').textContent = u.phone || '';
+    $('prof-loc').textContent = u.loc || 'Libreville, Gabon';
+    $('prof-level').textContent = u.level || 'Silver';
+    $('prof-txc').textContent = S.get('txs', []).length;
+    $('prof-cash').textContent = f(S.get('cash', 0));
+  },
+
+  async saveProfile() {
+    const name = $('ep-name')?.value.trim();
+    if (!name) { G.toast('Nom requis', 'err'); return; }
+    const u = S.get('user', {});
+    u.name = name;
+    u.phone = $('ep-phone')?.value.trim();
+    u.loc = $('ep-loc')?.value.trim();
+    u.avatar = name[0].toUpperCase();
+    S.set('user', u);
+
+    if (currentUser) {
+      await db.from('users').update({ name, phone: u.phone, location: u.loc, avatar: u.avatar }).eq('id', currentUser.id);
+      currentUser.name = name;
+    }
+
+    G.closeModal('mp');
+    G.render('profil');
+    G.toast('Profil mis à jour', 'inf');
+  },
+
+  async logout() {
+    G.toast('Déconnexion...', 'inf');
+    if (currentUser) await db.auth.signOut();
+    currentUser = null;
+    localStorage.clear();
+    setTimeout(() => G.go('onboard'), 1000);
+  },
+
+  // ── PIN (vérification) ──
+  r_pin() {
+    pinBuf = '';
+    document.querySelectorAll('.pin-dot').forEach(d => d.classList.remove('fill', 'err'));
+    const u = S.get('user', {});
+    if ($('pin-sub')) {
+      const name = (u.name || '').split(' ')[0];
+      $('pin-sub').textContent = name ? `Bonjour ${name} · PIN requis` : 'Entre ton code PIN · 1234';
+    }
+  },
+
+  pinKey(v) {
+    if (pinBuf.length >= 4) return;
+    pinBuf += v;
+    document.querySelectorAll('.pin-dot').forEach((d, i) => d.classList.toggle('fill', i < pinBuf.length));
+    if (pinBuf.length === 4) G._checkPin();
+  },
+
+  pinDel() {
+    pinBuf = pinBuf.slice(0, -1);
+    document.querySelectorAll('.pin-dot').forEach((d, i) => d.classList.toggle('fill', i < pinBuf.length));
+  },
+
+  _checkPin() {
+    const u = S.get('user', { pin: '1234' });
+    setTimeout(() => {
+      if (pinBuf === (u.pin || '1234')) {
+        hist = [];
+        G.go('home');
+      } else {
+        pinBuf = '';
+        document.querySelectorAll('.pin-dot').forEach(d => {
+          d.classList.remove('fill');
+          d.classList.add('err');
+          setTimeout(() => d.classList.remove('err'), 600);
+        });
+        G.toast('PIN incorrect', 'err');
+      }
+    }, 200);
+  },
+
+  // ── INSCRIPTION ──
+  async register() {
+    const name = $('reg-name')?.value.trim();
+    const phone = $('reg-phone')?.value.trim();
+    const pin = $('reg-pin')?.value.trim();
+
+    if (!name || name.length < 2) { G.toast('Nom complet requis', 'err'); return; }
+    if (!phone || phone.length < 8) { G.toast('Numéro de téléphone requis', 'err'); return; }
+    if (!pin || pin.length !== 4 || !/^\d{4}$/.test(pin)) { G.toast('PIN de 4 chiffres requis', 'err'); return; }
+
+    G.toast('Création du compte...', 'inf');
+
+    // Créer un compte auth avec email fictif basé sur le téléphone
+    const email = phone.replace(/[^0-9]/g, '') + '@ghettopay.ga';
+    const password = pin + phone.replace(/[^0-9]/g, '').slice(-6); // mot de passe robuste
+
+    const { data: authData, error: authError } = await db.auth.signUp({ email, password });
+    if (authError && !authError.message.includes('already registered')) {
+      G.toast('Erreur: ' + authError.message, 'err'); return;
+    }
+
+    // Si déjà inscrit, essayer de se connecter
+    if (authError?.message.includes('already registered')) {
+      const { error: loginError } = await db.auth.signInWithPassword({ email, password });
+      if (loginError) { G.toast('Ce numéro est déjà utilisé', 'err'); return; }
+    }
+
+    const { data: { session } } = await db.auth.getSession();
+    if (!session) { G.toast("Erreur d'authentification", 'err'); return; }
+
+    const avatar = name[0].toUpperCase();
+    // Vérifier si user existe déjà
+    const { data: existingUser } = await db.from('users').select('id').eq('phone', phone).single();
+    
+    let userId;
+    if (!existingUser) {
+      const { data: newUser, error: userError } = await db.from('users').insert({
+        auth_id: session.user.id, phone, name, avatar, pin_code: pin, location: 'Libreville, Gabon', level: 'Silver'
+      }).select().single();
+      if (userError) { G.toast('Erreur création compte: ' + userError.message, 'err'); return; }
+      userId = newUser.id;
+
+      // Créer le wallet avec solde de démarrage
+      await db.from('wallets').insert({ user_id: userId, balance: 10000, coffre_balance: 0, cashback: 0 });
+    } else {
+      userId = existingUser.id;
+    }
+
+    // Charger les données
+    await loadUserData(session.user.id);
+
+    // Initialiser les données locales
+    S.set('user', { name, phone, pin, avatar, loc: 'Libreville, Gabon', level: 'Silver' });
+    S.set('bills', [
+      { id: 1, name: 'SEEG Eau', ref: 'Réf: EAU-2024', amount: 28000, due: '31 déc.' },
+      { id: 2, name: 'SEEG Électricité', ref: 'Réf: ELEC-2024', amount: 35000, due: '31 déc.' }
+    ]);
+    S.set('notifs', [
+      { id: 1, title: 'Bienvenue sur GhettoPay !', desc: 'Ton compte est créé · 10 000 FCFA offerts', time: "À l'instant", read: false, icon: 'z', color: 'var(--gold2)', bg: 'rgba(212,160,23,.12)' },
+      { id: 2, title: 'Sécurité activée', desc: 'PIN configuré · Compte vérifié', time: "À l'instant", read: false, icon: 'shield', color: 'var(--green)', bg: 'rgba(22,163,74,.12)' }
+    ]);
+    S.set('txs', []);
+    S.set('coffres', []);
+    S.set('tontines', []);
+    S.set('ok', true);
+
+    G.ok('Compte créé !', `Bienvenue ${name} · 10 000 FCFA offerts`, () => G.go('pin'));
+  },
+
+  // ── OVERLAY / TOAST / MODAL ──
+  _okCb: null,
+  ok(title, sub, cb) {
+    $('ov-title').textContent = title;
+    $('ov-sub').textContent = sub || '';
+    $('overlay').classList.add('on');
+    G._okCb = cb || null;
+  },
+  closeOk() {
+    $('overlay').classList.remove('on');
+    if (G._okCb) { G._okCb(); G._okCb = null; }
+    else G.render(cur);
+  },
+  toast(msg, type) {
+    const t = $('toast-el');
+    t.textContent = msg;
+    t.className = 'toast ' + (type || '') + ' on';
+    clearTimeout(t._t);
+    t._t = setTimeout(() => t.classList.remove('on'), 3000);
+  },
+
+  showLogin() {
+    const f = document.getElementById('login-form');
+    f.style.display = 'flex';
+  },
+  hideLogin() {
+    document.getElementById('login-form').style.display = 'none';
+  },
+  async login() {
+    const phone = document.getElementById('login-phone')?.value.trim();
+    const pin = document.getElementById('login-pin')?.value.trim();
+    if (!phone || !pin) { G.toast('Numéro et PIN requis', 'err'); return; }
+    
+    G.toast('Connexion...', 'inf');
+    const email = phone.replace(/[^0-9]/g, '') + '@ghettopay.ga';
+    const password = pin + phone.replace(/[^0-9]/g, '').slice(-6);
+    
+    const { data, error } = await db.auth.signInWithPassword({ email, password });
+    if (error) { G.toast('Numéro ou PIN incorrect', 'err'); return; }
+    
+    await loadUserData(data.user.id);
+    G.go('pin');
+  },
+  showModal(id) { $(id).classList.add('on'); },
+  closeModal(id) { $(id).classList.remove('on'); },
 };
 
-function setBudTab(btn){btn.closest('.bud-tabs').querySelectorAll('.btab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');G.render('budget')}
-
-function tick(){
-  const n=new Date(),t=`${n.getHours().toString().padStart(2,'0')}:${n.getMinutes().toString().padStart(2,'0')}`;
-  document.querySelectorAll('[id^="clk"]').forEach(el=>el.textContent=t);
+function setBudTab(btn) {
+  btn.closest('.bud-tabs').querySelectorAll('.btab').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  G.render('budget');
 }
-tick();setInterval(tick,30000);
 
+// ── HORLOGE ──
+function tick() {
+  const n = new Date();
+  const t = `${n.getHours().toString().padStart(2, '0')}:${n.getMinutes().toString().padStart(2, '0')}`;
+  document.querySelectorAll('[id^="clk"]').forEach(el => el.textContent = t);
+}
+tick();
+setInterval(tick, 30000);
+
+// ── PWA INSTALL ──
 let dp;
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;setTimeout(()=>document.getElementById('install-banner').classList.add('on'),4000)});
-document.getElementById('install-btn').addEventListener('click',async()=>{
-  document.getElementById('install-banner').classList.remove('on');
-  if(dp){dp.prompt();await dp.userChoice;dp=null}
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); dp = e;
+  setTimeout(() => $('install-banner')?.classList.add('on'), 4000);
+});
+$('install-btn')?.addEventListener('click', async () => {
+  $('install-banner').classList.remove('on');
+  if (dp) { dp.prompt(); await dp.userChoice; dp = null; }
 });
 
-initData();
-cur='pin';
 </script>
+
 </body>
 </html>
