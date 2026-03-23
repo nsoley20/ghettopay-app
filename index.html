@@ -737,6 +737,106 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 .mi-tag{font-family:var(--fm);font-size:.52rem;font-weight:700;padding:4px 8px;border-radius:7px}
 .mi-tag.gold{background:rgba(212,160,23,.12);color:var(--gold)}
 .mi-tag.red{background:rgba(220,38,38,.1);color:#dc2626}
+
+/* ── RESPONSIVE AMÉLIORÉ ─────────────── */
+
+/* Très petits écrans (≤ 360px) */
+@media(max-width:360px){
+  .home-hdr{padding:0 14px 14px}
+  .bal-amt{font-size:1.75rem}
+  .bal-card{padding:14px 16px}
+  .qa-section{padding:10px 10px 0}
+  .cstrip{margin:10px 12px 0;padding:12px 14px;gap:10px}
+  .btn{padding:13px 16px;font-size:.88rem}
+  .inp{padding:12px 13px;font-size:.84rem}
+  .pin-k{height:58px;font-size:1.25rem;border-radius:14px}
+  .pin-wrap{padding:26px 18px;gap:26px}
+  .pin-pad{gap:9px}
+  .amt-val{font-size:2.4rem}
+  .numpad{gap:8px}
+  .nk{height:56px;font-size:1.1rem}
+  .p16{padding:12px}
+  .p18{padding:14px}
+  .card-p{padding:13px 15px}
+  .snav{padding:10px 14px 12px;gap:11px}
+  .bnav{padding:8px 4px calc(10px + var(--sab))}
+  .bt{padding:4px 8px;min-width:44px}
+  .bt-lbl{font-size:.48rem}
+  .profil-av{width:68px;height:68px;font-size:1.7rem}
+  .coffre-total-val{font-size:1.85rem}
+  .pstat-n{font-size:1rem}
+  .pstats{border-radius:12px}
+  .row-hdr{padding:12px 14px 6px}
+  .tx{padding:11px 14px;gap:11px}
+  .tx-av{width:38px;height:38px}
+  .bill-ic{width:38px;height:38px;border-radius:12px}
+  .notif-ic{width:36px;height:36px;border-radius:11px}
+  .back-btn{width:34px;height:34px}
+  .modal-box{padding:18px 16px calc(22px + var(--sab))}
+  .mi{padding:13px 14px;gap:11px}
+  .mi-ic{width:34px;height:34px;border-radius:10px}
+}
+
+/* Mode paysage mobile (hauteur ≤ 500px) */
+@media(orientation:landscape) and (max-height:500px){
+  body{align-items:stretch;justify-content:stretch;background:var(--bg)}
+  .shell{width:100%;height:100%;border-radius:0;padding:0;box-shadow:none}
+  .shell-inner{border-radius:0}
+  .island{display:none}
+
+  .sbar{padding:calc(var(--sat) + 5px) 16px 3px}
+  .home-hdr{padding:0 16px 12px}
+  .home-topbar{padding:4px 0 10px}
+  .bal-card{padding:12px 16px}
+  .bal-amt{font-size:1.55rem;margin:5px 0 3px}
+  .bal-card::before,.bal-card::after{display:none}
+  .home-hdr::after{display:none}
+  .cstrip{margin:10px 14px 0;padding:10px 14px}
+
+  .qa-section{padding:8px 12px 0}
+  .qa-cta{min-height:32px;padding:6px}
+  .qa-secondary{padding-top:8px;padding-bottom:8px}
+
+  .bnav{padding:5px 6px calc(5px + var(--sab))}
+  .bt{padding:3px 10px}
+  .bt svg{width:20px;height:20px}
+
+  .pin-wrap{padding:16px 28px;gap:20px;flex-direction:row;flex-wrap:wrap;justify-content:center}
+  .pin-logo{width:56px;height:56px;border-radius:16px}
+  .pin-logo svg{width:26px;height:26px}
+  .pin-brand{order:-1;flex:0 0 100%;text-align:center}
+  .pin-title{font-size:1.3rem}
+  .pin-k{height:52px;font-size:1.2rem;border-radius:14px}
+  .pin-pad{gap:8px;max-width:300px}
+
+  .amt-box{padding:12px 16px}
+  .amt-val{font-size:2rem;margin:0}
+
+  .coffre-hdr{padding:0 16px 12px}
+  .coffre-total-val{font-size:1.75rem}
+  .coffre-hdr-top{padding:6px 0 12px}
+
+  .profil-hdr{padding:0 16px 14px}
+  .profil-av{width:60px;height:60px;font-size:1.4rem;margin-bottom:8px}
+  .profil-name{font-size:.9rem}
+
+  .modal-box{padding:14px 18px calc(14px + var(--sab));gap:10px}
+  .snav{padding:8px 16px 10px}
+  .row-hdr{padding:10px 16px 6px}
+  .tx{padding:10px 16px}
+}
+
+/* Tablettes et grands écrans */
+@media(min-width:768px) and (min-height:700px){
+  .shell{
+    width:min(430px,94vw);
+    height:min(932px,96vh);
+    border-radius:clamp(0px,calc((100vw - 430px)*100),52px);
+  }
+  .shell-inner{
+    border-radius:clamp(0px,calc((100vw - 430px)*100),43px);
+  }
+}
 </style>
 </head>
 <body>
