@@ -1378,37 +1378,57 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 </div>
 
 <!-- SCANNER QR — caméra -->
-<div class="sc" id="sc-scan" style="background:#000">
+<div class="sc" id="sc-scan" style="background:#000;display:flex;flex-direction:column">
   <div class="sbar dk"><span class="sbar-t" id="clkD">09:41</span></div>
-  <div class="snav dk" style="background:transparent;border:none">
+  <div class="snav dk" style="background:rgba(0,0,0,.6);border:none;position:relative;z-index:20">
     <button class="back-btn dk" onclick="G.stopScan();G.back()"><svg><use href="#al"/></svg></button>
     <span class="snav-t" style="color:#fff">Scanner un QR</span>
+    <span id="scan-status" style="font-size:.62rem;color:rgba(255,255,255,.5);font-family:var(--fm)"></span>
   </div>
-  <!-- Viewfinder caméra -->
-  <div style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden">
-    <video id="scan-video" playsinline autoplay muted style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"></video>
+
+  <!-- Zone caméra -->
+  <div style="flex:1;position:relative;background:#000;overflow:hidden;display:flex;align-items:center;justify-content:center">
+    <!-- Vidéo en fond plein écran -->
+    <video id="scan-video" playsinline muted style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0"></video>
     <canvas id="scan-canvas" style="display:none"></canvas>
-    <!-- Overlay cadre viseur -->
-    <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:20px">
-      <div style="width:220px;height:220px;position:relative">
-        <!-- Coins du cadre -->
-        <div style="position:absolute;top:0;left:0;width:36px;height:36px;border-top:3px solid var(--gold2);border-left:3px solid var(--gold2);border-radius:6px 0 0 0"></div>
-        <div style="position:absolute;top:0;right:0;width:36px;height:36px;border-top:3px solid var(--gold2);border-right:3px solid var(--gold2);border-radius:0 6px 0 0"></div>
-        <div style="position:absolute;bottom:0;left:0;width:36px;height:36px;border-bottom:3px solid var(--gold2);border-left:3px solid var(--gold2);border-radius:0 0 0 6px"></div>
-        <div style="position:absolute;bottom:0;right:0;width:36px;height:36px;border-bottom:3px solid var(--gold2);border-right:3px solid var(--gold2);border-radius:0 0 6px 0"></div>
-        <!-- Ligne de scan -->
-        <div id="scan-line" style="position:absolute;left:10px;right:10px;height:2px;background:linear-gradient(90deg,transparent,var(--gold2),transparent);animation:scan 2s ease-in-out infinite;top:20px"></div>
-      </div>
-      <div style="font-family:var(--fm);font-size:.72rem;color:rgba(255,255,255,.6);text-align:center;padding:0 32px">Place le QR dans le cadre pour le détecter automatiquement</div>
+
+    <!-- Masque sombre sur les côtés (cutout) -->
+    <div style="position:absolute;inset:0;z-index:1;pointer-events:none">
+      <div style="position:absolute;inset:0;background:rgba(0,0,0,.6)"></div>
+      <!-- Fenêtre transparente au centre -->
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:230px;height:230px;background:transparent;box-shadow:0 0 0 9999px rgba(0,0,0,.6)"></div>
     </div>
-    <!-- Fond semi-transparent hors du cadre -->
-    <div style="position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:1"></div>
+
+    <!-- Cadre doré + ligne de scan (au-dessus du masque) -->
+    <div style="position:relative;z-index:2;width:230px;height:230px;flex-shrink:0">
+      <div style="position:absolute;top:0;left:0;width:40px;height:40px;border-top:3px solid var(--gold2);border-left:3px solid var(--gold2);border-radius:6px 0 0 0"></div>
+      <div style="position:absolute;top:0;right:0;width:40px;height:40px;border-top:3px solid var(--gold2);border-right:3px solid var(--gold2);border-radius:0 6px 0 0"></div>
+      <div style="position:absolute;bottom:0;left:0;width:40px;height:40px;border-bottom:3px solid var(--gold2);border-left:3px solid var(--gold2);border-radius:0 0 0 6px"></div>
+      <div style="position:absolute;bottom:0;right:0;width:40px;height:40px;border-bottom:3px solid var(--gold2);border-right:3px solid var(--gold2);border-radius:0 0 6px 0"></div>
+      <div id="scan-line" style="position:absolute;left:8px;right:8px;height:2px;background:linear-gradient(90deg,transparent,var(--gold2),transparent);top:50%;animation:scan 2s ease-in-out infinite"></div>
+    </div>
+
+    <!-- Bouton démarrer (si caméra pas encore active) -->
+    <div id="scan-start-btn" style="position:absolute;z-index:3;display:flex;flex-direction:column;align-items:center;gap:14px">
+      <button onclick="G.startCamera()" style="width:72px;height:72px;border-radius:50%;border:none;background:var(--gold2);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 28px rgba(212,160,23,.45)">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--forest)" stroke-width="2.5"><use href="#qric"/></svg>
+      </button>
+      <div style="font-size:.72rem;color:rgba(255,255,255,.65);text-align:center;font-family:var(--fm)">Appuie pour activer la caméra</div>
+    </div>
   </div>
-  <!-- Fallback si pas de caméra -->
-  <div id="scan-fallback" style="display:none;padding:20px;flex-direction:column;gap:12px">
-    <div style="font-size:.78rem;color:rgba(255,255,255,.55);text-align:center;margin-bottom:4px">Caméra non disponible — saisis le numéro manuellement</div>
-    <input id="scan-phone" class="inp" type="tel" placeholder="Numéro de téléphone (+241...)" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.15);color:#fff"/>
-    <button class="btn btn-gold" onclick="G.scanManualSend()"><svg><use href="#send"/></svg>Continuer</button>
+
+  <!-- Bas : info + fallback manuel -->
+  <div style="background:#111;padding:18px 16px 24px;display:flex;flex-direction:column;gap:12px">
+    <div id="scan-hint" style="font-size:.68rem;color:rgba(255,255,255,.4);text-align:center;font-family:var(--fm)">Place le QR code dans le cadre — détection automatique</div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="flex:1;height:1px;background:rgba(255,255,255,.1)"></div>
+      <div style="font-size:.6rem;color:rgba(255,255,255,.25);font-family:var(--fm)">ou</div>
+      <div style="flex:1;height:1px;background:rgba(255,255,255,.1)"></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <input id="scan-phone" class="inp" type="tel" placeholder="Saisir un numéro manuellement (+241...)" style="flex:1;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#fff;font-size:.78rem"/>
+      <button onclick="G.scanManualSend()" style="padding:12px 16px;border:none;border-radius:12px;background:var(--gold2);color:var(--forest);font-weight:800;font-size:.8rem;cursor:pointer;flex-shrink:0">OK</button>
+    </div>
   </div>
 </div>
 
@@ -1692,40 +1712,68 @@ const G = {
   _scanStream: null, _scanInterval: null,
 
   r_scan() {
+    // Reset UI
+    if ($('scan-start-btn')) $('scan-start-btn').style.display = 'flex';
+    if ($('scan-status')) $('scan-status').textContent = '';
+    if ($('scan-hint')) $('scan-hint').textContent = 'Place le QR code dans le cadre — détection automatique';
+    if ($('scan-line')) $('scan-line').style.display = 'block';
+    // Auto-start si l'API est disponible
+    if (navigator.mediaDevices?.getUserMedia) G.startCamera();
+  },
+
+  startCamera() {
     const video = $('scan-video');
     const canvas = $('scan-canvas');
-    const fallback = $('scan-fallback');
     if (!video) return;
 
+    G._scanActive = true;
+    if ($('scan-start-btn')) $('scan-start-btn').style.display = 'none';
+    if ($('scan-status')) $('scan-status').textContent = 'Démarrage…';
+
     if (!navigator.mediaDevices?.getUserMedia) {
-      if (fallback) fallback.style.display = 'flex';
+      if ($('scan-status')) $('scan-status').textContent = 'Caméra indisponible';
+      if ($('scan-hint')) $('scan-hint').textContent = 'Utilise la saisie manuelle ci-dessous';
       return;
     }
 
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } } })
       .then(stream => {
+        // Utilisateur déjà parti — stopper la stream immédiatement
+        if (!G._scanActive) { stream.getTracks().forEach(t => t.stop()); return; }
         G._scanStream = stream;
         video.srcObject = stream;
-        video.play();
-        G._scanInterval = setInterval(() => {
-          if (!canvas || video.readyState < 2) return;
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(video, 0, 0);
-          const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          if (!window.jsQR) return;
-          const code = jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
-          if (code?.data) {
-            G.stopScan();
-            G._handleQRResult(code.data);
-          }
-        }, 250);
+        video.onloadedmetadata = () => {
+          video.play().then(() => {
+            if (!G._scanActive) { G.stopScan(); return; }
+            if ($('scan-status')) $('scan-status').textContent = 'Actif';
+            G._scanInterval = setInterval(() => {
+              if (!G._scanActive || !canvas || video.readyState < 2 || video.videoWidth === 0) return;
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(video, 0, 0);
+              const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+              if (!window.jsQR) return;
+              const code = jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
+              if (code?.data) { G.stopScan(); G._handleQRResult(code.data); }
+            }, 300);
+          }).catch(() => G._scanError());
+        };
       })
-      .catch(() => {
-        if (fallback) fallback.style.display = 'flex';
-        G.toast('Caméra non disponible', 'err');
+      .catch(err => {
+        if (err.name === 'NotAllowedError') {
+          if ($('scan-status')) $('scan-status').textContent = 'Permission refusée';
+          G.toast('Autorise la caméra dans les paramètres du navigateur', 'err');
+        } else {
+          G._scanError();
+        }
       });
+  },
+
+  _scanError() {
+    if ($('scan-status')) $('scan-status').textContent = 'Caméra indisponible';
+    if ($('scan-hint')) $('scan-hint').textContent = 'Utilise la saisie manuelle ci-dessous';
+    if ($('scan-start-btn')) $('scan-start-btn').style.display = 'none';
   },
 
   stopScan() {
@@ -2085,12 +2133,26 @@ const G = {
           const { data: created } = await db.from('tontines').select('*').eq('creator_id', currentUser.id).order('created_at', { ascending: false });
           tontines = created || [];
         }
+        // Sync notifications from Supabase to localStorage
+        db.from('notifications').select('*').eq('user_id', currentUser.id).eq('read', false).then(({ data: dbNotifs }) => {
+          if (!dbNotifs?.length) return;
+          const existing = S.get('notifs', []);
+          const existingIds = new Set(existing.map(n => String(n.id)));
+          const newOnes = dbNotifs.filter(n => !existingIds.has(String(n.id))).map(n => ({
+            id: n.id, type: n.type || 'tontine', icon: 'users',
+            bg: 'rgba(10,74,46,.12)', color: 'var(--forest)',
+            title: n.title, desc: n.body || n.desc || '', time: new Date(n.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}), read: false
+          }));
+          if (newOnes.length) { S.set('notifs', [...newOnes, ...existing]); G.r_home && G.r_home(); }
+        }).catch(()=>{});
       } catch(e) {}
       // Fall back to localStorage if DB returned nothing
       if (!tontines.length) tontines = S.get('tontines', []);
     } else {
       tontines = S.get('tontines', []);
     }
+
+    G._tontinesList = tontines; // cache for openTontine()
 
     if (!tontines.length) {
       $('tontine-list').innerHTML = '<div style="text-align:center;padding:32px;color:var(--txt3);font-size:.82rem">Aucune tontine. Crée ou rejoins-en une !</div><button class="btn btn-gold" onclick="G.showModal(\'mt\')" style="margin:0 16px"><svg><use href="#plus"/></svg>Créer une tontine</button>';
@@ -2302,10 +2364,13 @@ const G = {
   // ── TONTINE DETAIL ──
   _curTontine: null,
   _tontineManageOpen: false,
+  _tontinesList: [],
 
   openTontine(id) {
-    const tontines = S.get('tontines', []);
-    G._curTontine = tontines.find(t => String(t.id) === String(id)) || null;
+    // Search in the last loaded list (covers DB UUIDs and localStorage timestamps)
+    G._curTontine = G._tontinesList.find(t => String(t.id) === String(id))
+                 || S.get('tontines', []).find(t => String(t.id) === String(id))
+                 || null;
     G._tontineManageOpen = false;
     G.go('tontine-detail');
   },
@@ -2467,7 +2532,7 @@ const G = {
     G.r_tontine_detail();
   },
 
-  _addTontineDetailMember() {
+  async _addTontineDetailMember() {
     const name = $('td-add-name')?.value.trim();
     const phone = $('td-add-phone')?.value.trim() || '';
     if (!name) { G.toast('Saisis un nom', 'err'); return; }
@@ -2477,6 +2542,34 @@ const G = {
     t.members.push({ name, phone });
     t.members_count = t.members.length;
     G._saveCurTontine();
+
+    // Notifier + ajouter dans Supabase si membre GhettoPay
+    if (currentUser && phone) {
+      try {
+        const { data: invited } = await db.from('users').select('id,name').eq('phone', phone).maybeSingle();
+        if (invited) {
+          // Ajouter à tontine_members pour que la tontine apparaisse chez lui
+          await db.from('tontine_members').insert({
+            tontine_id: t.id, user_id: invited.id,
+            turn_order: t.members.length, has_paid: false
+          });
+          // Notification dans Supabase (silencieux si table inexistante)
+          await db.from('notifications').insert({
+            user_id: invited.id, type: 'tontine_invite',
+            title: `Tu as été ajouté à "${t.name}"`,
+            body: `${S.get('user',{}).name || 'Quelqu\'un'} t\'a invité dans la tontine "${t.name}" — ${t.frequency === 'weekly' ? 'Hebdo' : 'Mensuel'} · ${f(t.amount_per_cycle)} FCFA`,
+            read: false
+          }).throwOnError().catch(()=>{});
+          G.toast(`${name} notifié !`, 'ok');
+        }
+      } catch(e) {}
+    }
+
+    // Notification locale pour le créateur
+    const notifs = S.get('notifs', []);
+    notifs.unshift({ id: Date.now(), type: 'tontine', icon: 'users', bg: 'rgba(10,74,46,.12)', color: 'var(--forest)', title: 'Membre ajouté', desc: `${name} a été ajouté à la tontine "${t.name}"`, time: 'À l\'instant', read: false });
+    S.set('notifs', notifs);
+
     G.r_tontine_detail();
   },
 
