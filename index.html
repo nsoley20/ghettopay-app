@@ -1267,7 +1267,7 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
     <div class="modal-handle"></div>
     <div class="modal-title">Nouveau coffre</div>
     <input id="nc-name" class="inp" placeholder="Nom (ex: Voyage en France)"/>
-    <input id="nc-target" class="inp" type="number" placeholder="Objectif en FCFA"/>
+    <input id="nc-target" class="inp" type="number" placeholder="Objectif en FCFA (optionnel)"/>
     <div>
       <div class="lbl" style="margin-bottom:10px">Durée de blocage</div>
       <div class="pills">
@@ -1937,7 +1937,6 @@ const G = {
     const target = parseInt($('nc-target')?.value) || 0;
     const months = parseInt($('nc-months')?.value) || 6;
     if (!name) { G.toast('Nom requis', 'err'); return; }
-    if (target <= 0) { G.toast('Objectif requis', 'err'); return; }
 
     const unlockDate = new Date();
     unlockDate.setMonth(unlockDate.getMonth() + months);
@@ -2021,6 +2020,14 @@ const G = {
         .limit(50)
         .then(({ data: txs2 }) => {
           if (!txs2?.length) { $('all-tx').innerHTML = '<div style="padding:16px;text-align:center;color:var(--txt3);font-size:.8rem">Aucune transaction</div>'; return; }
+          // Recalculate totals from DB data
+          let dbOut = 0, dbIn = 0;
+          txs2.forEach(t => {
+            if (t.to_user_id === currentUser.id) dbIn += (t.amount || 0);
+            else dbOut += (t.amount || 0);
+          });
+          if ($('bud-out')) $('bud-out').textContent = f(dbOut) + ' F';
+          if ($('bud-in')) $('bud-in').textContent = f(dbIn) + ' F';
           $('all-tx').innerHTML = txs2.map(t => {
             const isCredit = t.to_user_id === currentUser.id;
             const other = isCredit ? t.from_user : t.to_user;
@@ -2194,22 +2201,28 @@ const G = {
     // Noms pour affichage et DB
     const memberNames = rawMembers.map(m => typeof m === 'string' ? m : m.name);
 
+    let savedToDb = false;
     if (currentUser) {
-      const { data: t, error } = await db.from('tontines').insert({
-        name, creator_id: currentUser.id,
-        amount_per_cycle: amount, frequency: freq,
-        current_turn_user_id: currentUser.id,
-        members_count: rawMembers.length
-      }).select().single();
-      if (error) { G.toast('Erreur création', 'err'); return; }
-      const inserts = rawMembers.map((m, i) => ({
-        tontine_id: t.id, user_id: currentUser.id,
-        member_name: typeof m === 'string' ? m : m.name,
-        member_phone: typeof m === 'string' ? '' : (m.phone || ''),
-        turn_order: i + 1, has_paid: false
-      }));
-      await db.from('tontine_members').insert(inserts);
-    } else {
+      try {
+        const { data: t, error } = await db.from('tontines').insert({
+          name, creator_id: currentUser.id,
+          amount_per_cycle: amount, frequency: freq
+        }).select().single();
+        if (!error && t) {
+          const inserts = rawMembers.map((m, i) => {
+            const row = { tontine_id: t.id, user_id: currentUser.id, turn_order: i + 1, has_paid: false };
+            const mName = typeof m === 'string' ? m : m.name;
+            const mPhone = typeof m === 'string' ? '' : (m.phone || '');
+            if (mName) row.member_name = mName;
+            if (mPhone) row.member_phone = mPhone;
+            return row;
+          });
+          await db.from('tontine_members').insert(inserts);
+          savedToDb = true;
+        }
+      } catch(e) { /* fall through to localStorage */ }
+    }
+    if (!savedToDb) {
       const tontines = S.get('tontines', []);
       tontines.unshift({ id: Date.now().toString(), name, amount_per_cycle: amount, frequency: freq, members_count: rawMembers.length, members_paid: 0, members: rawMembers, start_date: new Date().toISOString() });
       S.set('tontines', tontines);
