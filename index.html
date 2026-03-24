@@ -1105,6 +1105,17 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
   <div class="scroll"><div class="p16 g14" id="tontine-list"></div></div>
 </div>
 
+<!-- TONTINE DETAIL -->
+<div class="sc" id="sc-tontine-detail">
+  <div class="sbar"><span class="sbar-t" id="clk-td">09:41</span></div>
+  <div class="snav">
+    <button class="back-btn" onclick="G.back()"><svg><use href="#al"/></svg></button>
+    <span class="snav-t" id="td-title">Tontine</span>
+    <span class="snav-a" id="td-manage-btn" style="display:none" onclick="G._toggleTontineManage()">Gérer</span>
+  </div>
+  <div class="scroll"><div class="p16 g14" id="td-body"></div></div>
+</div>
+
 <!-- FACTURES -->
 <div class="sc" id="sc-factures">
   <div class="sbar"><span class="sbar-t" id="clk7">09:41</span></div>
@@ -1514,6 +1525,7 @@ const G = {
       coffre: () => G.r_coffre(),
       budget: () => G.r_budget(),
       tontine: () => G.r_tontine(),
+      'tontine-detail': () => G.r_tontine_detail(),
       factures: () => G.r_factures(),
       recv: () => G.r_recv(),
       qrhub: () => G.r_qrhub(),
@@ -2107,7 +2119,7 @@ const G = {
       const orderRow = members.length > 0
         ? `<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px">${members.map((m, mi) => `<div style="padding:3px 8px;border-radius:6px;font-size:.55rem;font-weight:700;background:${mi===currentTurnIdx?'rgba(212,160,23,.3)':'rgba(255,255,255,.1)'};color:${mi===currentTurnIdx?'var(--gold2)':'rgba(255,255,255,.55)'};" title="${mPhone(m)}">${mi+1}. ${mName(m)}</div>`).join('')}</div>`
         : '';
-      return `<div style="background:${colors[i % colors.length]};border-radius:18px;padding:18px;position:relative;overflow:hidden">
+      return `<div style="background:${colors[i % colors.length]};border-radius:18px;padding:18px;position:relative;overflow:hidden;cursor:pointer" onclick="G.openTontine('${t.id}')">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
           <div style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.9rem;color:#fff">${t.name[0]}</div>
           <div style="flex:1"><div style="font-size:.82rem;font-weight:800;color:#fff">${t.name}</div><div style="font-size:.6rem;color:rgba(255,255,255,.55);font-family:var(--fm)">${total} membres · ${t.frequency === 'weekly' ? 'Hebdo' : 'Mensuel'}</div></div>
@@ -2115,8 +2127,7 @@ const G = {
         </div>
         ${turnBadge}${orderRow}
         <div style="background:rgba(255,255,255,.15);border-radius:100px;height:6px;overflow:hidden;margin-bottom:6px"><div style="width:${pct}%;height:100%;border-radius:100px;background:var(--gold2)"></div></div>
-        <div style="display:flex;justify-content:space-between;font-family:var(--fm);font-size:.56rem;color:rgba(255,255,255,.5);margin-bottom:12px"><span>${paid} / ${total} ont cotisé</span><span>Cycle en cours</span></div>
-        <button style="width:100%;padding:10px;border:1.5px solid rgba(255,255,255,.25);border-radius:10px;background:rgba(255,255,255,.12);color:#fff;font-size:.78rem;font-weight:800;font-family:var(--f);cursor:pointer" onclick="G.payTontine('${t.id}','${t.amount_per_cycle}','${t.name}')">Cotiser maintenant</button>
+        <div style="display:flex;justify-content:space-between;font-family:var(--fm);font-size:.56rem;color:rgba(255,255,255,.5);margin-bottom:12px"><span>${paid} / ${total} ont cotisé</span><span>Appuyer pour voir le détail →</span></div>
       </div>`;
     }).join('') + `<button class="btn btn-ghost" onclick="G.showModal('mt')" style="margin-top:4px"><svg><use href="#plus"/></svg>Créer une tontine</button>`;
   },
@@ -2253,6 +2264,12 @@ const G = {
     const n = parseInt(amount) || 0;
     const bal = S.get('bal', 0);
     if (n > bal) { G.toast('Solde insuffisant', 'err'); return; }
+    const u = S.get('user', {});
+
+    // Check already paid
+    const tontines = S.get('tontines', []);
+    const lt = tontines.find(x => x.id == tontineId);
+    if (lt?.paid_by?.includes(u.name || 'Moi')) { G.toast('Tu as déjà cotisé ce cycle', 'err'); return; }
 
     if (currentUser) {
       await db.from('wallets').update({ balance: bal - n }).eq('user_id', currentUser.id);
@@ -2263,8 +2280,222 @@ const G = {
       S.set('bal', bal - n);
     }
 
-    G.r_tontine();
-    G.ok(`${f(n)} FCFA cotisés`, `${name} · Confirmé ✓`, () => G.go('tontine'));
+    // Update progress in localStorage
+    if (lt) {
+      if (!lt.paid_by) lt.paid_by = [];
+      lt.paid_by.push(u.name || 'Moi');
+      lt.members_paid = lt.paid_by.length;
+      S.set('tontines', tontines);
+      if (G._curTontine?.id == tontineId) G._curTontine = lt;
+    }
+
+    const txList = S.get('txs', []);
+    txList.unshift({ id: Date.now(), type: 'tontine', name, amount: n, time: new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'short'}), cat: 'Tontine' });
+    S.set('txs', txList);
+    S.set('bal', bal - n);
+
+    if (cur === 'tontine-detail') G.r_tontine_detail();
+    else G.r_tontine();
+    G.ok(`${f(n)} FCFA cotisés`, `${name} · Confirmé ✓`, () => {});
+  },
+
+  // ── TONTINE DETAIL ──
+  _curTontine: null,
+  _tontineManageOpen: false,
+
+  openTontine(id) {
+    const tontines = S.get('tontines', []);
+    G._curTontine = tontines.find(t => String(t.id) === String(id)) || null;
+    G._tontineManageOpen = false;
+    G.go('tontine-detail');
+  },
+
+  r_tontine_detail() {
+    const t = G._curTontine;
+    if (!t) { G.back(); return; }
+    if ($('td-title')) $('td-title').textContent = t.name;
+
+    const u = S.get('user', {});
+    const members = t.members || [];
+    const mName = m => typeof m === 'string' ? m : (m?.name || '?');
+    const mPhone = m => typeof m === 'string' ? '' : (m?.phone || '');
+    const isCreator = !t.creator_id || t.creator_id === currentUser?.id || (members.length > 0 && mName(members[0]) === (u.name || 'Moi'));
+    if ($('td-manage-btn')) $('td-manage-btn').style.display = isCreator ? '' : 'none';
+
+    const paid = t.members_paid || 0;
+    const total = members.length || 1;
+    const pct = Math.round(paid / total * 100);
+    const isWeekly = t.frequency === 'weekly';
+    const now = new Date();
+    const startDate = t.start_date ? new Date(t.start_date) : new Date();
+
+    // Current cycle index
+    let cycleIdx = 0;
+    if (isWeekly) cycleIdx = Math.floor((now - startDate) / 604800000);
+    else cycleIdx = (now.getFullYear() - startDate.getFullYear()) * 12 + (now.getMonth() - startDate.getMonth());
+    const currentTurnIdx = members.length > 0 ? cycleIdx % members.length : 0;
+    const currentRecipient = members[currentTurnIdx] ? mName(members[currentTurnIdx]) : '—';
+    const alreadyPaid = t.paid_by?.includes(u.name || 'Moi');
+
+    // Build schedule (show up to 12 upcoming cycles)
+    const schedule = members.map((m, i) => {
+      const totalCycles = Math.floor(cycleIdx / members.length) * members.length + i;
+      const d = new Date(startDate);
+      if (isWeekly) d.setDate(d.getDate() + totalCycles * 7);
+      else d.setMonth(d.getMonth() + totalCycles);
+      // Adjust if date is in the past
+      while (d < now && i !== currentTurnIdx % members.length) {
+        if (isWeekly) d.setDate(d.getDate() + members.length * 7);
+        else d.setMonth(d.getMonth() + members.length);
+      }
+      const isCurrent = i === currentTurnIdx % members.length;
+      const isPast = d < now && !isCurrent;
+      const label = isWeekly
+        ? `Sem. du ${d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})}`
+        : d.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+      return { m, d, isCurrent, isPast, label, index: i };
+    });
+
+    // Calendar: mini month view
+    const calYear = now.getFullYear(), calMonth = now.getMonth();
+    const firstDay = new Date(calYear, calMonth, 1).getDay();
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    const calTitle = now.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+
+    // Highlighted days: next payment day this month for current recipient
+    let highlightDay = null;
+    if (!isWeekly) {
+      // For monthly tontine, payment is on startDate's day of the month
+      const payDay = startDate.getDate();
+      if (payDay <= daysInMonth) highlightDay = payDay;
+    } else {
+      // For weekly, highlight the day of the week matching start
+      const dayOfWeek = startDate.getDay();
+      for (let d = 1; d <= daysInMonth; d++) {
+        if (new Date(calYear, calMonth, d).getDay() === dayOfWeek) { highlightDay = d; break; }
+      }
+    }
+
+    const calDays = ['D','L','M','M','J','V','S'];
+    let calCells = '';
+    for (let i = 0; i < (firstDay === 0 ? 6 : firstDay - 1); i++) calCells += '<div></div>';
+    for (let d = 1; d <= daysInMonth; d++) {
+      const isToday = d === now.getDate();
+      const isHL = d === highlightDay;
+      calCells += `<div style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:${isToday||isHL?'800':'500'};${isHL?'background:var(--gold2);color:#000;':''}${isToday&&!isHL?'background:var(--forest);color:#fff;':''}color:${isHL?'#000':isToday?'#fff':'var(--txt)'}">${d}</div>`;
+    }
+
+    // Manage section
+    const manageHTML = G._tontineManageOpen && isCreator ? `
+      <div style="background:var(--card);border-radius:16px;padding:16px;border:1.5px solid var(--border)">
+        <div class="lbl" style="margin-bottom:12px">Membres de la tontine</div>
+        ${members.map((m, i) => `
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg2);border-radius:12px;margin-bottom:8px">
+            <div style="width:28px;height:28px;border-radius:50%;background:${i===currentTurnIdx%members.length?'var(--gold2)':'var(--forest)'};color:${i===currentTurnIdx%members.length?'#000':'#fff'};font-size:.68rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</div>
+            <div style="flex:1"><div style="font-size:.8rem;font-weight:700;color:var(--txt)">${mName(m)}</div>${mPhone(m)?`<div style="font-size:.6rem;color:var(--txt3)">${mPhone(m)}</div>`:''}</div>
+            ${members.length > 1 ? `<button onclick="G._removeTontineDetailMember(${i})" style="border:none;background:rgba(220,38,38,.1);color:#dc2626;padding:5px 10px;border-radius:8px;font-size:.72rem;font-weight:700;cursor:pointer">Retirer</button>` : ''}
+          </div>`).join('')}
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input id="td-add-name" class="inp" placeholder="Nom..." style="flex:1"/>
+          <input id="td-add-phone" class="inp" type="tel" placeholder="+241..." style="flex:1"/>
+          <button onclick="G._addTontineDetailMember()" style="padding:10px 14px;border:none;border-radius:12px;background:var(--forest);color:#fff;font-weight:800;font-size:.85rem;cursor:pointer">+</button>
+        </div>
+      </div>` : '';
+
+    $('td-body').innerHTML = `
+      <!-- INFOS TONTINE -->
+      <div style="background:linear-gradient(135deg,var(--forest),var(--forest2));border-radius:18px;padding:18px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div>
+            <div style="font-size:.68rem;color:rgba(255,255,255,.6);font-weight:700;text-transform:uppercase;letter-spacing:.05em">${isCreator?'👑 Mère de tontine · ':''}${isWeekly?'Hebdomadaire':'Mensuelle'}</div>
+            <div style="font-family:var(--fd);font-size:1.3rem;font-weight:900;color:#fff;margin-top:2px">${f(t.amount_per_cycle)} <span style="font-size:.65rem;font-weight:600;opacity:.7">FCFA/cycle</span></div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:.6rem;color:rgba(255,255,255,.6)">Total cagnotte</div>
+            <div style="font-family:var(--fd);font-size:.95rem;font-weight:900;color:var(--gold2)">${f(t.amount_per_cycle * total)}</div>
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,.15);border-radius:100px;height:8px;overflow:hidden;margin-bottom:6px">
+          <div style="width:${pct}%;height:100%;border-radius:100px;background:var(--gold2);transition:.4s"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:.6rem;color:rgba(255,255,255,.55)">
+          <span>${paid} / ${total} membres ont cotisé ce cycle</span><span>${pct}%</span>
+        </div>
+      </div>
+
+      <!-- TOUR EN COURS -->
+      <div style="background:rgba(212,160,23,.1);border:1.5px solid rgba(212,160,23,.3);border-radius:16px;padding:16px">
+        <div style="font-size:.65rem;font-weight:800;color:var(--gold2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">🎯 Tour en cours</div>
+        <div style="font-size:.95rem;font-weight:900;color:var(--txt)">${currentRecipient} <span style="font-size:.68rem;font-weight:600;color:var(--txt3)">reçoit ce cycle</span></div>
+        <div style="font-size:.65rem;color:var(--txt3);margin-top:3px">Cagnotte : ${f(t.amount_per_cycle * total)} FCFA</div>
+        <button onclick="G.payTontine('${t.id}','${t.amount_per_cycle}','${t.name}')" style="width:100%;margin-top:12px;padding:11px;border:none;border-radius:12px;background:${alreadyPaid?'var(--bg2)':'var(--gold2)'};color:${alreadyPaid?'var(--txt3)':'#000'};font-size:.8rem;font-weight:900;font-family:var(--f);cursor:${alreadyPaid?'default':'pointer'}">
+          ${alreadyPaid ? '✓ Cotisation payée ce cycle' : 'Cotiser maintenant'}
+        </button>
+      </div>
+
+      ${manageHTML}
+
+      <!-- CALENDRIER MENSUEL -->
+      <div style="background:var(--card);border-radius:16px;padding:16px">
+        <div style="font-size:.72rem;font-weight:800;color:var(--txt);text-transform:capitalize;margin-bottom:12px">📅 ${calTitle}</div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;margin-bottom:8px">
+          ${calDays.map(d=>`<div style="font-size:.58rem;font-weight:700;color:var(--txt3);padding:4px 0">${d}</div>`).join('')}
+          ${calCells}
+        </div>
+        ${highlightDay ? `<div style="font-size:.65rem;color:var(--txt3);text-align:center;margin-top:4px">
+          <span style="display:inline-block;width:10px;height:10px;background:var(--gold2);border-radius:50%;margin-right:4px;vertical-align:middle"></span>Jour de collecte · <strong>${currentRecipient}</strong>
+        </div>` : ''}
+      </div>
+
+      <!-- PLANNING ROTATION -->
+      <div style="background:var(--card);border-radius:16px;padding:16px">
+        <div style="font-size:.72rem;font-weight:800;color:var(--txt);margin-bottom:12px">📋 Planning de rotation</div>
+        ${schedule.map(s => `
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+            <div style="width:26px;height:26px;border-radius:50%;background:${s.isCurrent?'var(--gold2)':s.isPast?'var(--bg2)':'var(--forest)'};color:${s.isCurrent?'#000':'#fff'};font-size:.65rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">${s.index+1}</div>
+            <div style="flex:1">
+              <div style="font-size:.8rem;font-weight:${s.isCurrent?'900':'700'};color:${s.isPast?'var(--txt3)':'var(--txt)'}">${mName(s.m)}</div>
+              <div style="font-size:.6rem;color:var(--txt3);font-family:var(--fm)">${s.label}</div>
+            </div>
+            <div style="font-size:.65rem;font-weight:700;color:${s.isCurrent?'var(--gold2)':s.isPast?'var(--txt3)':'var(--txt2)'}">${s.isCurrent?'← En cours':s.isPast?'Passé':'À venir'}</div>
+          </div>`).join('')}
+      </div>`;
+  },
+
+  _toggleTontineManage() {
+    G._tontineManageOpen = !G._tontineManageOpen;
+    G.r_tontine_detail();
+  },
+
+  _addTontineDetailMember() {
+    const name = $('td-add-name')?.value.trim();
+    const phone = $('td-add-phone')?.value.trim() || '';
+    if (!name) { G.toast('Saisis un nom', 'err'); return; }
+    const t = G._curTontine;
+    if (!t.members) t.members = [];
+    if (t.members.find(m => (typeof m === 'string' ? m : m.name) === name)) { G.toast('Déjà membre', 'err'); return; }
+    t.members.push({ name, phone });
+    t.members_count = t.members.length;
+    G._saveCurTontine();
+    G.r_tontine_detail();
+  },
+
+  _removeTontineDetailMember(i) {
+    const t = G._curTontine;
+    if (!t?.members) return;
+    t.members.splice(i, 1);
+    t.members_count = t.members.length;
+    G._saveCurTontine();
+    G.r_tontine_detail();
+  },
+
+  _saveCurTontine() {
+    const t = G._curTontine;
+    if (!t) return;
+    const tontines = S.get('tontines', []);
+    const idx = tontines.findIndex(x => String(x.id) === String(t.id));
+    if (idx >= 0) tontines[idx] = t;
+    S.set('tontines', tontines);
   },
 
   // ── FACTURES ──
