@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -9,10 +8,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="theme-color" content="#0A4A2E"/>
 <title>GhettoPay</title>
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<style>
 
+<style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
   --ink:      #0D0D0D;
@@ -409,72 +406,23 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 }
 
 .qa-cta{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  padding:18px 12px 16px;
-  border-radius:18px;
-  cursor:pointer;
-  transition:.18s;
-  border:none;
-  position:relative;
-  overflow:hidden;
-  min-height:90px;
+  display:flex;flex-direction:row;align-items:center;justify-content:center;
+  gap:9px;padding:12px 14px;border-radius:14px;cursor:pointer;transition:.18s;
+  border:none;position:relative;overflow:hidden;min-height:48px;
 }
 .qa-cta:active{transform:scale(.96)}
-
-/* Bouton Envoyer — gradient doré */
-.qa-cta-send{
-  background:linear-gradient(145deg,var(--gold) 0%,var(--gold2) 60%,#fcd34d 100%);
-  box-shadow:0 8px 28px rgba(212,160,23,.38);
-}
-.qa-cta-send::after{
-  content:'';position:absolute;width:80px;height:80px;border-radius:50%;
-  background:rgba(255,255,255,.18);bottom:-22px;right:-18px;pointer-events:none;
-}
-
-/* Bouton Recevoir — gradient forêt */
-.qa-cta-recv{
-  background:linear-gradient(145deg,var(--forest) 0%,var(--forest2) 60%,#1A6B40 100%);
-  box-shadow:0 8px 28px rgba(10,74,46,.35);
-}
-.qa-cta-recv::after{
-  content:'';position:absolute;width:80px;height:80px;border-radius:50%;
-  background:rgba(255,255,255,.07);bottom:-22px;right:-18px;pointer-events:none;
-}
-
-.qa-cta-ic{
-  width:46px;height:46px;border-radius:14px;
-  display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;
-}
+.qa-cta-send{background:linear-gradient(145deg,var(--gold) 0%,var(--gold2) 60%,#fcd34d 100%);box-shadow:0 5px 18px rgba(212,160,23,.38)}
+.qa-cta-recv{background:linear-gradient(145deg,var(--forest) 0%,var(--forest2) 60%,#1A6B40 100%);box-shadow:0 5px 18px rgba(10,74,46,.35)}
+.qa-cta-ic{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .qa-cta-send .qa-cta-ic{background:rgba(0,0,0,.12)}
 .qa-cta-recv .qa-cta-ic{background:rgba(255,255,255,.15)}
-
-.qa-cta-ic svg{width:22px;height:22px;stroke-width:2.2;fill:none}
+.qa-cta-ic svg{width:16px;height:16px;stroke-width:2.4;fill:none}
 .qa-cta-send .qa-cta-ic svg{stroke:var(--forest)}
 .qa-cta-recv .qa-cta-ic svg{stroke:#fff}
-
-.qa-cta-lbl{
-  font-size:.82rem;
-  font-weight:900;
-  letter-spacing:.02em;
-  text-transform:uppercase;
-}
+.qa-cta-lbl{font-size:.8rem;font-weight:900;letter-spacing:.01em}
 .qa-cta-send .qa-cta-lbl{color:var(--forest)}
 .qa-cta-recv .qa-cta-lbl{color:#fff}
-
-.qa-cta-sub{
-  font-size:.58rem;
-  font-weight:600;
-  font-family:var(--fm);
-  opacity:.6;
-  margin-top:-4px;
-}
-.qa-cta-send .qa-cta-sub{color:rgba(0,0,0,.6)}
-.qa-cta-recv .qa-cta-sub{color:rgba(255,255,255,.7)}
+.qa-cta-sub{display:none}
 
 /* Rangée 2 : Scanner / Payer / Tontine — boutons secondaires plus discrets */
 .qa-secondary{
@@ -742,59 +690,12 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 .mi-tag.red{background:rgba(220,38,38,.1);color:#dc2626}
 
 @keyframes loadbar{0%{transform:translateX(-100%)}100%{transform:translateX(300%)}}
-
-/* CALENDAR */
-.cal-wrap{background:var(--card);border-radius:16px;border:1px solid var(--border);overflow:hidden}
-.cal-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--forest)}
-.cal-title{font-size:.85rem;font-weight:800;color:#fff}
-.cal-nav-btn{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.12);border:none;color:#fff;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;font-family:var(--f)}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:10px 8px}
-.cal-dn{font-size:.5rem;font-weight:700;color:var(--txt3);text-align:center;text-transform:uppercase;padding:4px 0}
-.cal-d{width:100%;aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:600;color:var(--txt);cursor:pointer;transition:.12s;border:none;background:none;font-family:var(--f)}
-.cal-d:hover:not(.emp):not(.past){background:rgba(10,74,46,.08);color:var(--forest)}
-.cal-d.today{background:rgba(10,74,46,.1);color:var(--forest);font-weight:800}
-.cal-d.sel{background:var(--forest)!important;color:#fff!important;font-weight:800}
-.cal-d.past{color:var(--bg3);cursor:default}
-.cal-d.emp{cursor:default}
-.cal-info{padding:10px 14px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.cal-info-txt{font-size:.72rem;color:var(--txt2);font-family:var(--fm)}
-.cal-info-dur{font-size:.68rem;font-weight:700;color:var(--forest);background:rgba(10,74,46,.08);padding:3px 10px;border-radius:8px}
-/* TONTINE */
-.tnt-mb{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
-.tnt-mb:last-child{border-bottom:none}
-.tnt-mb-av{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:.85rem}
-.tnt-mb-nm{font-size:.8rem;font-weight:700;color:var(--txt)}
-.tnt-mb-sub{font-size:.58rem;color:var(--txt3);font-family:var(--fm);margin-top:1px}
-.tnt-mb-badge{font-size:.55rem;font-weight:700;padding:3px 8px;border-radius:6px;margin-left:auto;flex-shrink:0}
-.tnt-mb-badge.paid{background:rgba(22,163,74,.1);color:#15803d}
-.tnt-mb-badge.turn{background:rgba(212,160,23,.12);color:var(--gold)}
-.tnt-mb-badge.wait{background:rgba(0,0,0,.05);color:var(--txt3)}
-/* TX ROW */
-.txr{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--border)}
-.txr:last-child{border-bottom:none}
-.txr-av{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center}
-.txr-info{flex:1;min-width:0}
-.txr-name{font-size:.82rem;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.txr-meta{font-size:.6rem;color:var(--txt3);margin-top:2px;font-family:var(--fm)}
-.txr-right{text-align:right;flex-shrink:0}
-.txr-amt{font-size:.88rem;font-weight:800}
-.txr-amt.cr{color:#15803d}
-.txr-amt.db{color:#dc2626}
-.txr-fee{font-size:.54rem;color:var(--txt3);margin-top:1px}
-/* RECEVOIR */
-.rv-tabs{display:flex;gap:0;background:var(--card);border-bottom:1px solid var(--border);flex-shrink:0}
-.rv-tab{flex:1;padding:13px 8px;border:none;font-size:.76rem;font-weight:700;cursor:pointer;transition:.15s;background:none;color:var(--txt3);font-family:var(--f);border-bottom:3px solid transparent}
-.rv-tab.on{color:var(--forest);border-bottom-color:var(--forest)}
-.rv-pane{display:none;flex:1;overflow-y:auto}
-.rv-pane.on{display:flex;flex-direction:column}
-/* MANUAL NUMBER INPUT */
-.num-input-row{display:flex;gap:8px;align-items:center}
-.num-flag{font-size:1.2rem}
-.num-prefix{font-size:.88rem;font-weight:700;color:var(--txt);padding:0 4px}
 </style>
 </head>
 <body>
-<div class="shell"><div class="shell-inner" id="root">
+<div class="shell">
+<div class="shell-inner" id="root">
+
 <svg style="display:none"><defs>
 <symbol id="z" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
 <symbol id="send" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></symbol>
@@ -828,13 +729,9 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 <symbol id="wifi" viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 16 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></symbol>
 <symbol id="star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
 <symbol id="edit" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></symbol>
-
-<symbol id="phone-call" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.59 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.54a16 16 0 0 0 6.29 6.29l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
-<symbol id="calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></symbol>
-<symbol id="download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
-<symbol id="link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
-<symbol id="person-add" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></symbol>
 </defs></svg>
+
+
 <!-- LOADING -->
 <div class="sc on" id="sc-loading" style="background:linear-gradient(155deg,var(--forest) 0%,var(--ink) 70%);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px">
   <div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(212,160,23,.4)">
@@ -860,6 +757,7 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
     <div style="width:100%;display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
       <input id="reg-name" class="inp" placeholder="Ton nom complet" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.12);color:#fff" />
       <input id="reg-phone" class="inp" type="tel" placeholder="Numéro de téléphone (+241...)" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.12);color:#fff" />
+      <input id="reg-email" class="inp" type="email" placeholder="Ton adresse email" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.12);color:#fff" />
       <input id="reg-pin" class="inp" type="password" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="Choisis un code PIN (4 chiffres)" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.12);color:#fff" />
     </div>
 
@@ -874,7 +772,7 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
     <!-- Login form (caché par défaut) -->
     <div id="login-form" style="display:none;width:100%;flex-direction:column;gap:12px;margin-top:16px">
       <div style="font-size:.82rem;font-weight:800;color:#fff;text-align:center;margin-bottom:4px">Connexion</div>
-      <input id="login-phone" class="inp" type="tel" placeholder="Numéro de téléphone" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.12);color:#fff" />
+      <input id="login-email" class="inp" type="email" placeholder="Ton adresse email" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.12);color:#fff" />
       <input id="login-pin" class="inp" type="password" maxlength="4" inputmode="numeric" placeholder="Code PIN" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.12);color:#fff" />
       <button class="btn btn-gold" onclick="G.login()" style="width:100%">Se connecter</button>
       <button class="btn btn-ghost" onclick="G.hideLogin()" style="width:100%;color:rgba(255,255,255,.5)">Annuler</button>
@@ -909,7 +807,7 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
       <button class="pin-k" onclick="G.pinKey('0')" style="grid-column:2">0</button>
       <button class="pin-k" onclick="G.pinDel()"><svg><use href="#del"/></svg></button>
     </div>
-    <div class="pin-skip" onclick="G.pinKey('1');G.pinKey('2');G.pinKey('3');G.pinKey('4')">Utiliser l'empreinte digitale</div>
+    <div class="pin-skip" onclick="G.toast('Empreinte non disponible sur ce navigateur','err')">Utiliser l'empreinte digitale</div>
   </div>
 </div>
 
@@ -943,7 +841,6 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
       </div>
       <div class="bal-amt" id="bal-amt"><span class="cur">FCFA </span>680 000</div>
       <div class="bal-sub" id="bal-sub">+ Coffre : 245 000 FCFA</div>
-      
     </div>
   </div>
 
@@ -958,7 +855,7 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
         <div class="qa-cta-lbl">Envoyer</div>
         <div class="qa-cta-sub">Rapide &amp; sécurisé</div>
       </div>
-      <div class="qa-cta qa-cta-recv" onclick="G.ok('QR prêt','Partage-le pour recevoir')">
+      <div class="qa-cta qa-cta-recv" onclick="G.go('recv')">
         <div class="qa-cta-ic">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><use href="#recv"/></svg>
         </div>
@@ -992,7 +889,7 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 
   <div class="cstrip" onclick="G.go('coffre')">
     <div class="cstrip-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold2)" stroke-width="2"><use href="#lock"/></svg></div>
-    <div class="cstrip-body"><div class="cstrip-t">Mon Coffre Forêt</div><div class="cstrip-s">Épargne sécurisée · 5.5%/an</div></div>
+    <div class="cstrip-body"><div class="cstrip-t">Mon Coffre Forêt</div><div class="cstrip-s">Épargne sécurisée · Taux garanti</div></div>
     <div class="cstrip-val" id="cstrip-val">245 000</div>
     <div class="cstrip-arr"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2"><use href="#ar"/></svg></div>
   </div>
@@ -1019,22 +916,23 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
       <span class="snav-t">Envoyer de l'argent</span>
     </div>
     <div class="p16 g14" style="padding-bottom:16px">
-      <div class="srch"><svg><use href="#srch"/></svg><input type="text" placeholder="Nom ou numéro de téléphone..."/></div>
+      <div class="srch"><svg><use href="#srch"/></svg><input id="contact-search" type="text" placeholder="Nom ou numéro de téléphone..." oninput="G.filterContacts(this.value)"/></div>
       <div class="lbl">Contacts récents</div>
       <div class="contacts-row" id="contact-grid"></div>
-      <div class="lbl" style="margin-top:4px">Saisir un numéro manuellement</div>
-      <div class="num-input-row">
-        <div style="background:var(--bg2);border-radius:14px;padding:13px 16px;display:flex;align-items:center;gap:10px;flex:1;border:2px solid transparent;transition:.2s" id="manual-input-wrap">
-          <span style="font-size:1.1rem">🇬🇦</span>
-          <span style="font-size:.82rem;font-weight:700;color:var(--txt3)">+241</span>
-          <input id="manual-phone" type="tel" placeholder="06 XX XX XX" style="border:none;outline:none;background:none;font-family:var(--f);font-size:.88rem;color:var(--txt);flex:1" oninput="G.manualPhone(this.value)" onfocus="this.parentElement.style.borderColor='rgba(10,74,46,.3)';this.parentElement.style.background='var(--card)'" onblur="this.parentElement.style.borderColor='transparent';this.parentElement.style.background='var(--bg2)'"/>
-        </div>
-        <button onclick="G.confirmManualPhone()" style="padding:13px 16px;background:var(--forest);border:none;border-radius:12px;color:#fff;font-size:.8rem;font-weight:800;cursor:pointer;font-family:var(--f)">OK</button>
-      </div>
       <div class="rec-row" id="rec-row" style="display:none">
         <div class="rec-av" id="rec-av">A</div>
         <div><div class="rec-name" id="rec-name"></div><div class="rec-phone" id="rec-phone"></div></div>
         <div class="rec-chk"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><use href="#chk"/></svg></div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:12px;display:flex;flex-direction:column;gap:8px">
+        <div class="lbl">Ou saisir un numéro</div>
+        <div style="display:flex;gap:8px">
+          <input id="manual-phone" class="inp" type="tel" placeholder="+241 06 XX XX XX" style="flex:1"/>
+          <button onclick="G.selManualPhone()" style="padding:12px 18px;border:none;border-radius:12px;background:var(--forest);color:#fff;font-weight:800;font-size:.8rem;cursor:pointer;flex-shrink:0">OK</button>
+        </div>
+        <button id="pick-contact-btn" onclick="G.pickContact()" style="width:100%;padding:11px;border:1.5px dashed var(--border);border-radius:12px;background:none;color:var(--txt2);font-size:.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#users"/></svg>Sélectionner depuis les contacts
+        </button>
       </div>
     </div>
   </div>
@@ -1043,7 +941,7 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
       <div class="amt-box">
         <div class="amt-lbl">Montant à envoyer</div>
         <div class="amt-val"><span class="cur">FCFA </span><span id="amt-disp">0</span></div>
-        <div class="amt-fee"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5"><use href="#chk"/></svg>Frais : ~50 FCFA seulement</div>
+        <div class="amt-fee" id="fee-disp"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5"><use href="#chk"/></svg>Frais : 0 FCFA (1,5%)</div>
       </div>
       <div class="numpad">
         <button class="nk" onclick="G.kp('1')">1</button><button class="nk" onclick="G.kp('2')">2</button><button class="nk" onclick="G.kp('3')">3</button>
@@ -1059,59 +957,71 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
   </div>
 </div>
 
-<!-- QR -->
+<!-- QR / PAYER -->
 <div class="sc" id="sc-qr" style="background:var(--ink)">
   <div class="sbar dk"><span class="sbar-t" id="clk3">09:41</span></div>
   <div class="snav dk">
     <button class="back-btn dk" onclick="G.back()"><svg><use href="#al"/></svg></button>
-    <span class="snav-t">QR Code</span>
+    <span class="snav-t">Payer par QR</span>
   </div>
   <div class="scroll">
-    <div class="qr-area">
-      <div class="qr-vf">
-        <div class="qr-c tl"></div><div class="qr-c tr"></div>
-        <div class="qr-c bl"></div><div class="qr-c br"></div>
-        <div class="qr-line"></div>
-        <svg width="90" height="90" viewBox="0 0 80 80" style="opacity:.08">
-          <rect x="8" y="8" width="22" height="22" fill="white" rx="2"/><rect x="10" y="10" width="6" height="6" fill="#0d0d0d"/>
-          <rect x="50" y="8" width="22" height="22" fill="white" rx="2"/><rect x="52" y="10" width="6" height="6" fill="#0d0d0d"/>
-          <rect x="8" y="50" width="22" height="22" fill="white" rx="2"/><rect x="10" y="52" width="6" height="6" fill="#0d0d0d"/>
-          <rect x="34" y="8" width="6" height="6" fill="white"/><rect x="42" y="18" width="6" height="6" fill="white"/>
-          <rect x="34" y="34" width="10" height="10" fill="white"/>
-        </svg>
+    <div style="padding:16px;display:flex;flex-direction:column;align-items:center;gap:14px">
+      <div style="text-align:center;padding:20px 0 8px">
+        <div style="width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 6px 24px rgba(212,160,23,.4)">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--forest)" stroke-width="2.5"><use href="#qric"/></svg>
+        </div>
+        <div style="font-size:.88rem;font-weight:800;color:#fff;margin-bottom:4px">Payer un commerçant</div>
+        <div style="font-size:.65rem;color:rgba(255,255,255,.4)">Saisis les informations du paiement</div>
       </div>
-      <div class="qr-hint">Pointe vers le QR du commerçant</div>
-      <div class="qr-form" style="width:100%">
-        <label>Nom du commerçant</label>
-        <input id="qr-merchant" class="inp" placeholder="Ex: Market Mbolo..."/>
-        <label>Montant (FCFA)</label>
-        <input id="qr-amount" class="inp" type="number" placeholder="Ex: 5000"/>
+      <div style="width:100%;background:rgba(255,255,255,.07);border-radius:18px;padding:16px;border:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;gap:10px">
+        <label style="font-size:.6rem;color:rgba(255,255,255,.42);font-family:var(--fm);text-transform:uppercase;letter-spacing:.1em">Nom du commerçant</label>
+        <input id="qr-merchant" class="inp" placeholder="Ex: Market Mbolo..." style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#fff"/>
+        <label style="font-size:.6rem;color:rgba(255,255,255,.42);font-family:var(--fm);text-transform:uppercase;letter-spacing:.1em">Montant (FCFA)</label>
+        <input id="qr-amount" class="inp" type="number" placeholder="Ex: 5 000" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#fff"/>
+        <button class="btn btn-gold" onclick="G.doQR()"><svg><use href="#shield"/></svg>Confirmer le paiement</button>
       </div>
-      <button class="btn btn-gold" style="width:100%" onclick="G.doQR()"><svg><use href="#shield"/></svg>Confirmer le paiement QR</button>
     </div>
-    <div class="qr-div"><div class="qr-div-line"></div><span class="qr-div-txt">Mon QR Code</span><div class="qr-div-line"></div></div>
-    <div class="p16 g14" style="padding-top:14px">
-      <div class="qr-mycard">
-        <div class="qr-mycard-img">
-          <svg viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
-            <rect width="10" height="10" fill="white"/>
-            <rect x="0" y="0" width="4" height="4" fill="#0d0d0d"/><rect x="1" y="1" width="2" height="2" fill="white"/>
-            <rect x="6" y="0" width="4" height="4" fill="#0d0d0d"/><rect x="7" y="1" width="2" height="2" fill="white"/>
-            <rect x="0" y="6" width="4" height="4" fill="#0d0d0d"/><rect x="1" y="7" width="2" height="2" fill="white"/>
-            <rect x="5" y="0" width="1" height="1" fill="#0d0d0d"/><rect x="5" y="2" width="1" height="1" fill="#0d0d0d"/>
-            <rect x="4" y="5" width="1" height="1" fill="#0d0d0d"/><rect x="6" y="5" width="1" height="1" fill="#0d0d0d"/>
-            <rect x="8" y="5" width="1" height="1" fill="#0d0d0d"/><rect x="4" y="7" width="2" height="1" fill="#0d0d0d"/>
-            <rect x="7" y="7" width="1" height="1" fill="#0d0d0d"/>
-          </svg>
+  </div>
+</div>
+
+<!-- RECEVOIR — Mon QR personnel -->
+<div class="sc" id="sc-recv">
+  <div class="home-hdr" style="padding-bottom:16px">
+    <div class="sbar dk"><span class="sbar-t" id="clkB">09:41</span></div>
+    <div class="snav dk" style="border:none;background:transparent;padding-top:0">
+      <button class="back-btn dk" onclick="G.back()"><svg><use href="#al"/></svg></button>
+      <span class="snav-t">Recevoir de l'argent</span>
+    </div>
+  </div>
+  <div class="scroll">
+    <div style="padding:20px 20px 80px;display:flex;flex-direction:column;align-items:center;gap:16px">
+      <div style="width:100%;background:#fff;border-radius:24px;padding:24px 20px;display:flex;flex-direction:column;align-items:center;gap:14px;box-shadow:0 8px 32px rgba(0,0,0,.1)">
+        <div style="font-size:.58rem;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.14em;font-family:var(--fm)">Mon QR de paiement</div>
+        <div id="recv-qr-real" style="display:flex;align-items:center;justify-content:center;border-radius:12px;overflow:hidden;padding:4px"></div>
+        <div style="text-align:center">
+          <div style="font-size:1rem;font-weight:800;color:var(--ink)" id="recv-name">Utilisateur</div>
+          <div style="font-family:var(--fm);font-size:.68rem;color:var(--txt3);margin-top:3px" id="recv-phone"></div>
         </div>
-        <div>
-          <div class="qr-mycard-name" id="qr-name">Rostand Moussavou</div>
-          <div class="qr-mycard-phone" id="qr-phone">+241 06 12 34 56</div>
-          <div class="qr-mycard-phone">GhettoPay · Libreville</div>
-        </div>
-        <button class="qr-share" onclick="G.ok('QR partagé','Ton ami peut maintenant te payer')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--forest)" stroke-width="2"><use href="#share"/></svg></button>
+        <div style="width:100%;height:1px;background:var(--border)"></div>
+        <div style="font-size:.66rem;color:var(--txt3);text-align:center;line-height:1.75">Demande à ton ami de scanner ce QR<br>ou partage le lien ci-dessous</div>
       </div>
-      <button class="btn btn-forest" onclick="G.ok('QR affiché','Montre ce code pour te faire payer')"><svg><use href="#recv"/></svg>Afficher mon QR pour recevoir</button>
+      <div style="width:100%;display:flex;gap:10px">
+        <button onclick="G.shareQR()" style="flex:1;padding:14px;border:none;border-radius:14px;background:var(--forest);color:#fff;font-size:.82rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(10,74,46,.3)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><use href="#recv"/></svg>Télécharger QR
+        </button>
+        <button onclick="G.copyPayLink()" style="flex:1;padding:14px;border:1.5px solid var(--border);border-radius:14px;background:var(--card);color:var(--txt);font-size:.82rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#share"/></svg>Copier lien
+        </button>
+      </div>
+      <div style="width:100%;background:rgba(10,74,46,.07);border-radius:16px;padding:14px 16px;border:1px solid rgba(10,74,46,.1)">
+        <div style="font-size:.7rem;font-weight:800;color:var(--forest);margin-bottom:8px">Comment recevoir ?</div>
+        <div style="font-size:.66rem;color:var(--txt2);line-height:2">
+          1. Partage ton QR ou le lien<br>
+          2. Ton ami scanne avec GhettoPay<br>
+          3. Il saisit le montant et confirme<br>
+          4. Tu reçois instantanément ✓
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -1127,7 +1037,7 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
     </div>
     <div class="coffre-total-lbl">Total épargné</div>
     <div class="coffre-total-val" id="coffre-total">245 000 FCFA</div>
-    <div class="coffre-rate"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--green3)" stroke-width="2.5"><use href="#trend"/></svg>Rendement actif · +5.5%/an</div>
+    <div class="coffre-rate"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--green3)" stroke-width="2.5"><use href="#trend"/></svg>Rendement actif · Taux garanti</div>
   </div>
   <div class="scroll">
     <div class="p16 g14" id="coffre-list"></div>
@@ -1187,7 +1097,7 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
   <div class="snav">
     <button class="back-btn" onclick="G.back()"><svg><use href="#al"/></svg></button>
     <span class="snav-t">Tontines</span>
-    <span class="snav-a" onclick="G.ok('Tontine créée','Partage le code à tes amis')">+ Nouvelle</span>
+    <span class="snav-a" onclick="G.showModal('mt')">+ Créer</span>
   </div>
   <div class="scroll"><div class="p16 g14" id="tontine-list"></div></div>
 </div>
@@ -1213,7 +1123,6 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
         </div>
       </div>
       <button class="btn btn-gold" onclick="G.payAll()"><svg><use href="#chk"/></svg>Tout payer maintenant</button>
-      <div class="g10" id="bills-done"></div>
     </div>
   </div>
 </div>
@@ -1309,18 +1218,52 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
   </div>
 </div>
 
+<!-- MODAL TONTINE -->
+<div class="modal" id="mt" onclick="if(event.target===this)G.closeModal('mt')">
+  <div class="modal-box" style="max-height:88vh;overflow-y:auto">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nouvelle tontine</div>
+    <input id="nt-name" class="inp" placeholder="Nom (ex: Amis Libreville)"/>
+    <input id="nt-amount" class="inp" type="number" placeholder="Montant par cycle (FCFA)"/>
+    <div>
+      <div class="lbl" style="margin-bottom:10px">Fréquence</div>
+      <div class="pills" id="nt-pills">
+        <div class="pill on" id="nt-freq-w" onclick="document.getElementById('nt-freq-w').classList.add('on');document.getElementById('nt-freq-m').classList.remove('on');document.getElementById('nt-freq').value='weekly'">Hebdo</div>
+        <div class="pill" id="nt-freq-m" onclick="document.getElementById('nt-freq-m').classList.add('on');document.getElementById('nt-freq-w').classList.remove('on');document.getElementById('nt-freq').value='monthly'">Mensuel</div>
+      </div>
+      <input id="nt-freq" type="hidden" value="weekly"/>
+    </div>
+    <div>
+      <div class="lbl" style="margin-bottom:8px">Ordre des membres <span style="font-size:.6rem;font-weight:400;text-transform:none;letter-spacing:0;color:var(--txt3)">(ordre de rotation)</span></div>
+      <div id="nt-members-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
+      <div style="display:flex;gap:8px">
+        <input id="nt-member-input" class="inp" placeholder="Nom du membre..." style="flex:1"/>
+        <button onclick="G.addTontineMember()" style="padding:12px 18px;border:none;border-radius:12px;background:var(--forest);color:#fff;font-weight:800;font-size:.9rem;cursor:pointer;flex-shrink:0">+</button>
+      </div>
+    </div>
+    <button class="btn btn-gold" onclick="G.createTontine()"><svg><use href="#users"/></svg>Créer la tontine</button>
+    <button class="btn btn-ghost" onclick="G.closeModal('mt')">Annuler</button>
+  </div>
+</div>
+
 <!-- MODAL COFFRE -->
 <div class="modal" id="mc" onclick="if(event.target===this)G.closeModal('mc')">
   <div class="modal-box">
     <div class="modal-handle"></div>
     <div class="modal-title">Nouveau coffre</div>
-    <input id="nc-name" class="inp" placeholder="Nom du coffre (ex: Voyage France)"/>
+    <input id="nc-name" class="inp" placeholder="Nom (ex: Voyage en France)"/>
     <input id="nc-target" class="inp" type="number" placeholder="Objectif en FCFA"/>
-    <input id="nc-init" class="inp" type="number" placeholder="Dépôt initial (optionnel)"/>
-    <div class="lbl" style="margin-bottom:8px">Date de déblocage</div>
-    <div id="nc-cal"></div>
-    <input id="nc-unlock" type="hidden" value=""/>
-    <button class="btn btn-gold" onclick="G.createCoffre()" style="margin-top:4px"><svg><use href="#lock"/></svg>Créer ce coffre</button>
+    <div>
+      <div class="lbl" style="margin-bottom:10px">Durée de blocage</div>
+      <div class="pills">
+        <div class="pill on" onclick="G.setDur(this,3)">3 mois</div>
+        <div class="pill" onclick="G.setDur(this,6)">6 mois</div>
+        <div class="pill" onclick="G.setDur(this,12)">1 an</div>
+        <div class="pill" onclick="G.setDur(this,24)">2 ans</div>
+      </div>
+      <input id="nc-months" type="hidden" value="3"/>
+    </div>
+    <button class="btn btn-gold" onclick="G.createCoffre()"><svg><use href="#lock"/></svg>Créer ce coffre</button>
     <button class="btn btn-ghost" onclick="G.closeModal('mc')">Annuler</button>
   </div>
 </div>
@@ -1360,938 +1303,1002 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 
 </div></div>
 
-
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 // ════════════════════════════════════════════════
-// GHETTOPAY v3 — Amélioré
+// GHETTOPAY — Connecté à Supabase
 // ════════════════════════════════════════════════
 
+// ── SUPABASE CONFIG ──
 const SUPA_URL = 'https://qzazkxlamuylurhjquzu.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6YXpreGxhbXV5bHVyaGpxdXp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyNjM0NzYsImV4cCI6MjA4OTgzOTQ3Nn0.ow7l6dQZqsl5j8UFMrMY0JgIWR65gBFuMLn6MdI7SzQ';
+
+// Initialiser le client Supabase (SDK chargé via CDN juste avant)
 const db = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
-let cur = 'loading', hist = [], selC = null, aStr = '', pinBuf = '', balVis = true;
-let currentUser = null;
-let rvSelContact = null;
-let calSelected = null;
+appStart();
 
+// ── STATE ──
+let cur = 'loading', hist = [], pD = {}, selC = null, aStr = '', pinBuf = '', balVis = true;
+let currentUser = null; // utilisateur connecté
+let isNewUser = false;  // mode inscription
+
+// ── HELPERS ──
 const f = n => new Intl.NumberFormat('fr-FR').format(Math.round(n));
 const $ = id => document.getElementById(id);
-const si = (ic,col,sz=18) => `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="${col}" stroke-width="2"><use href="#${ic}"/></svg>`;
+const si = (ic, col, sz=18) => `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="${col}" stroke-width="2"><use href="#${ic}"/></svg>`;
 
-const S = {
-  get(k,d){ try{ const v=localStorage.getItem('gp3_'+k); return v!==null?JSON.parse(v):d; }catch{ return d; } },
-  set(k,v){ try{ localStorage.setItem('gp3_'+k,JSON.stringify(v)); }catch{} }
-};
-
-// ── START ──
-appStart();
-async function appStart(){
-  const { data:{ session } } = await db.auth.getSession();
-  if(session){ await loadUserData(session.user.id); G.go('pin'); }
-  else G.go('onboard');
+// ── DÉMARRAGE ──
+async function appStart() {
+  // Vérifier si session existante
+  const { data: { session } } = await db.auth.getSession();
+  if (session) {
+    await loadUserData(session.user.id);
+    G.go('pin');
+  } else {
+    G.go('onboard');
+  }
   $('sc-loading').classList.remove('on');
 }
 
-async function loadUserData(authId){
-  const { data:user } = await db.from('users').select('*').eq('auth_id',authId).single();
-  if(!user) return;
-  const { data:wallet } = await db.from('wallets').select('*').eq('user_id',user.id).single();
+// ── CHARGER LES DONNÉES UTILISATEUR ──
+async function loadUserData(authId) {
+  // Chercher l'utilisateur par auth_id
+  const { data: user } = await db.from('users').select('*').eq('auth_id', authId).single();
+  if (!user) return;
+  
+  const { data: wallet } = await db.from('wallets').select('*').eq('user_id', user.id).single();
+  
   currentUser = { ...user, wallet };
-  S.set('user',{ name:user.name, phone:user.phone, email:user.email||'', pin:user.pin_code, avatar:user.avatar, loc:user.location, level:user.level });
-  S.set('bal', wallet?.balance||0);
-  S.set('coffre', wallet?.coffre_balance||0);
-  S.set('cash', wallet?.cashback||0);
+  
+  // Mettre en cache local pour affichage rapide
+  S.set('user', { name: user.name, phone: user.phone, pin: user.pin_code, avatar: user.avatar, loc: user.location, level: user.level });
+  S.set('bal', wallet?.balance || 0);
+  S.set('coffre', wallet?.coffre_balance || 0);
+  S.set('cash', wallet?.cashback || 0);
 }
 
-// ── NAV ──
+// ── CACHE LOCAL (fallback rapide) ──
+const S = {
+  get(k, d) { try { const v = localStorage.getItem('gp3_' + k); return v !== null ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('gp3_' + k, JSON.stringify(v)); } catch {} }
+};
+
+// ── NAVIGATION ──
 const G = {
-  go(scr){
-    const p=$('sc-'+cur), n=$('sc-'+scr);
-    if(!n) return;
-    if(p) p.classList.remove('on');
+  go(scr) {
+    const p = $('sc-' + cur), n = $('sc-' + scr);
+    if (!n) return;
+    if (p) p.classList.remove('on');
     n.classList.add('on');
-    if(cur!==scr) hist.push(cur);
-    cur=scr; G.render(scr);
-    const map={home:0,budget:1,coffre:3,profil:4};
-    document.querySelectorAll('.bnav').forEach(nav=>{
-      nav.querySelectorAll('.bt').forEach(b=>b.classList.remove('on'));
-      if(map[scr]!==undefined) nav.querySelectorAll('.bt')[map[scr]]?.classList.add('on');
-    });
+    if (cur !== scr) hist.push(cur);
+    cur = scr;
+    G.render(scr);
+    // Mettre à jour navbar
+    document.querySelectorAll('.bt').forEach(b => b.classList.remove('on'));
+    const map = { home: 0, budget: 1, coffre: 3, profil: 4 };
+    if (map[scr] !== undefined) {
+      document.querySelectorAll('.bt')[map[scr]]?.classList.add('on');
+    }
   },
-  back(){ if(hist.length) G.go(hist.pop()); else G.go('home'); },
-  render(scr){
-    const r={ home:()=>G.r_home(), send:()=>G.r_send(), coffre:()=>G.r_coffre(), budget:()=>G.r_budget(),
-      tontine:()=>G.r_tontine(), factures:()=>G.r_factures(), notifs:()=>G.r_notifs(),
-      profil:()=>G.r_profil(), qr:()=>G.r_qr(), recevoir:()=>G.r_recevoir(), pin:()=>G.r_pin() };
-    r[scr]?.();
+
+  back() {
+    if (hist.length) G.go(hist.pop());
+    else G.go('home');
+  },
+
+  render(scr) {
+    const renders = {
+      home: () => G.r_home(),
+      send: () => G.r_send(),
+      coffre: () => G.r_coffre(),
+      budget: () => G.r_budget(),
+      tontine: () => G.r_tontine(),
+      factures: () => G.r_factures(),
+      recv: () => G.r_recv(),
+      notifs: () => G.r_notifs(),
+      profil: () => G.r_profil(),
+      qr: () => G.r_qr(),
+    };
+    renders[scr]?.();
   },
 
   // ── HOME ──
-  r_home(){
-    const bal=S.get('bal',0), cbal=S.get('coffre',0), u=S.get('user',{});
-    const parts=(u.name||'').split(' ');
-    $('home-name').textContent=(parts[0]||'')+(parts[1]?' '+parts[1][0]+'.':'');
-    $('home-av').textContent=u.avatar||'?';
-    $('bal-amt').innerHTML=`<span class="cur">FCFA </span>${balVis?f(bal):'• • • •'}`;
-    $('bal-sub').textContent=`+ Coffre : ${f(cbal)} FCFA`;
-    $('cstrip-val').textContent=f(cbal);
-    const unread=S.get('notifs',[]).filter(n=>!n.read).length;
-    $('notif-dot').style.display=unread?'block':'none';
+  r_home() {
+    const bal = S.get('bal', 0), cbal = S.get('coffre', 0), u = S.get('user', {});
+    $('home-name').textContent = (u.name || 'Utilisateur').split(' ')[0] + ' ' + ((u.name || '').split(' ')[1]?.[0] || '') + '.';
+    $('home-av').textContent = u.avatar || '?';
+    $('bal-amt').innerHTML = `<span class="cur">FCFA </span>${balVis ? f(bal) : '• • • •'}`;
+    $('bal-sub').textContent = `+ Coffre : ${f(cbal)} FCFA`;
+    $('cstrip-val').textContent = f(cbal);
+    const unread = S.get('notifs', []).filter(n => !n.read).length;
+    $('notif-dot').style.display = unread ? 'block' : 'none';
     G.r_txList();
   },
 
-  _txRow(isCredit,name,ico,col,bg,cat,time,amount,fee){
-    const sign=isCredit?'+':'-';
-    const feeHtml=fee>0?`<div class="txr-fee">Frais : ${f(fee)} F</div>`:'';
-    return `<div class="txr"><div class="txr-av" style="background:${bg}">${si(ico,col,15)}</div><div class="txr-info"><div class="txr-name">${name}</div><div class="txr-meta">${cat} · ${time}</div></div><div class="txr-right"><div class="txr-amt ${isCredit?'cr':'db'}">${sign}${f(amount)} <small style="font-size:.6rem;opacity:.65">F</small></div>${feeHtml}</div></div>`;
+  _txRow(isCredit, name, ico, col, bg, cat, time, amount) {
+    const sign = isCredit ? '+' : '-';
+    return `<div class="tx"><div class="tx-av" style="background:${bg}">${si(ico, col, 15)}</div><div class="tx-info"><div class="tx-name">${name}</div><div class="tx-meta">${cat} · ${time}</div></div><div class="tx-right"><div class="tx-amt ${isCredit?'cr':'db'}">${sign}${f(amount)} <span style="font-size:.6rem;opacity:.65">F</span></div></div></div>`;
   },
 
-  async r_txList(){
-    const empty='<div style="padding:28px;text-align:center;color:var(--txt3);font-size:.82rem">Aucune transaction récente</div>';
-    if(!currentUser){
-      const txs=S.get('txs',[]);
-      $('tx-list').innerHTML=!txs.length?empty:txs.slice(0,8).map(t=>{
-        const isCredit=t.type==='recv';
-        const ico={recv:'recv',send:'send',qr:'qric',recharge:'phone',bill:'pay',coffre_deposit:'lock',tontine:'users'}[t.type]||'send';
-        const col=isCredit?'#16A34A':'#DC2626';
-        const bg=isCredit?'rgba(22,163,74,.12)':'rgba(212,160,23,.12)';
-        const cat={recv:'Reçu',send:'Envoyé',qr:'QR Pay',recharge:'Recharge',bill:'Facture',coffre_deposit:'Coffre',tontine:'Tontine'}[t.type]||t.type;
-        return G._txRow(isCredit,t.name||'Inconnu',ico,col,bg,cat,t.time||'—',t.amount,t.fee||0);
+  async r_txList() {
+    const empty = '<div style="padding:28px;text-align:center;color:var(--txt3);font-size:.82rem">Aucune transaction récente</div>';
+    if (!currentUser) {
+      const txs = S.get('txs', []);
+      if (!txs.length) { $('tx-list').innerHTML = empty; return; }
+      $('tx-list').innerHTML = txs.slice(0, 8).map(t => {
+        const isCredit = t.type === 'recv';
+        const ico = { recv:'recv', send:'send', qr:'qric', recharge:'phone', bill:'pay', coffre_deposit:'lock', tontine:'users' }[t.type] || 'send';
+        const col = isCredit ? '#16A34A' : '#DC2626';
+        const bg = isCredit ? 'rgba(22,163,74,.12)' : 'rgba(212,160,23,.12)';
+        const cat = { recv:'Reçu', send:'Envoyé', qr:'QR Pay', recharge:'Recharge', bill:'Facture', coffre_deposit:'Coffre', tontine:'Tontine' }[t.type] || t.type;
+        return G._txRow(isCredit, t.name || 'Inconnu', ico, col, bg, cat, t.time || '—', t.amount);
       }).join('');
       return;
     }
-    const { data:txs }=await db.from('transactions')
+    const { data: txs } = await db.from('transactions')
       .select('*, from_user:from_user_id(name,avatar), to_user:to_user_id(name,avatar)')
       .or(`from_user_id.eq.${currentUser.id},to_user_id.eq.${currentUser.id}`)
-      .order('created_at',{ascending:false}).limit(8);
-    if(!txs?.length){ $('tx-list').innerHTML=empty; return; }
-    $('tx-list').innerHTML=txs.map(t=>{
-      const isCredit=t.to_user_id===currentUser.id;
-      const other=isCredit?t.from_user:t.to_user;
-      const name=other?.name||t.merchant_name||'GhettoPay';
-      const ico={transfer:isCredit?'recv':'send',qr:'qric',recharge:'phone',bill:'pay',coffre_deposit:'lock',tontine:'users'}[t.type]||'send';
-      const col=isCredit?'#16A34A':'#DC2626';
-      const bg=isCredit?'rgba(22,163,74,.12)':'rgba(212,160,23,.12)';
-      const cat={transfer:'Transfert',qr:'QR Pay',recharge:'Recharge',bill:'Facture',coffre_deposit:'Coffre',tontine:'Tontine'}[t.type]||t.type;
-      const time=new Date(t.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
-      return G._txRow(isCredit,name,ico,col,bg,cat,time,t.amount,0);
+      .order('created_at', { ascending: false }).limit(8);
+    if (!txs?.length) { $('tx-list').innerHTML = empty; return; }
+    $('tx-list').innerHTML = txs.map(t => {
+      const isCredit = t.to_user_id === currentUser.id;
+      const other = isCredit ? t.from_user : t.to_user;
+      const name = other?.name || t.merchant_name || 'GhettoPay';
+      const ico = { transfer: isCredit?'recv':'send', qr:'qric', recharge:'phone', bill:'pay', coffre_deposit:'lock', tontine:'users' }[t.type] || 'send';
+      const col = isCredit ? '#16A34A' : '#DC2626';
+      const bg = isCredit ? 'rgba(22,163,74,.12)' : 'rgba(212,160,23,.12)';
+      const cat = { transfer:'Transfert', qr:'QR Pay', recharge:'Recharge', bill:'Facture', coffre_deposit:'Coffre', tontine:'Tontine' }[t.type] || t.type;
+      const time = new Date(t.created_at).toLocaleDateString('fr-FR', { day:'numeric', month:'short' });
+      return G._txRow(isCredit, name, ico, col, bg, cat, time, t.amount);
     }).join('');
   },
 
-  toggleBal(){
-    balVis=!balVis;
-    const bal=S.get('bal',0),cbal=S.get('coffre',0);
-    $('bal-amt').innerHTML=`<span class="cur">FCFA </span>${balVis?f(bal):'• • • •'}`;
-    $('bal-sub').textContent=balVis?`+ Coffre : ${f(cbal)} FCFA`:'••••••••';
-    $('eye-ic').innerHTML=balVis?'<use href="#eye"/>':'<use href="#eyeo"/>';
+  toggleBal() {
+    balVis = !balVis;
+    const bal = S.get('bal', 0), cbal = S.get('coffre', 0);
+    $('bal-amt').innerHTML = `<span class="cur">FCFA </span>${balVis ? f(bal) : '• • • •'}`;
+    $('bal-sub').textContent = balVis ? `+ Coffre : ${f(cbal)} FCFA` : '••••••••';
+    $('eye-ic').innerHTML = balVis ? '<use href="#eye"/>' : '<use href="#eyeoff"/>';
   },
 
   // ── SEND ──
-  r_send(){
-    aStr=''; $('amt-disp').textContent='0'; $('rec-row').style.display='none';
-    selC=null;
-    const mp=$('manual-phone'); if(mp) mp.value='';
+  r_send() {
+    aStr = '';
+    $('amt-disp').textContent = '0';
+    $('rec-row').style.display = 'none';
+    selC = null;
     G.r_contacts();
   },
 
-  async r_contacts(){
-    G._allContacts=[]; G._contactMap={};
-    if(!currentUser){ G._allContacts=S.get('contacts',[]); }
-    else {
-      const {data:users}=await db.from('users').select('id,name,avatar,phone').neq('id',currentUser.id).limit(30);
-      G._allContacts=users||[];
-      (users||[]).forEach(u=>G._contactMap[u.id]=u);
+  async r_contacts() {
+    G._allContacts = [];
+    G._contactMap = {};
+    if (!currentUser) {
+      G._allContacts = S.get('contacts', []);
+    } else {
+      const { data: users } = await db.from('users').select('id,name,avatar,phone').neq('id', currentUser.id).limit(30);
+      G._allContacts = users || [];
+      (users||[]).forEach(u => G._contactMap[u.id] = u);
     }
     G._renderContacts(G._allContacts);
-    // Also load for recevoir
-    G._rvContacts=G._allContacts;
   },
 
-  _renderContacts(list){
-    const grads=['linear-gradient(135deg,#0A4A2E,#16A34A)','linear-gradient(135deg,#7c3aed,#a78bfa)','linear-gradient(135deg,#0284c7,#38bdf8)','linear-gradient(135deg,#d97706,#fcd34d)','linear-gradient(135deg,#dc2626,#f87171)'];
-    $('contact-grid').innerHTML=!list?.length?'<div style="color:var(--txt3);font-size:.78rem;padding:4px 0">Aucun utilisateur</div>':list.map((u,i)=>{
-      const av=u.avatar||u.av||(u.name||'?')[0].toUpperCase();
-      return `<div class="contact" onclick="G.selContact('${u.id}')"><div class="c-av" style="background:${u.bg||grads[i%grads.length]}">${av}</div><div class="c-name">${(u.name||'').split(' ')[0]}</div></div>`;
+  _renderContacts(list) {
+    if (!list?.length) {
+      $('contact-grid').innerHTML = '<div style="color:var(--txt3);font-size:.78rem;padding:4px 0">Aucun utilisateur trouvé</div>';
+      return;
+    }
+    const grads = ['linear-gradient(135deg,#0A4A2E,#16A34A)','linear-gradient(135deg,#7c3aed,#a78bfa)','linear-gradient(135deg,#0284c7,#38bdf8)','linear-gradient(135deg,#d97706,#fcd34d)','linear-gradient(135deg,#dc2626,#f87171)'];
+    $('contact-grid').innerHTML = list.map((u, i) => {
+      const av = u.avatar || u.av || (u.name||'?')[0].toUpperCase();
+      const nm = (u.name||'').split(' ')[0];
+      return `<div class="contact" onclick="G.selContact('${u.id}')"><div class="c-av" style="background:${u.bg||grads[i%grads.length]}">${av}</div><div class="c-name">${nm}</div></div>`;
     }).join('');
   },
 
-  filterContacts(q){
-    if(!q){ G._renderContacts(G._allContacts); return; }
-    G._renderContacts((G._allContacts||[]).filter(u=>(u.name||'').toLowerCase().includes(q.toLowerCase())||(u.phone||'').includes(q)));
+  filterContacts(q) {
+    if (!q) { G._renderContacts(G._allContacts); return; }
+    const filtered = (G._allContacts||[]).filter(u => (u.name||'').toLowerCase().includes(q.toLowerCase()) || (u.phone||'').includes(q));
+    G._renderContacts(filtered);
   },
 
-  selContact(id){
-    const c=G._contactMap?.[id]||(S.get('contacts',[])).find(x=>x.id===id)||(G._allContacts||[]).find(x=>x.id===id);
-    if(!c) return;
-    selC={ id:c.id, name:c.name, phone:c.phone||'', av:c.avatar||c.av||(c.name||'?')[0].toUpperCase() };
-    $('rec-av').textContent=selC.av;
-    $('rec-name').textContent=selC.name;
-    $('rec-phone').textContent=selC.phone;
-    $('rec-row').style.display='flex';
+  selContact(id) {
+    let c = G._contactMap?.[id] || (S.get('contacts',[])).find(x => x.id === id) || (G._allContacts||[]).find(x => x.id === id);
+    if (!c) return;
+    selC = { id: c.id, name: c.name, phone: c.phone||'', av: c.avatar || c.av || (c.name||'?')[0].toUpperCase() };
+    $('rec-av').textContent = selC.av;
+    $('rec-name').textContent = selC.name;
+    $('rec-phone').textContent = selC.phone;
+    $('rec-row').style.display = 'flex';
   },
 
-  // === MODIFICATION 1: Manual phone input ===
-  manualPhone(val){
-    // Just store, confirm on button click
+  kp(v) {
+    if (v === 'del') { aStr = aStr.slice(0, -1); }
+    else if (aStr.length < 9) { aStr += v; }
+    const n = parseInt(aStr) || 0;
+    $('amt-disp').textContent = f(n);
+    const fee = Math.round(n * 0.015);
+    const fd = $('fee-disp');
+    if (fd) fd.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5"><use href="#chk"/></svg>Frais : ${fee > 0 ? f(fee) + ' FCFA (1,5%)' : '0 FCFA'}`;
   },
-  async confirmManualPhone(){
-    const raw=($('manual-phone')?.value||'').replace(/\s/g,'');
-    if(!raw||raw.length<6){ G.toast('Saisis un numéro valide','err'); return; }
-    const phone=(raw.startsWith('+241')||raw.startsWith('241'))?raw:'+241'+raw;
-    // Search for user with this phone
-    G.toast('Recherche...','inf');
-    if(currentUser){
-      const {data:user}=await db.from('users').select('id,name,avatar,phone').eq('phone',phone).single();
-      if(!user){ G.toast('Utilisateur non trouvé','err'); return; }
-      selC={ id:user.id, name:user.name, phone:user.phone, av:user.avatar||user.name[0] };
+
+  async doSend() {
+    if (!selC) { G.toast('Choisis un destinataire', 'err'); return; }
+    const n = parseInt(aStr) || 0;
+    if (n <= 0) { G.toast('Saisis un montant', 'err'); return; }
+    const fee = Math.round(n * 0.015);
+    const total = n + fee;
+    const bal = S.get('bal', 0);
+    if (total > bal) { G.toast('Solde insuffisant (frais inclus)', 'err'); return; }
+    const note = $('send-note')?.value || '';
+
+    if (currentUser) {
+      G.toast('Envoi en cours...', 'inf');
+      const { data, error } = await db.rpc('transfer_money', {
+        p_from_user_id: currentUser.id, p_to_user_id: selC.id, p_amount: n, p_note: note
+      });
+      if (error || !data?.success) { G.toast(data?.error || 'Erreur de transfert', 'err'); return; }
+      const newBal = bal - total;
+      S.set('bal', newBal);
+      if (currentUser.wallet) currentUser.wallet.balance = newBal;
     } else {
-      selC={ id:'manual-'+Date.now(), name:phone, phone:phone, av:'?' };
+      S.set('bal', bal - total);
+      const txs = S.get('txs', []);
+      txs.unshift({ id: Date.now(), name: selC.name, av: selC.av, amount: n, fee, type: 'send', cat: 'Transfert', time: "À l'instant" });
+      S.set('txs', txs);
     }
-    $('rec-av').textContent=selC.av;
-    $('rec-name').textContent=selC.name;
-    $('rec-phone').textContent=selC.phone;
-    $('rec-row').style.display='flex';
-    G.toast('Destinataire sélectionné','inf');
+    G.ok(`${f(n)} FCFA envoyés`, `À ${selC.name} · Frais ${f(fee)} FCFA · Confirmé ✓`, () => G.go('home'));
   },
 
-  kp(v){
-    if(v==='del'){ aStr=aStr.slice(0,-1); }
-    else if(aStr.length<9){ aStr+=v; }
-    const n=parseInt(aStr)||0;
-    $('amt-disp').textContent=f(n);
-    const fee=Math.round(n*.015);
-    const fd=$('fee-disp');
-    if(fd) fd.innerHTML=`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5"><use href="#chk"/></svg>Frais : ${fee>0?f(fee)+' FCFA (1,5%)':'0 FCFA'}`;
+  // ── QR (paiement commerçant) ──
+  r_qr() {
+    if ($('qr-merchant')) $('qr-merchant').value = '';
+    if ($('qr-amount')) $('qr-amount').value = '';
   },
 
-  async doSend(){
-    if(!selC){ G.toast('Choisis un destinataire','err'); return; }
-    const n=parseInt(aStr)||0;
-    if(n<=0){ G.toast('Saisis un montant','err'); return; }
-    const fee=Math.round(n*.015);
-    const total=n+fee;
-    const bal=S.get('bal',0);
-    if(total>bal){ G.toast('Solde insuffisant (frais inclus)','err'); return; }
-    const note=$('send-note')?.value||'';
-    if(currentUser){
-      G.toast('Envoi en cours...','inf');
-      const {data,error}=await db.rpc('transfer_money',{ p_from_user_id:currentUser.id, p_to_user_id:selC.id, p_amount:n, p_note:note });
-      if(error||!data?.success){ G.toast(data?.error||'Erreur','err'); return; }
-      S.set('bal',bal-total);
-      if(currentUser.wallet) currentUser.wallet.balance=bal-total;
+  // ── RECEVOIR — QR personnel ──
+  r_recv() {
+    const u = S.get('user', {});
+    if ($('recv-name')) $('recv-name').textContent = u.name || 'Utilisateur';
+    if ($('recv-phone')) $('recv-phone').textContent = u.phone || '';
+    if (!window.QRCode) return;
+    const qrData = `ghettopay:pay?phone=${encodeURIComponent(u.phone||'')}&name=${encodeURIComponent(u.name||'')}`;
+    const qrEl = $('recv-qr-real');
+    if (qrEl) {
+      qrEl.innerHTML = '';
+      new QRCode(qrEl, { text: qrData || 'ghettopay', width: 200, height: 200, colorDark: '#0D0D0D', colorLight: '#FFFFFF', correctLevel: QRCode.CorrectLevel.M });
+    }
+  },
+
+  shareQR() {
+    const u = S.get('user', {});
+    const qrEl = $('recv-qr-real');
+    const canvas = qrEl?.querySelector('canvas');
+    const img = qrEl?.querySelector('img');
+    const fname = `ghettopay-${(u.name||'qr').toLowerCase().replace(/\s+/g,'-')}.png`;
+    if (canvas) {
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = fname;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      G.toast('QR téléchargé !', 'inf');
+    } else if (img) {
+      const a = document.createElement('a');
+      a.href = img.src; a.download = fname;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      G.toast('QR téléchargé !', 'inf');
     } else {
-      S.set('bal',bal-total);
-      const txs=S.get('txs',[]);
-      txs.unshift({ id:Date.now(), name:selC.name, av:selC.av, amount:n, fee, type:'send', cat:'Transfert', time:"À l'instant" });
-      S.set('txs',txs);
+      G.copyPayLink();
     }
-    G.ok(`${f(n)} FCFA envoyés`,`À ${selC.name} · Frais ${f(fee)} FCFA · Confirmé ✓`,()=>G.go('home'));
   },
 
-  // ── QR (Scanner) ──
-  r_qr(){
-    const u=S.get('user',{});
-    if($('qr-name')) $('qr-name').textContent=u.name||'Utilisateur';
-    if($('qr-phone')) $('qr-phone').textContent=u.phone||'';
-    if($('qr-real')){
-      $('qr-real').innerHTML='';
-      if(window.QRCode){
-        const data=`ghettopay:pay?phone=${encodeURIComponent(u.phone||'')}&name=${encodeURIComponent(u.name||'')}`;
-        new QRCode($('qr-real'),{ text:data||'ghettopay', width:180, height:180, colorDark:'#0D0D0D', colorLight:'#FFFFFF', correctLevel:QRCode.CorrectLevel.M });
+  copyPayLink() {
+    const u = S.get('user', {});
+    const link = `https://ghettopay.ga/pay?phone=${encodeURIComponent(u.phone||'')}&name=${encodeURIComponent(u.name||'')}`;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(link)
+        .then(() => G.toast('Lien copié !', 'inf'))
+        .catch(() => G.toast('Lien : ' + link, 'inf'));
+    } else {
+      G.toast('Lien copié !', 'inf');
+    }
+  },
+
+  selManualPhone() {
+    const phone = $('manual-phone')?.value.trim();
+    if (!phone || phone.length < 6) { G.toast('Numéro invalide', 'err'); return; }
+    selC = { id: 'manual_' + phone, name: phone, phone, av: '📞' };
+    $('rec-av').textContent = selC.av;
+    $('rec-name').textContent = selC.name;
+    $('rec-phone').textContent = selC.phone;
+    $('rec-row').style.display = 'flex';
+    if ($('manual-phone')) $('manual-phone').value = '';
+    G.toast('Destinataire défini', 'inf');
+  },
+
+  async pickContact() {
+    if (!('contacts' in navigator && 'ContactsManager' in window)) {
+      G.toast('Non disponible sur ce navigateur', 'err'); return;
+    }
+    try {
+      const contacts = await navigator.contacts.select(['name', 'tel'], { multiple: false });
+      if (contacts?.length) {
+        const c = contacts[0];
+        const phone = c.tel?.[0] || '';
+        const name = c.name?.[0] || phone;
+        selC = { id: 'contact_' + phone, name, phone, av: (name[0]||'?').toUpperCase() };
+        $('rec-av').textContent = selC.av;
+        $('rec-name').textContent = selC.name;
+        $('rec-phone').textContent = selC.phone;
+        $('rec-row').style.display = 'flex';
       }
-    }
+    } catch(e) { G.toast('Accès contacts refusé', 'err'); }
   },
 
-  doQR(){
-    const merchant=$('qr-merchant')?.value.trim();
-    const amount=parseInt($('qr-amount')?.value)||0;
-    if(!merchant){ G.toast('Nom du commerçant requis','err'); return; }
-    if(amount<=0){ G.toast('Montant requis','err'); return; }
-    const bal=S.get('bal',0);
-    if(amount>bal){ G.toast('Solde insuffisant','err'); return; }
-    if(currentUser){
-      db.from('transactions').insert({ from_user_id:currentUser.id, amount, type:'qr', merchant_name:merchant, status:'completed' })
-        .then(({error})=>{
-          if(error){ G.toast('Erreur paiement','err'); return; }
-          S.set('bal',bal-amount);
-          G.ok(`${f(amount)} FCFA payés`,`${merchant} · Confirmé ✓`,()=>G.go('home'));
-        });
+  doQR() {
+    const merchant = $('qr-merchant')?.value.trim();
+    const amount = parseInt($('qr-amount')?.value) || 0;
+    if (!merchant) { G.toast('Nom du commerçant requis', 'err'); return; }
+    if (amount <= 0) { G.toast('Montant requis', 'err'); return; }
+    const bal = S.get('bal', 0);
+    if (amount > bal) { G.toast('Solde insuffisant', 'err'); return; }
+
+    if (currentUser) {
+      // Enregistrer le paiement QR
+      db.from('transactions').insert({
+        from_user_id: currentUser.id,
+        amount,
+        type: 'qr',
+        merchant_name: merchant,
+        status: 'completed'
+      }).then(({ error }) => {
+        if (error) { G.toast('Erreur paiement', 'err'); return; }
+        S.set('bal', bal - amount);
+        G.ok(`${f(amount)} FCFA payés`, `${merchant} · Confirmé ✓`, () => G.go('home'));
+      });
     } else {
-      S.set('bal',bal-amount);
-      G.ok(`${f(amount)} FCFA payés`,`${merchant} · Confirmé ✓`,()=>G.go('home'));
+      S.set('bal', bal - amount);
+      G.ok(`${f(amount)} FCFA payés`, `${merchant} · Confirmé ✓`, () => G.go('home'));
     }
-  },
-
-  // === MODIFICATION 8: RECEVOIR screen (séparé du QR) ===
-  r_recevoir(){
-    const u=S.get('user',{});
-    if($('rv-name')) $('rv-name').textContent=u.name||'Utilisateur';
-    if($('rv-phone')) $('rv-phone').textContent=u.phone||'';
-    // Generate QR for recevoir
-    if($('qr-recv-code')){
-      $('qr-recv-code').innerHTML='';
-      if(window.QRCode){
-        const qrData=`ghettopay:pay?phone=${encodeURIComponent(u.phone||'')}&name=${encodeURIComponent(u.name||'')}`;
-        new QRCode($('qr-recv-code'),{ text:qrData||'ghettopay', width:170, height:170, colorDark:'#0D0D0D', colorLight:'#FFFFFF', correctLevel:QRCode.CorrectLevel.H });
-      }
-    }
-    // Load contacts for "demander"
-    if($('rv-req-contacts')&&G._rvContacts){
-      const grads=['linear-gradient(135deg,#0A4A2E,#16A34A)','linear-gradient(135deg,#7c3aed,#a78bfa)','linear-gradient(135deg,#0284c7,#38bdf8)'];
-      $('rv-req-contacts').innerHTML=(G._rvContacts||[]).slice(0,6).map((u2,i)=>{
-        const av=u2.avatar||(u2.name||'?')[0].toUpperCase();
-        return `<div class="contact" onclick="G.rvSelReq('${u2.id}','${u2.name.replace(/'/g,'')}','${av}')"><div class="c-av" style="background:${grads[i%grads.length]}">${av}</div><div class="c-name">${(u2.name||'').split(' ')[0]}</div></div>`;
-      }).join('');
-    }
-  },
-
-  rvTab(btn,pane){
-    document.querySelectorAll('.rv-tab').forEach(t=>t.classList.remove('on'));
-    btn.classList.add('on');
-    document.querySelectorAll('.rv-pane').forEach(p=>p.classList.remove('on'));
-    $(pane)?.classList.add('on');
-    if(pane==='rv-qr') G.r_recevoir();
-  },
-
-  // === MODIFICATION 7: Download QR + Copy link ===
-  downloadQR(){
-    const canvas=document.querySelector('#qr-recv-code canvas');
-    if(!canvas){ G.toast('QR non disponible','err'); return; }
-    const link=document.createElement('a');
-    link.download='ghettopay-qr.png';
-    link.href=canvas.toDataURL('image/png');
-    link.click();
-    G.toast('QR téléchargé !','inf');
-  },
-
-  copyQRLink(){
-    const u=S.get('user',{});
-    const link=`${location.origin}${location.pathname}?pay=${encodeURIComponent(u.phone||'')}&name=${encodeURIComponent(u.name||'')}`;
-    navigator.clipboard.writeText(link).then(()=>G.toast('Lien copié !','inf')).catch(()=>G.toast('Impossible de copier','err'));
-  },
-
-  genPayLink(){
-    const u=S.get('user',{});
-    const amount=parseInt($('rv-link-amount')?.value)||0;
-    const note=($('rv-link-note')?.value||'').trim();
-    let url=`${location.origin}${location.pathname}?pay=${encodeURIComponent(u.phone||'')}&name=${encodeURIComponent(u.name||'')}`;
-    if(amount>0) url+=`&amount=${amount}`;
-    if(note) url+=`&note=${encodeURIComponent(note)}`;
-    $('rv-link-url').textContent=url;
-    $('rv-link-result').style.display='block';
-  },
-
-  copyPayLink(){
-    const url=$('rv-link-url')?.textContent;
-    if(!url) return;
-    navigator.clipboard.writeText(url).then(()=>G.toast('Lien copié !','inf')).catch(()=>G.toast('Impossible de copier','err'));
-  },
-
-  rvSelReq(id,name,av){
-    rvSelContact={ id, name, av };
-    const el=$('rv-req-selected');
-    if(el){ el.style.display='flex'; }
-    if($('rv-req-av')) $('rv-req-av').textContent=av;
-    if($('rv-req-name')) $('rv-req-name').textContent=name;
-  },
-
-  async sendRequest(){
-    if(!rvSelContact){ G.toast('Sélectionne un contact','err'); return; }
-    const amount=parseInt($('rv-req-amount')?.value)||0;
-    if(amount<=0){ G.toast('Montant requis','err'); return; }
-    const note=($('rv-req-note')?.value||'').trim();
-    G.ok('Demande envoyée !',`${rvSelContact.name} recevra ta demande de ${f(amount)} FCFA${note?' pour '+note:''}`,()=>G.go('home'));
   },
 
   // ── COFFRE ──
-  r_coffre(){
-    const cbal=S.get('coffre',0);
-    $('coffre-total').textContent=f(cbal)+' FCFA';
+  r_coffre() {
+    const cbal = S.get('coffre', 0);
+    $('coffre-total').textContent = f(cbal) + ' FCFA';
     G.r_coffreList();
-    // Init calendar in modal
-    G.initCal();
   },
 
-  // === MODIFICATION 3: Calendar ===
-  initCal(){
-    const el=$('nc-cal');
-    if(!el) return;
-    const today=new Date();
-    calSelected=null;
-    G.renderCal(el,today.getFullYear(),today.getMonth());
-  },
-
-  renderCal(el,year,month){
-    const today=new Date();
-    const days=['L','M','M','J','V','S','D'];
-    const months=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
-    const first=new Date(year,month,1);
-    const last=new Date(year,month+1,0);
-    let startDay=first.getDay()-1; if(startDay<0) startDay=6;
-
-    let grid='';
-    days.forEach(d=>{ grid+=`<div class="cal-dn">${d}</div>`; });
-    for(let i=0;i<startDay;i++) grid+=`<button class="cal-d emp"></button>`;
-    for(let d=1;d<=last.getDate();d++){
-      const date=new Date(year,month,d);
-      const isPast=date<=today;
-      const isToday=date.toDateString()===today.toDateString();
-      const isSel=calSelected&&date.toDateString()===calSelected.toDateString();
-      let cls='cal-d';
-      if(isPast&&!isToday) cls+=' past';
-      if(isToday) cls+=' today';
-      if(isSel) cls+=' sel';
-      const disabled=isPast&&!isToday;
-      grid+=`<button class="${cls}" ${disabled?'disabled':''} onclick="G.calSelect(${year},${month},${d})">${d}</button>`;
+  async r_coffreList() {
+    let coffres = [];
+    if (currentUser) {
+      const { data } = await db.from('coffres').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+      coffres = data || [];
+    } else {
+      coffres = S.get('coffres', []);
     }
 
-    const selInfo=calSelected?
-      `<span class="cal-info-txt">${calSelected.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})}</span><span class="cal-info-dur">${G.calDurText(calSelected)}</span>`:
-      `<span class="cal-info-txt">Choisir une date</span><span class="cal-info-dur">—</span>`;
-
-    el.innerHTML=`<div class="cal-wrap"><div class="cal-head"><button class="cal-nav-btn" onclick="G.calNav(-1,${year},${month})">‹</button><span class="cal-title">${months[month]} ${year}</span><button class="cal-nav-btn" onclick="G.calNav(1,${year},${month})">›</button></div><div class="cal-grid">${grid}</div><div class="cal-info">${selInfo}</div></div>`;
-    if($('nc-unlock')) $('nc-unlock').value=calSelected?calSelected.toISOString().split('T')[0]:'';
-  },
-
-  calNav(dir,year,month){
-    const el=$('nc-cal'); if(!el) return;
-    let m=month+dir, y=year;
-    if(m<0){ m=11; y--; } if(m>11){ m=0; y++; }
-    G.renderCal(el,y,m);
-  },
-
-  calSelect(year,month,day){
-    calSelected=new Date(year,month,day);
-    G.renderCal($('nc-cal'),year,month);
-  },
-
-  calDurText(date){
-    const today=new Date(); today.setHours(0,0,0,0);
-    const diff=Math.round((date-today)/(1000*60*60*24));
-    const months=Math.round(diff/30);
-    if(months>=12) return Math.round(months/12)+' an'+(Math.round(months/12)>1?'s':'');
-    if(months>0) return months+' mois';
-    return diff+' j';
-  },
-
-  async r_coffreList(){
-    let coffres=[];
-    if(currentUser){
-      const {data}=await db.from('coffres').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});
-      coffres=data||[];
-    } else coffres=S.get('coffres',[]);
-
-    if(!coffres.length){
-      $('coffre-list').innerHTML='<div style="text-align:center;padding:32px;color:var(--txt3);font-size:.82rem">Aucun coffre. Crée le tien !</div>';
+    if (!coffres.length) {
+      $('coffre-list').innerHTML = '<div style="text-align:center;padding:32px 16px;color:var(--txt3);font-size:.82rem">Aucun coffre. Crée le tien !</div>';
       return;
     }
-    
-    const html=coffres.map(c=>{
-      const pct=c.target>0?Math.min(100,Math.round((c.saved/c.target)*100)):0;
-      const today=new Date();
-      const unlockDate=c.unlock_date?new Date(c.unlock_date):null;
-      const locked=unlockDate&&unlockDate>today;
-      const unlock=c.unlock_date?new Date(c.unlock_date).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}):'—';
-      const barColor=pct>=100?'var(--green)':pct>=50?'var(--gold)':'var(--forest)';
-      const statusIcon=locked?'🔒':'✅';
-      const statusTxt=locked?'Bloqué jusqu’au':'Disponible depuis';
-      
-      let btns='<button class="btn btn-ghost" style="font-size:.73rem;flex:1" onclick="G.depositCoffre(\'' +  "'+c.id+'','" + "'+c.name+'\'" + ',false)">+ Ajouter</button>';
-      
-      // Build deposit button safely
-      const depositBtn = [
-        '<button class="btn btn-ghost" style="font-size:.73rem;flex:1"',
-        ' onclick="G.depositCoffre(\'' , c.id , '\',' , JSON.stringify(c.name) , ',', String(!!locked) , ')">',
-        si('plus','var(--txt2)',13) , ' Ajouter</button>'
-      ].join('');
-      
-      const withdrawBtn = locked ? 
-        '<div style="flex:1;font-size:.6rem;color:var(--txt3);display:flex;align-items:center;justify-content:center">Bloqué</div>' :
-        ['<button class="btn btn-gold" style="font-size:.73rem;flex:1"',
-         ' onclick="G.withdrawCoffre(\'' , c.id , '\',' , JSON.stringify(c.name) , ',' , c.saved , ')">',
-         si('recv','var(--forest)',13) , ' Retirer</button>'
-        ].join('');
-      
-      return [
-        '<div class="coffre-item">',
-        '<div class="ci-head">',
-        '<div class="ci-ic" style="background:rgba(10,74,46,.1)">' + si('lock','var(--forest)',19) + '</div>',
-        '<div style="flex:1"><div class="ci-name">' + c.name + '</div>',
-        '<div class="ci-dl">' + statusIcon + ' ' + statusTxt + ' ' + unlock + '</div></div>',
-        '<div class="ci-right"><div class="ci-val">' + f(c.saved) + ' F</div>',
-        '<div class="ci-rate">' + pct + '% de ' + f(c.target) + ' F</div></div>',
-        '</div>',
-        '<div class="ci-bar-bg"><div class="ci-bar" style="width:' + pct + '%;background:' + barColor + '"></div></div>',
-        '<div class="ci-bar-lbls"><span>' + f(c.saved) + ' FCFA</span><span>Objectif : ' + f(c.target) + ' FCFA</span></div>',
-        '<div style="display:flex;gap:8px;margin-top:10px">',
-        depositBtn,
-        withdrawBtn,
-        '</div></div>'
-      ].join('');
-    });
-    $('coffre-list').innerHTML=html.join('');
-  },
 
-    async createCoffre(){
-    const name=$('nc-name')?.value.trim();
-    const target=parseInt($('nc-target')?.value)||0;
-    const init=parseInt($('nc-init')?.value)||0;
-    const unlock=$('nc-unlock')?.value;
-    if(!name){ G.toast('Nom requis','err'); return; }
-    if(target<=0){ G.toast('Objectif requis','err'); return; }
-    if(!unlock){ G.toast('Choisir une date de déblocage','err'); return; }
-    const bal=S.get('bal',0);
-    if(init>bal){ G.toast('Solde insuffisant pour le dépôt initial','err'); return; }
-
-    if(currentUser){
-      const {data:nc,error}=await db.from('coffres').insert({ user_id:currentUser.id, name, target, saved:init||0, unlock_date:unlock }).select().single();
-      if(error){ G.toast('Erreur: '+error.message,'err'); return; }
-      if(init>0){
-        await db.from('wallets').update({balance:bal-init}).eq('user_id',currentUser.id);
-        await db.from('transactions').insert({from_user_id:currentUser.id,amount:init,type:'coffre_deposit',merchant_name:name,status:'completed'});
-        S.set('bal',bal-init);
-        S.set('coffre',S.get('coffre',0)+init);
+    const nowDate = new Date();
+    $('coffre-list').innerHTML = coffres.map(c => {
+      const pct = c.target > 0 ? Math.round((c.saved / c.target) * 100) : 0;
+      const unlockDate = c.unlock_date ? new Date(c.unlock_date) : null;
+      const unlockStr = unlockDate ? unlockDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+      // Calendar: months from now to unlock
+      let calHTML = '';
+      if (unlockDate) {
+        const totalMonths = Math.max(1, Math.ceil((unlockDate - nowDate) / (30.5 * 24 * 3600 * 1000)));
+        const cappedMonths = Math.min(totalMonths, 12);
+        const dots = Array.from({length: cappedMonths}, (_, i) => {
+          const md = new Date(nowDate); md.setMonth(md.getMonth() + i);
+          const mname = md.toLocaleDateString('fr-FR', {month:'short'});
+          const isLast = i === cappedMonths - 1;
+          return `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0">
+            <div style="width:${isLast?'10px':'8px'};height:${isLast?'10px':'8px'};border-radius:50%;background:${isLast?'var(--gold)':i===0?'var(--green)':'var(--bg3)'};border:${isLast?'2px solid var(--gold2)':'none'}"></div>
+            <span style="font-size:.4rem;color:var(--txt3);font-family:var(--fm)">${mname}</span>
+          </div>`;
+        }).join('');
+        const monthsLeft = Math.max(0, Math.ceil((unlockDate - nowDate) / (30.5 * 24 * 3600 * 1000)));
+        calHTML = `<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+          <div style="font-size:.55rem;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-family:var(--fm)">Calendrier · ${monthsLeft} mois restant${monthsLeft>1?'s':''}</div>
+          <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;align-items:flex-end">${dots}${totalMonths>12?`<div style="font-size:.55rem;color:var(--txt3);align-self:center;margin-left:2px">+${totalMonths-12}</div>`:''}</div>
+        </div>`;
       }
+      return `<div class="coffre-item">
+        <div class="ci-head">
+          <div class="ci-ic" style="background:rgba(10,74,46,.1)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="var(--forest)" stroke-width="1.9"><use href="#lock"/></svg></div>
+          <div style="flex:1"><div class="ci-name">${c.name}</div><div class="ci-dl">Déblocage : ${unlockStr}</div></div>
+          <div class="ci-right"><div class="ci-val">${f(c.saved)} F</div><div class="ci-rate">${pct}% atteint</div></div>
+        </div>
+        <div class="ci-bar-bg"><div class="ci-bar" style="width:${pct}%;background:var(--green)"></div></div>
+        <div class="ci-bar-lbls"><span>${f(c.saved)} FCFA épargnés</span><span>Objectif : ${f(c.target)} FCFA</span></div>
+        ${calHTML}
+        <button class="btn btn-ghost" style="margin-top:10px;font-size:.75rem" onclick="G.depositCoffre('${c.id}','${c.name}')">
+          <svg><use href="#plus"/></svg>Ajouter des fonds
+        </button>
+      </div>`;
+    }).join('');
+  },
+
+  async createCoffre() {
+    const name = $('nc-name')?.value.trim();
+    const target = parseInt($('nc-target')?.value) || 0;
+    const months = parseInt($('nc-months')?.value) || 6;
+    if (!name) { G.toast('Nom requis', 'err'); return; }
+    if (target <= 0) { G.toast('Objectif requis', 'err'); return; }
+
+    const unlockDate = new Date();
+    unlockDate.setMonth(unlockDate.getMonth() + months);
+
+    if (currentUser) {
+      const { error } = await db.from('coffres').insert({
+        user_id: currentUser.id, name, target, saved: 0,
+        unlock_date: unlockDate.toISOString().split('T')[0]
+      });
+      if (error) { G.toast('Erreur création coffre', 'err'); return; }
     } else {
-      const coffres=S.get('coffres',[]);
-      coffres.unshift({ id:Date.now().toString(), name, target, saved:init||0, unlock_date:unlock });
-      S.set('coffres',coffres);
-      if(init>0){ S.set('bal',bal-init); S.set('coffre',S.get('coffre',0)+init); }
+      const coffres = S.get('coffres', []);
+      coffres.unshift({ id: Date.now().toString(), name, target, saved: 0, unlock_date: unlockDate.toISOString().split('T')[0] });
+      S.set('coffres', coffres);
     }
+
     G.closeModal('mc');
-    if($('nc-name')) $('nc-name').value='';
-    if($('nc-target')) $('nc-target').value='';
-    if($('nc-init')) $('nc-init').value='';
-    calSelected=null;
+    $('nc-name').value = ''; $('nc-target').value = '';
     G.r_coffre();
-    G.toast('Coffre créé !','ok');
+    G.toast('Coffre créé !', 'ok');
   },
 
-  async depositCoffre(coffreId,coffreName,locked){
-    const amount=parseInt(prompt(`Combien veux-tu déposer dans "${coffreName}" ? (FCFA)`))||0;
-    if(amount<=0) return;
-    const bal=S.get('bal',0);
-    if(amount>bal){ G.toast('Solde insuffisant','err'); return; }
-    if(currentUser){
-      await db.from('wallets').update({balance:bal-amount}).eq('user_id',currentUser.id);
-      const {data:cof}=await db.from('coffres').select('saved').eq('id',coffreId).single();
-      await db.from('coffres').update({saved:(cof?.saved||0)+amount}).eq('id',coffreId);
-      await db.from('transactions').insert({from_user_id:currentUser.id,amount,type:'coffre_deposit',merchant_name:coffreName,status:'completed'});
-      S.set('bal',bal-amount);
-      S.set('coffre',S.get('coffre',0)+amount);
-    } else {
-      S.set('bal',bal-amount);
-      S.set('coffre',S.get('coffre',0)+amount);
-      const coffres=S.get('coffres',[]);
-      const c=coffres.find(x=>x.id==coffreId); if(c) c.saved+=amount;
-      S.set('coffres',coffres);
-    }
-    G.r_coffre();
-    G.toast(`${f(amount)} FCFA déposés`,'ok');
-  },
+  async depositCoffre(coffreId, coffreName) {
+    const amount = parseInt(prompt(`Combien veux-tu déposer dans "${coffreName}" ? (FCFA)`)) || 0;
+    if (amount <= 0) return;
+    const bal = S.get('bal', 0);
+    if (amount > bal) { G.toast('Solde insuffisant', 'err'); return; }
 
-  async withdrawCoffre(coffreId,coffreName,saved){
-    const amount=parseInt(prompt(`Combien veux-tu retirer de "${coffreName}" ? (FCFA, max ${f(saved)})`))||0;
-    if(amount<=0) return;
-    if(amount>saved){ G.toast(`Maximum disponible : ${f(saved)} FCFA`,'err'); return; }
-    const bal=S.get('bal',0);
-    if(currentUser){
-      await db.from('wallets').update({balance:bal+amount}).eq('user_id',currentUser.id);
-      const {data:cof}=await db.from('coffres').select('saved').eq('id',coffreId).single();
-      await db.from('coffres').update({saved:Math.max(0,(cof?.saved||0)-amount)}).eq('id',coffreId);
-      S.set('bal',bal+amount);
-      S.set('coffre',Math.max(0,S.get('coffre',0)-amount));
+    if (currentUser) {
+      // Débiter wallet, créditer coffre
+      await db.from('wallets').update({ balance: bal - amount }).eq('user_id', currentUser.id);
+      await db.from('coffres').update({ saved: db.rpc('increment', { row_id: coffreId, x: amount }) }).eq('id', coffreId);
+      // Plus simple : fetch saved actuel puis update
+      const { data: cof } = await db.from('coffres').select('saved').eq('id', coffreId).single();
+      await db.from('coffres').update({ saved: (cof?.saved || 0) + amount }).eq('id', coffreId);
+      await db.from('transactions').insert({ from_user_id: currentUser.id, amount, type: 'coffre_deposit', merchant_name: coffreName, status: 'completed' });
+      S.set('bal', bal - amount);
+      S.set('coffre', S.get('coffre', 0) + amount);
     } else {
-      S.set('bal',bal+amount);
-      S.set('coffre',Math.max(0,S.get('coffre',0)-amount));
-      const coffres=S.get('coffres',[]);
-      const c=coffres.find(x=>x.id==coffreId); if(c) c.saved=Math.max(0,c.saved-amount);
-      S.set('coffres',coffres);
+      S.set('bal', bal - amount);
+      S.set('coffre', S.get('coffre', 0) + amount);
+      const coffres = S.get('coffres', []);
+      const c = coffres.find(x => x.id == coffreId);
+      if (c) c.saved += amount;
+      S.set('coffres', coffres);
     }
+
     G.r_coffre();
-    G.toast(`${f(amount)} FCFA retirés vers ton solde`,'ok');
+    G.toast(`${f(amount)} FCFA déposés`, 'ok');
   },
 
   // ── BUDGET ──
-  r_budget(){
-    const txs=S.get('txs',[]);
-    const out=txs.filter(t=>['send','qr','bill','recharge','coffre_deposit'].includes(t.type));
-    const inp=txs.filter(t=>t.type==='recv'||t.type==='transfer_in');
-    const totalOut=out.reduce((s,t)=>s+(t.amount||0),0);
-    const totalIn=inp.reduce((s,t)=>s+(t.amount||0),0);
-    // === MODIFICATION 5: Show actual amounts ===
-    $('bud-out').textContent=f(totalOut)+' F';
-    $('bud-in').textContent=f(totalIn)+' F';
-    const cats=[
-      {name:'Transferts',ico:'send',col:'#D4A017',bg:'rgba(212,160,23,.12)',types:['send','transfer']},
-      {name:'Paiements',ico:'pay',col:'#3b82f6',bg:'rgba(59,130,246,.12)',types:['qr','bill']},
-      {name:'Recharges',ico:'phone',col:'#dc2626',bg:'rgba(220,38,38,.12)',types:['recharge']},
-      {name:'Coffre',ico:'lock',col:'#0A4A2E',bg:'rgba(10,74,46,.12)',types:['coffre_deposit']},
+  r_budget() {
+    const txs = S.get('txs', []);
+    const out = txs.filter(t => t.type === 'send' || t.type === 'qr' || t.type === 'bill' || t.type === 'recharge' || t.type === 'coffre_deposit');
+    const inp = txs.filter(t => t.type === 'recv' || t.type === 'transfer_in');
+    const totalOut = out.reduce((s, t) => s + (t.amount || 0), 0);
+    const totalIn = inp.reduce((s, t) => s + (t.amount || 0), 0);
+    $('bud-out').textContent = f(totalOut) + ' F';
+    $('bud-in').textContent = f(totalIn) + ' F';
+    
+    // Catégories
+    const cats = [
+      { name: 'Transferts', ico: 'send', col: '#D4A017', bg: 'rgba(212,160,23,.12)', types: ['send', 'transfer'] },
+      { name: 'Paiements', ico: 'pay', col: '#3b82f6', bg: 'rgba(59,130,246,.12)', types: ['qr', 'bill'] },
+      { name: 'Recharges', ico: 'phone', col: '#dc2626', bg: 'rgba(220,38,38,.12)', types: ['recharge'] },
+      { name: 'Coffre', ico: 'lock', col: '#0A4A2E', bg: 'rgba(10,74,46,.12)', types: ['coffre_deposit'] },
     ];
-    $('cat-list').innerHTML=cats.map(cat=>{
-      const total=txs.filter(t=>cat.types.includes(t.type)).reduce((s,t)=>s+(t.amount||0),0);
-      const pct=totalOut>0?Math.round(total/totalOut*100):0;
-      return `<div class="cat-item"><div class="cat-ic" style="background:${cat.bg}">${si(cat.ico,cat.col,15)}</div><div style="flex:1"><div class="cat-name">${cat.name}</div><div class="cat-bar-wrap" style="margin-top:5px"><div class="cat-bar-fill" style="width:${pct}%;background:${cat.col}"></div></div></div><div class="cat-right"><div class="cat-val">${f(total)} F</div><div class="cat-pct">${pct}%</div></div></div>`;
+    $('cat-list').innerHTML = cats.map(cat => {
+      const total = txs.filter(t => cat.types.includes(t.type)).reduce((s, t) => s + (t.amount || 0), 0);
+      const pct = totalOut > 0 ? Math.round(total / totalOut * 100) : 0;
+      return `<div class="cat-item"><div class="cat-ic" style="background:${cat.bg}">${si(cat.ico, cat.col, 15)}</div><div style="flex:1"><div class="cat-name">${cat.name}</div><div class="cat-bar-wrap" style="margin-top:5px"><div class="cat-bar-fill" style="width:${pct}%;background:${cat.col}"></div></div></div><div class="cat-right"><div class="cat-val">${f(total)} F</div><div class="cat-pct">${pct}%</div></div></div>`;
     }).join('');
-    if(currentUser){
-      db.from('transactions').select('*, from_user:from_user_id(name,avatar), to_user:to_user_id(name,avatar)').or(`from_user_id.eq.${currentUser.id},to_user_id.eq.${currentUser.id}`).order('created_at',{ascending:false}).limit(50)
-        .then(({data:txs2})=>{
-          if(!txs2?.length){ $('all-tx').innerHTML='<div style="padding:16px;text-align:center;color:var(--txt3);font-size:.8rem">Aucune transaction</div>'; return; }
-          // === MODIFICATION 5: Show amounts in budget ===
-          $('all-tx').innerHTML=txs2.map(t=>{
-            const isCredit=t.to_user_id===currentUser.id;
-            const other=isCredit?t.from_user:t.to_user;
-            const name=other?.name||t.merchant_name||'GhettoPay';
-            const ico={transfer:isCredit?'recv':'send',qr:'qric',recharge:'phone',bill:'pay',coffre_deposit:'lock',tontine:'users'}[t.type]||'send';
-            const col=isCredit?'#16A34A':'#DC2626'; const bg=isCredit?'rgba(22,163,74,.12)':'rgba(212,160,23,.12)';
-            const cat={transfer:'Transfert',qr:'QR Pay',recharge:'Recharge',bill:'Facture',coffre_deposit:'Coffre',tontine:'Tontine'}[t.type]||t.type;
-            const time=new Date(t.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
-            return G._txRow(isCredit,name,ico,col,bg,cat,time,t.amount,0);
+
+    // All transactions
+    if (currentUser) {
+      db.from('transactions')
+        .select('*, from_user:from_user_id(name,avatar), to_user:to_user_id(name,avatar)')
+        .or(`from_user_id.eq.${currentUser.id},to_user_id.eq.${currentUser.id}`)
+        .order('created_at', { ascending: false })
+        .limit(50)
+        .then(({ data: txs2 }) => {
+          if (!txs2?.length) { $('all-tx').innerHTML = '<div style="padding:16px;text-align:center;color:var(--txt3);font-size:.8rem">Aucune transaction</div>'; return; }
+          $('all-tx').innerHTML = txs2.map(t => {
+            const isCredit = t.to_user_id === currentUser.id;
+            const other = isCredit ? t.from_user : t.to_user;
+            const name = other?.name || t.merchant_name || 'GhettoPay';
+            const ico = { transfer: isCredit?'recv':'send', qr:'qric', recharge:'phone', bill:'pay', coffre_deposit:'lock', tontine:'users' }[t.type] || 'send';
+            const col = isCredit ? '#16A34A' : '#DC2626';
+            const bg = isCredit ? 'rgba(22,163,74,.12)' : 'rgba(212,160,23,.12)';
+            const cat = { transfer:'Transfert', qr:'QR Pay', recharge:'Recharge', bill:'Facture', coffre_deposit:'Coffre', tontine:'Tontine' }[t.type] || t.type;
+            const time = new Date(t.created_at).toLocaleDateString('fr-FR', { day:'numeric', month:'short' });
+            return G._txRow(isCredit, name, ico, col, bg, cat, time, t.amount);
           }).join('');
         });
     } else {
-      $('all-tx').innerHTML=txs.length?txs.map(t=>{
-        const isCredit=t.type==='recv'; const ico={recv:'recv',send:'send',qr:'qric',recharge:'phone',bill:'pay',coffre_deposit:'lock',tontine:'users'}[t.type]||'send';
-        const col=isCredit?'#16A34A':'#DC2626'; const bg=isCredit?'rgba(22,163,74,.12)':'rgba(212,160,23,.12)';
-        const cat=t.cat||t.type; const time=t.time||'—';
-        return G._txRow(isCredit,t.name||'Inconnu',ico,col,bg,cat,time,t.amount,t.fee||0);
-      }).join(''):'<div style="padding:16px;text-align:center;color:var(--txt3);font-size:.8rem">Aucune transaction</div>';
+      $('all-tx').innerHTML = txs.length ? txs.map(t => {
+        const isCredit = t.type === 'recv';
+        const ico = { recv:'recv', send:'send', qr:'qric', recharge:'phone', bill:'pay', coffre_deposit:'lock', tontine:'users' }[t.type] || 'send';
+        const col = isCredit ? '#16A34A' : '#DC2626';
+        const bg = isCredit ? 'rgba(22,163,74,.12)' : 'rgba(212,160,23,.12)';
+        const cat = t.cat || { recv:'Reçu', send:'Envoyé', qr:'QR Pay', recharge:'Recharge', bill:'Facture', coffre_deposit:'Coffre', tontine:'Tontine' }[t.type] || t.type;
+        return G._txRow(isCredit, t.name||'Inconnu', ico, col, bg, cat, t.time||'—', t.amount);
+      }).join('') : '<div style="padding:16px;text-align:center;color:var(--txt3);font-size:.8rem">Aucune transaction</div>';
     }
   },
 
-  // ── TONTINE (avec membres et logique complète) ──
-  r_tontine(){ G._loadTontines(); },
+  // ── TONTINE ──
+  r_tontine() { G._loadTontines(); },
 
-  async _loadTontines(){
-    let tontines=[];
-    if(currentUser){
-      const {data:m}=await db.from('tontine_members').select('tontine_id').eq('user_id',currentUser.id);
-      if(m?.length){
-        const ids=m.map(x=>x.tontine_id);
-        const {data}=await db.from('tontines').select('*, tontine_members(*, user:user_id(id,name,avatar,phone))').in('id',ids);
-        tontines=data||[];
+  async _loadTontines() {
+    let tontines = [];
+    if (currentUser) {
+      const { data: memberships } = await db.from('tontine_members').select('tontine_id').eq('user_id', currentUser.id);
+      if (memberships?.length) {
+        const ids = memberships.map(m => m.tontine_id);
+        const { data } = await db.from('tontines').select('*, tontine_members(count)').in('id', ids);
+        tontines = data || [];
       }
-    } else tontines=S.get('tontines',[]);
-    if(!tontines.length){
-      const emptyTnt='<div style="text-align:center;padding:32px;color:var(--txt3);font-size:.82rem">Aucune tontine.</div>';
-      const createBtn='<button class="btn btn-gold" onclick="G.showModal(&quot;mt&quot;)" style="margin:0 16px 16px">Créer une tontine</button>';
-      $('tontine-list').innerHTML=emptyTnt+createBtn;
+    } else {
+      tontines = S.get('tontines', []);
+    }
+
+    if (!tontines.length) {
+      $('tontine-list').innerHTML = '<div style="text-align:center;padding:32px;color:var(--txt3);font-size:.82rem">Aucune tontine. Crée ou rejoins-en une !</div><button class="btn btn-gold" onclick="G.showModal(\'mt\')" style="margin:0 16px"><svg><use href="#plus"/></svg>Créer une tontine</button>';
       return;
     }
-    const colors=['linear-gradient(135deg,#7c3aed,#a78bfa)','linear-gradient(135deg,#0284c7,#38bdf8)','linear-gradient(135deg,var(--forest),var(--forest2))'];
-    $('tontine-list').innerHTML=tontines.map((t,i)=>{
-      // === MODIFICATION 2: Full tontine logic with members list ===
-      const members=t.tontine_members||[];
-      const sorted=[...members].sort((a,b)=>a.turn_order-b.turn_order);
-      const paidCount=sorted.filter(m=>m.has_paid).length;
-      const total=sorted.length||1;
-      const pct=Math.round(paidCount/total*100);
-      const currentTurnMember=sorted.find(m=>m.turn_order===sorted.filter(m2=>!m2.has_received).map(m2=>m2.turn_order).sort((a,b)=>a-b)[0]);
-      const isMyTurn=currentTurnMember?.user_id===currentUser?.id;
-      const myMembership=sorted.find(m=>m.user_id===currentUser?.id);
-      const membersHtml=sorted.map((m,mi)=>{
-        const badgeCls=m.has_paid?'paid':m.turn_order===sorted.filter(m2=>!m2.has_received).map(m2=>m2.turn_order).sort((a,b)=>a-b)[0]?'turn':'wait';
-        const badgeTxt=m.has_paid?'✓ Cotisé':badgeCls==='turn'?'⚡ Son tour':'En attente';
-        const grads=['linear-gradient(135deg,#0A4A2E,#16A34A)','linear-gradient(135deg,#7c3aed,#a78bfa)','linear-gradient(135deg,#0284c7,#38bdf8)','linear-gradient(135deg,#d97706,#fcd34d)'];
-        const av=m.user?.avatar||(m.user?.name||'?')[0].toUpperCase();
-        return `<div class="tnt-mb"><div class="tnt-mb-av" style="background:${grads[mi%grads.length]}">${av}</div><div style="flex:1"><div class="tnt-mb-nm">${m.user?.name||'Membre '+(mi+1)}</div><div class="tnt-mb-sub">Tour ${m.turn_order} · ${m.has_received?'✅ A reçu':mi===0?'🎯 Prochain à recevoir':'En attente'}</div></div><span class="tnt-mb-badge ${badgeCls}">${badgeTxt}</span></div>`;
-      }).join('');
-      return `<div style="background:var(--card);border-radius:20px;border:1px solid var(--border);overflow:hidden;margin-bottom:14px">
-        <div style="background:${colors[i%colors.length]};padding:16px 18px">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-            <div style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.95rem;color:#fff">${t.name[0]}</div>
-            <div style="flex:1"><div style="font-size:.84rem;font-weight:800;color:#fff">${t.name}</div><div style="font-size:.6rem;color:rgba(255,255,255,.55);font-family:var(--fm)">${total} membres · ${t.frequency==='weekly'?'Hebdomadaire':'Mensuel'}</div></div>
-            <div style="text-align:right"><div style="font-family:var(--fd);font-size:.92rem;font-weight:900;color:#fff">${f(t.amount_per_cycle)}</div><div style="font-size:.54rem;color:rgba(255,255,255,.5)">FCFA/cycle</div></div>
-          </div>
-          ${isMyTurn&&!myMembership?.has_paid?'<div style="background:rgba(212,160,23,.2);border:1px solid rgba(212,160,23,.3);border-radius:8px;padding:7px 12px;font-size:.72rem;font-weight:700;color:var(--gold2);margin-bottom:10px">⚡ C\'est ton tour de cotiser !</div>':''}
-          <div style="background:rgba(255,255,255,.15);border-radius:100px;height:5px;overflow:hidden;margin-bottom:6px"><div style="width:${pct}%;height:100%;border-radius:100px;background:var(--gold2)"></div></div>
-          <div style="display:flex;justify-content:space-between;font-family:var(--fm);font-size:.54rem;color:rgba(255,255,255,.5)">${paidCount}/${total} ont cotisé · ${f(paidCount*t.amount_per_cycle)} FCFA collectés</div>
+
+    const colors = ['linear-gradient(135deg,#7c3aed,#a78bfa)', 'linear-gradient(135deg,#0284c7,#38bdf8)', 'linear-gradient(135deg,var(--forest),var(--forest2))'];
+    const now = new Date();
+    $('tontine-list').innerHTML = tontines.map((t, i) => {
+      const paid = t.members_paid || 0;
+      const total = t.tontine_members?.[0]?.count || t.members_count || (t.members?.length || 5);
+      const pct = total > 0 ? Math.round(paid / total * 100) : 0;
+      // Calculate whose turn it is this month
+      const members = t.members || [];
+      const startDate = t.start_date ? new Date(t.start_date) : new Date();
+      const monthsElapsed = (now.getFullYear() - startDate.getFullYear()) * 12 + (now.getMonth() - startDate.getMonth());
+      const currentTurnIdx = members.length > 0 ? monthsElapsed % members.length : 0;
+      const currentTurnName = members[currentTurnIdx] || null;
+      const turnBadge = currentTurnName
+        ? `<div style="background:rgba(212,160,23,.2);border:1px solid rgba(212,160,23,.35);border-radius:10px;padding:8px 12px;font-size:.68rem;font-weight:700;color:var(--gold2);margin-bottom:12px">🎯 Tour du mois · <strong>${currentTurnName}</strong></div>`
+        : '';
+      // Member order row
+      const orderRow = members.length > 0
+        ? `<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px">${members.map((m, mi) => `<div style="padding:3px 8px;border-radius:6px;font-size:.55rem;font-weight:700;background:${mi===currentTurnIdx?'rgba(212,160,23,.3)':'rgba(255,255,255,.1)'};color:${mi===currentTurnIdx?'var(--gold2)':'rgba(255,255,255,.55)'}">${mi+1}. ${m}</div>`).join('')}</div>`
+        : '';
+      return `<div style="background:${colors[i % colors.length]};border-radius:18px;padding:18px;position:relative;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <div style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.9rem;color:#fff">${t.name[0]}</div>
+          <div style="flex:1"><div style="font-size:.82rem;font-weight:800;color:#fff">${t.name}</div><div style="font-size:.6rem;color:rgba(255,255,255,.55);font-family:var(--fm)">${total} membres · ${t.frequency === 'weekly' ? 'Hebdo' : 'Mensuel'}</div></div>
+          <div style="text-align:right"><div style="font-family:var(--fd);font-size:.88rem;font-weight:900;color:#fff">${f(t.amount_per_cycle)}</div><div style="font-size:.54rem;color:rgba(255,255,255,.5)">FCFA/cycle</div></div>
         </div>
-        <!-- Membres -->
-        <div style="padding:12px 16px;border-bottom:1px solid var(--border)">
-          <div style="font-size:.58rem;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Membres & Tours</div>
-          ${membersHtml||'<div style="font-size:.76rem;color:var(--txt3);text-align:center;padding:8px">Aucun membre</div>'}
-          ${currentUser&&t.creator_id===currentUser.id?'<button onclick="G.addMember(' + JSON.stringify(t.id) + ')" style="width:100%;margin-top:10px;padding:9px;border:1.5px dashed var(--border);border-radius:10px;background:none;font-family:var(--f);font-size:.76rem;font-weight:700;color:var(--txt3);cursor:pointer">+ Inviter un membre</button>':''}
-        </div>
-        <!-- Actions -->
-        <div style="padding:12px 16px;display:flex;gap:8px">
-          ${!myMembership?.has_paid?`<button style="flex:1;padding:10px;border:none;border-radius:11px;background:${isMyTurn?'var(--forest)':'rgba(10,74,46,.08)'};color:${isMyTurn?'#fff':'var(--forest)'};font-size:.78rem;font-weight:800;cursor:pointer;border:1.5px solid rgba(10,74,46,.18);font-family:var(--f)" onclick="G.payTontine('${t.id}','${t.amount_per_cycle}','${t.name}')">💰 Cotiser (${f(t.amount_per_cycle)} F)</button>`:`<div style="flex:1;text-align:center;font-size:.72rem;color:var(--green);font-weight:700;padding:10px">✅ Tu as cotisé ce cycle</div>`}
-        </div>
+        ${turnBadge}${orderRow}
+        <div style="background:rgba(255,255,255,.15);border-radius:100px;height:6px;overflow:hidden;margin-bottom:6px"><div style="width:${pct}%;height:100%;border-radius:100px;background:var(--gold2)"></div></div>
+        <div style="display:flex;justify-content:space-between;font-family:var(--fm);font-size:.56rem;color:rgba(255,255,255,.5);margin-bottom:12px"><span>${paid} / ${total} ont cotisé</span><span>Cycle en cours</span></div>
+        <button style="width:100%;padding:10px;border:1.5px solid rgba(255,255,255,.25);border-radius:10px;background:rgba(255,255,255,.12);color:#fff;font-size:.78rem;font-weight:800;font-family:var(--f);cursor:pointer" onclick="G.payTontine('${t.id}','${t.amount_per_cycle}','${t.name}')">Cotiser maintenant</button>
       </div>`;
-    }).join('')+`<button class="btn btn-ghost" onclick="G.showModal('mt')">${si('plus','var(--txt2)',14)} Créer une tontine</button>`;
+    }).join('') + `<button class="btn btn-ghost" onclick="G.showModal('mt')" style="margin-top:4px"><svg><use href="#plus"/></svg>Créer une tontine</button>`;
   },
 
-  async addMember(tontineId){
-    const phone=prompt('Numéro de téléphone du nouveau membre (+241...)');
-    if(!phone) return;
-    if(!currentUser){ G.toast('Connecte-toi pour ajouter des membres','err'); return; }
-    const {data:user}=await db.from('users').select('id,name').eq('phone',phone).single();
-    if(!user){ G.toast('Utilisateur non trouvé','err'); return; }
-    const {data:members}=await db.from('tontine_members').select('turn_order').eq('tontine_id',tontineId);
-    const nextTurn=(members?.length||0)+1;
-    await db.from('tontine_members').insert({ tontine_id:tontineId, user_id:user.id, turn_order:nextTurn });
-    G.r_tontine();
-    G.toast(`${user.name} ajouté à la tontine`,'ok');
+  _tontineMembers: [],
+
+  addTontineMember() {
+    const inp = $('nt-member-input');
+    const name = inp?.value.trim();
+    if (!name) return;
+    G._tontineMembers.push(name);
+    inp.value = '';
+    G._renderTontineMembers();
   },
 
-  async createTontine(){
-    const name=$('nt-name')?.value.trim();
-    const amount=parseInt($('nt-amount')?.value)||0;
-    const freq=$('nt-freq')?.value||'monthly';
-    if(!name){ G.toast('Nom requis','err'); return; }
-    if(amount<=0){ G.toast('Montant requis','err'); return; }
-    if(currentUser){
-      const {data:t,error}=await db.from('tontines').insert({ name, creator_id:currentUser.id, amount_per_cycle:amount, frequency:freq, current_turn_user_id:currentUser.id }).select().single();
-      if(error){ G.toast('Erreur création','err'); return; }
-      await db.from('tontine_members').insert({ tontine_id:t.id, user_id:currentUser.id, turn_order:1, has_paid:false, has_received:false });
+  _renderTontineMembers() {
+    const list = $('nt-members-list');
+    if (!list) return;
+    list.innerHTML = G._tontineMembers.map((m, i) =>
+      `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg2);border-radius:10px">
+        <div style="width:22px;height:22px;border-radius:50%;background:var(--forest);color:#fff;font-size:.65rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</div>
+        <span style="flex:1;font-size:.8rem;font-weight:700;color:var(--txt)">${m}</span>
+        <button onclick="G._removeTontineMember(${i})" style="border:none;background:none;color:var(--txt3);cursor:pointer;font-size:.85rem;padding:2px 6px">✕</button>
+      </div>`
+    ).join('');
+  },
+
+  _removeTontineMember(i) {
+    G._tontineMembers.splice(i, 1);
+    G._renderTontineMembers();
+  },
+
+  async createTontine() {
+    const name = $('nt-name')?.value.trim();
+    const amount = parseInt($('nt-amount')?.value) || 0;
+    const freq = $('nt-freq')?.value || 'monthly';
+    if (!name) { G.toast('Nom requis', 'err'); return; }
+    if (amount <= 0) { G.toast('Montant requis', 'err'); return; }
+
+    const members = G._tontineMembers.length > 0 ? [...G._tontineMembers] : ['Moi'];
+
+    if (currentUser) {
+      const { data: t, error } = await db.from('tontines').insert({
+        name, creator_id: currentUser.id,
+        amount_per_cycle: amount, frequency: freq,
+        current_turn_user_id: currentUser.id,
+        members_count: members.length
+      }).select().single();
+      if (error) { G.toast('Erreur création', 'err'); return; }
+      const inserts = members.map((m, i) => ({ tontine_id: t.id, user_id: currentUser.id, member_name: m, turn_order: i + 1, has_paid: false }));
+      await db.from('tontine_members').insert(inserts);
     } else {
-      const tontines=S.get('tontines',[]);
-      tontines.unshift({ id:Date.now().toString(), name, amount_per_cycle:amount, frequency:freq, tontine_members:[{user_id:'local',turn_order:1,has_paid:false,has_received:false}] });
-      S.set('tontines',tontines);
+      const tontines = S.get('tontines', []);
+      tontines.unshift({ id: Date.now().toString(), name, amount_per_cycle: amount, frequency: freq, members_count: members.length, members_paid: 0, members, start_date: new Date().toISOString() });
+      S.set('tontines', tontines);
     }
+
+    G._tontineMembers = [];
     G.closeModal('mt');
-    if($('nt-name')) $('nt-name').value=''; if($('nt-amount')) $('nt-amount').value='';
+    $('nt-name').value = ''; $('nt-amount').value = '';
+    if ($('nt-members-list')) $('nt-members-list').innerHTML = '';
     G.r_tontine();
-    G.toast('Tontine créée ! Ajoute des membres.','ok');
+    G.toast('Tontine créée !', 'ok');
   },
 
-  async payTontine(tontineId,amount,name){
-    const n=parseInt(amount)||0;
-    const bal=S.get('bal',0);
-    if(n>bal){ G.toast('Solde insuffisant','err'); return; }
-    if(currentUser){
-      await db.from('wallets').update({balance:bal-n}).eq('user_id',currentUser.id);
-      await db.from('tontine_members').update({has_paid:true}).eq('tontine_id',tontineId).eq('user_id',currentUser.id);
-      await db.from('transactions').insert({from_user_id:currentUser.id,amount:n,type:'tontine',merchant_name:name,status:'completed'});
-      S.set('bal',bal-n);
+  async payTontine(tontineId, amount, name) {
+    const n = parseInt(amount) || 0;
+    const bal = S.get('bal', 0);
+    if (n > bal) { G.toast('Solde insuffisant', 'err'); return; }
+
+    if (currentUser) {
+      await db.from('wallets').update({ balance: bal - n }).eq('user_id', currentUser.id);
+      await db.from('tontine_members').update({ has_paid: true }).eq('tontine_id', tontineId).eq('user_id', currentUser.id);
+      await db.from('transactions').insert({ from_user_id: currentUser.id, amount: n, type: 'tontine', merchant_name: name, status: 'completed' });
+      S.set('bal', bal - n);
     } else {
-      S.set('bal',bal-n);
+      S.set('bal', bal - n);
     }
+
     G.r_tontine();
-    G.ok(`${f(n)} FCFA cotisés`,`${name} · Confirmé ✓`,()=>G.go('tontine'));
+    G.ok(`${f(n)} FCFA cotisés`, `${name} · Confirmé ✓`, () => G.go('tontine'));
   },
 
   // ── FACTURES ──
-  r_factures(){
-    const bills=S.get('bills',[]);
-    const todo=bills.filter(b=>!b.paid);
-    const done=bills.filter(b=>b.paid);
-    // === MODIFICATION 6: tout payer fait disparaître les factures ===
-    $('bills-todo').innerHTML=todo.map(b=>`
+  r_factures() {
+    const bills = S.get('bills', []);
+    const todo = bills.filter(b => !b.paid);
+    $('bills-todo').innerHTML = todo.map(b => `
       <div class="bill-item" id="bill-${b.id}">
-        <div class="bill-ic" style="background:rgba(220,38,38,.1)">${si('pay','#dc2626',20)}</div>
-        <div><div class="bill-name">${b.name}</div><div class="bill-ref">${b.ref||'—'}</div></div>
-        <div class="bill-right"><div class="bill-val">${f(b.amount)} F</div><div class="bill-due">${b.due||'—'}</div></div>
+        <div class="bill-ic" style="background:rgba(220,38,38,.1)">${si('pay', '#dc2626', 20)}</div>
+        <div><div class="bill-name">${b.name}</div><div class="bill-ref">${b.ref || 'Réf: —'}</div></div>
+        <div class="bill-right"><div class="bill-val">${f(b.amount)} F</div><div class="bill-due">${b.due || '—'}</div></div>
         <button onclick="G.payBill('${b.id}')" style="margin-left:8px;padding:6px 12px;background:var(--forest);color:#fff;border:none;border-radius:8px;font-size:.72rem;font-weight:700;cursor:pointer">Payer</button>
-      </div>`).join('')||'<div style="padding:12px;color:var(--green);font-size:.84rem;font-weight:700;text-align:center">✅ Aucune facture en attente !</div>';
-    $('bills-done').innerHTML=done.length?`<div class="lbl">Payées</div>`+done.map(b=>`<div class="bill-item" style="opacity:.55"><div class="bill-ic" style="background:rgba(22,163,74,.1)">${si('chk','#16a34a',20)}</div><div><div class="bill-name">${b.name}</div><div class="bill-ref" style="color:var(--green)">✓ Payé</div></div><div class="bill-right"><div class="bill-val">${f(b.amount)} F</div></div></div>`).join(''):'';
+      </div>`).join('') || '<div style="padding:20px;text-align:center;color:var(--txt3);font-size:.82rem">Toutes les factures sont payées 🎉</div>';
   },
 
-  payBill(id){
-    const bills=S.get('bills',[]);
-    const b=bills.find(x=>x.id==id);
-    if(!b) return;
-    const bal=S.get('bal',0);
-    if(b.amount>bal){ G.toast('Solde insuffisant','err'); return; }
-    b.paid=true;
-    S.set('bal',bal-b.amount); S.set('bills',bills);
-    if(currentUser){
-      db.from('transactions').insert({from_user_id:currentUser.id,amount:b.amount,type:'bill',merchant_name:b.name,status:'completed'});
-      db.from('wallets').update({balance:bal-b.amount}).eq('user_id',currentUser.id);
+  payBill(id) {
+    const bills = S.get('bills', []);
+    const b = bills.find(x => x.id == id);
+    if (!b) return;
+    const bal = S.get('bal', 0);
+    if (b.amount > bal) { G.toast('Solde insuffisant', 'err'); return; }
+    b.paid = true;
+    S.set('bal', bal - b.amount);
+    S.set('bills', bills);
+    if (currentUser) {
+      db.from('transactions').insert({ from_user_id: currentUser.id, amount: b.amount, type: 'bill', merchant_name: b.name, status: 'completed' });
+      db.from('wallets').update({ balance: bal - b.amount }).eq('user_id', currentUser.id);
     }
-    // === MODIFICATION 6: Remove from DOM immediately ===
-    const el=$(`bill-${id}`);
-    if(el){ el.style.transition='opacity .3s'; el.style.opacity='0'; setTimeout(()=>{ el.remove(); if(!$('bills-todo').children.length) G.r_factures(); },350); }
-    G.ok('Facture payée',`${b.name} · ${f(b.amount)} FCFA`,()=>G.go('factures'));
+    // Animate removal from DOM immediately
+    const el = $('bill-' + id);
+    if (el) { el.style.transition = 'opacity .3s,transform .3s'; el.style.opacity = '0'; el.style.transform = 'translateX(40px)'; setTimeout(() => { el.remove(); G.r_factures(); }, 320); }
+    else { G.r_factures(); }
+    G.toast(`${b.name} payée · ${f(b.amount)} FCFA`, 'inf');
   },
 
-  // === MODIFICATION 6: Tout payer — tout disparaît ===
-  payAll(){
-    const bills=S.get('bills',[]).filter(b=>!b.paid);
-    if(!bills.length){ G.toast('Aucune facture en attente','inf'); return; }
-    let bal=S.get('bal',0);
-    const allBills=S.get('bills',[]);
-    for(const b of bills){
-      if(b.amount>bal){ G.toast('Solde insuffisant','err'); return; }
-      bal-=b.amount; b.paid=true;
-    }
-    S.set('bal',bal); S.set('bills',allBills);
-    if(currentUser) db.from('wallets').update({balance:bal}).eq('user_id',currentUser.id);
-    const total=bills.reduce((s,b)=>s+b.amount,0);
-    $('bills-todo').innerHTML='<div style="padding:20px;color:var(--green);font-size:.88rem;font-weight:700;text-align:center">✅ Toutes les factures ont été payées !</div>';
-    G.ok(`${bills.length} facture${bills.length>1?'s':''} payées`,`Total : ${f(total)} FCFA · Tout est réglé ✓`,()=>G.go('factures'));
+  payAll() {
+    const bills = S.get('bills', []).filter(b => !b.paid);
+    if (!bills.length) { G.toast('Toutes les factures sont déjà payées', 'inf'); return; }
+    let bal = S.get('bal', 0);
+    const total = bills.reduce((s, b) => s + b.amount, 0);
+    if (total > bal) { G.toast('Solde insuffisant', 'err'); return; }
+    const allBills = S.get('bills', []);
+    for (const b of bills) { b.paid = true; bal -= b.amount; }
+    S.set('bal', bal);
+    S.set('bills', allBills);
+    // Animate all out
+    bills.forEach(b => {
+      const el = $('bill-' + b.id);
+      if (el) { el.style.transition = 'opacity .3s,transform .3s'; el.style.opacity = '0'; el.style.transform = 'translateX(40px)'; }
+    });
+    setTimeout(() => {
+      G.r_factures();
+      G.ok(`${bills.length} facture${bills.length>1?'s':''} payée${bills.length>1?'s':''}`, `Total : ${f(total)} FCFA · Confirmé ✓`, () => G.go('home'));
+    }, 350);
   },
 
   // ── RECHARGE ──
-  setOp(n,on,off){ $('rch-op').value=n; $(on).classList.add('on'); $(off).classList.remove('on'); },
-  setPill(el,v){ el.closest('.pills').querySelectorAll('.pill').forEach(p=>p.classList.remove('on')); el.classList.add('on'); $('rch-amt').value=v; },
-  setDur(el,m){ document.querySelectorAll('#mc .pill').forEach(p=>p.classList.remove('on')); el.classList.add('on'); $('nc-months').value=m; },
+  setOp(n, on, off) { $('rch-op').value = n; $(on).classList.add('on'); $(off).classList.remove('on'); },
+  setPill(el, v) { el.closest('.pills').querySelectorAll('.pill').forEach(p => p.classList.remove('on')); el.classList.add('on'); $('rch-amt').value = v; },
+  setDur(el, m) { document.querySelectorAll('#mc .pill').forEach(p => p.classList.remove('on')); el.classList.add('on'); $('nc-months').value = m; },
 
-  doRecharge(){
-    const op=$('rch-op')?.value, ph=$('rch-phone')?.value.trim(), n=parseInt($('rch-amt')?.value)||0;
-    if(!ph){ G.toast('Saisis un numéro','err'); return; }
-    if(n<=0){ G.toast('Choisis un montant','err'); return; }
-    const bal=S.get('bal',0);
-    if(n>bal){ G.toast('Solde insuffisant','err'); return; }
-    S.set('bal',bal-n);
-    if(currentUser){
-      db.from('wallets').update({balance:bal-n}).eq('user_id',currentUser.id);
-      db.from('transactions').insert({from_user_id:currentUser.id,amount:n,type:'recharge',merchant_name:`Recharge ${op}`,status:'completed'});
+  doRecharge() {
+    const op = $('rch-op')?.value, ph = $('rch-phone')?.value.trim(), n = parseInt($('rch-amt')?.value) || 0;
+    if (!ph) { G.toast('Saisis un numéro', 'err'); return; }
+    if (n <= 0) { G.toast('Choisis un montant', 'err'); return; }
+    const bal = S.get('bal', 0);
+    if (n > bal) { G.toast('Solde insuffisant', 'err'); return; }
+    S.set('bal', bal - n);
+    if (currentUser) {
+      db.from('wallets').update({ balance: bal - n }).eq('user_id', currentUser.id);
+      db.from('transactions').insert({ from_user_id: currentUser.id, amount: n, type: 'recharge', merchant_name: `Recharge ${op}`, status: 'completed' });
     }
-    G.ok('Recharge effectuée',`${f(n)} FCFA de crédit ${op}`,()=>G.go('home'));
+    G.ok('Recharge effectuée', `${f(n)} FCFA de crédit ${op}`, () => G.go('home'));
   },
 
   // ── NOTIFS ──
-  r_notifs(){
-    const notifs=S.get('notifs',[]);
-    $('notif-list').innerHTML=notifs.map(n=>`
-      <div class="notif-item ${n.read?'':'unread'}">
-        <div class="notif-ic" style="background:${n.bg}">${si(n.icon,n.color,17)}</div>
+  r_notifs() {
+    const notifs = S.get('notifs', []);
+    $('notif-list').innerHTML = notifs.map(n => `
+      <div class="notif-item ${n.read ? '' : 'unread'}">
+        <div class="notif-ic" style="background:${n.bg}">${si(n.icon, n.color, 17)}</div>
         <div><div class="notif-title">${n.title}</div><div class="notif-desc">${n.desc}</div><div class="notif-time">${n.time}</div></div>
-      </div>`).join('')||'<div style="padding:24px;text-align:center;color:var(--txt3);font-size:.82rem">Aucune notification</div>';
+      </div>`).join('') || '<div style="padding:24px;text-align:center;color:var(--txt3);font-size:.82rem">Aucune notification</div>';
   },
 
-  readAll(){
-    const ns=S.get('notifs',[]);
-    ns.forEach(n=>n.read=true); S.set('notifs',ns);
-    G.render('notifs'); G.toast('Toutes lues','inf');
-    $('notif-dot').style.display='none';
+  readAll() {
+    const ns = S.get('notifs', []);
+    ns.forEach(n => n.read = true);
+    S.set('notifs', ns);
+    G.render('notifs');
+    G.toast('Toutes lues', 'inf');
+    $('notif-dot').style.display = 'none';
   },
 
   // ── PROFIL ──
-  r_profil(){
-    const u=S.get('user',{});
-    $('prof-av').textContent=u.avatar||'?';
-    $('prof-name').textContent=u.name||'';
-    $('prof-phone').textContent=u.phone||'';
-    $('prof-loc').textContent=u.loc||'Libreville, Gabon';
-    $('prof-level').textContent=u.level||'Silver';
-    $('prof-txc').textContent=S.get('txs',[]).length;
-    $('prof-cash').textContent=f(S.get('cash',0));
+  r_profil() {
+    const u = S.get('user', {});
+    $('prof-av').textContent = u.avatar || '?';
+    $('prof-name').textContent = u.name || '';
+    $('prof-phone').textContent = u.phone || '';
+    $('prof-loc').textContent = u.loc || 'Libreville, Gabon';
+    $('prof-level').textContent = u.level || 'Silver';
+    $('prof-txc').textContent = S.get('txs', []).length;
+    $('prof-cash').textContent = f(S.get('cash', 0));
   },
 
-  async saveProfile(){
-    const name=$('ep-name')?.value.trim();
-    if(!name){ G.toast('Nom requis','err'); return; }
-    const u=S.get('user',{});
-    u.name=name; u.phone=$('ep-phone')?.value.trim(); u.loc=$('ep-loc')?.value.trim(); u.avatar=name[0].toUpperCase();
-    S.set('user',u);
-    if(currentUser){ await db.from('users').update({name,phone:u.phone,location:u.loc,avatar:u.avatar}).eq('id',currentUser.id); currentUser.name=name; }
-    G.closeModal('mp'); G.render('profil'); G.toast('Profil mis à jour','inf');
+  async saveProfile() {
+    const name = $('ep-name')?.value.trim();
+    if (!name) { G.toast('Nom requis', 'err'); return; }
+    const u = S.get('user', {});
+    u.name = name;
+    u.phone = $('ep-phone')?.value.trim();
+    u.loc = $('ep-loc')?.value.trim();
+    u.avatar = name[0].toUpperCase();
+    S.set('user', u);
+
+    if (currentUser) {
+      await db.from('users').update({ name, phone: u.phone, location: u.loc, avatar: u.avatar }).eq('id', currentUser.id);
+      currentUser.name = name;
+    }
+
+    G.closeModal('mp');
+    G.render('profil');
+    G.toast('Profil mis à jour', 'inf');
   },
 
-  async logout(){
-    G.toast('Déconnexion...','inf');
-    if(currentUser) await db.auth.signOut();
-    currentUser=null; localStorage.clear();
-    setTimeout(()=>G.go('onboard'),1000);
+  async logout() {
+    G.toast('Déconnexion...', 'inf');
+    if (currentUser) await db.auth.signOut();
+    currentUser = null;
+    localStorage.clear();
+    setTimeout(() => G.go('onboard'), 1000);
   },
 
-  // ── PIN ──
-  r_pin(){
-    pinBuf='';
-    document.querySelectorAll('.pin-dot').forEach(d=>d.classList.remove('fill','err'));
-    const u=S.get('user',{});
-    if($('pin-sub')){ const name=(u.name||'').split(' ')[0]; $('pin-sub').textContent=name?`Bonjour ${name} · Saisis ton PIN`:'Entre ton code PIN'; }
+  // ── PIN (vérification) ──
+  r_pin() {
+    pinBuf = '';
+    document.querySelectorAll('.pin-dot').forEach(d => d.classList.remove('fill', 'err'));
+    const u = S.get('user', {});
+    if ($('pin-sub')) {
+      const name = (u.name || '').split(' ')[0];
+      $('pin-sub').textContent = name ? `Bonjour ${name} · Saisis ton PIN` : 'Entre ton code PIN';
+    }
   },
 
-  pinKey(v){
-    if(pinBuf.length>=4) return;
-    pinBuf+=v;
-    document.querySelectorAll('.pin-dot').forEach((d,i)=>d.classList.toggle('fill',i<pinBuf.length));
-    if(pinBuf.length===4) G._checkPin();
+  pinKey(v) {
+    if (pinBuf.length >= 4) return;
+    pinBuf += v;
+    document.querySelectorAll('.pin-dot').forEach((d, i) => d.classList.toggle('fill', i < pinBuf.length));
+    if (pinBuf.length === 4) G._checkPin();
   },
 
-  pinDel(){
-    pinBuf=pinBuf.slice(0,-1);
-    document.querySelectorAll('.pin-dot').forEach((d,i)=>d.classList.toggle('fill',i<pinBuf.length));
+  pinDel() {
+    pinBuf = pinBuf.slice(0, -1);
+    document.querySelectorAll('.pin-dot').forEach((d, i) => d.classList.toggle('fill', i < pinBuf.length));
   },
 
-  _checkPin(){
-    const u=S.get('user',{});
-    setTimeout(()=>{
-      if(u.pin&&pinBuf===u.pin){ hist=[]; G.go('home'); }
-      else {
-        pinBuf='';
-        document.querySelectorAll('.pin-dot').forEach(d=>{ d.classList.remove('fill'); d.classList.add('err'); setTimeout(()=>d.classList.remove('err'),600); });
-        G.toast('PIN incorrect','err');
+  _checkPin() {
+    const u = S.get('user', {});
+    setTimeout(() => {
+      if (u.pin && pinBuf === u.pin) {
+        hist = [];
+        G.go('home');
+      } else {
+        pinBuf = '';
+        document.querySelectorAll('.pin-dot').forEach(d => {
+          d.classList.remove('fill');
+          d.classList.add('err');
+          setTimeout(() => d.classList.remove('err'), 600);
+        });
+        G.toast('PIN incorrect', 'err');
       }
-    },200);
+    }, 200);
   },
 
-  // ── AUTH ──
-  async register(){
-    const name=$('reg-name')?.value.trim();
-    const phone=$('reg-phone')?.value.trim();
-    const email=$('reg-email')?.value.trim();
-    const pin=$('reg-pin')?.value.trim();
-    if(!name||name.length<2){ G.toast('Nom complet requis','err'); return; }
-    if(!phone||phone.length<8){ G.toast('Numéro requis','err'); return; }
-    if(!email||!email.includes('@')){ G.toast('Email valide requis','err'); return; }
-    if(!pin||pin.length!==4||!/^\d{4}$/.test(pin)){ G.toast('PIN de 4 chiffres requis','err'); return; }
-    G.toast('Création du compte...','inf');
-    const password=pin+'GhettoPay2024';
-    const {data:authData,error:authError}=await db.auth.signUp({email,password});
-    if(authError){ G.toast('Erreur: '+authError.message,'err'); return; }
-    if(!authData.session){
-      G.ok('Vérifie ton email !',`Un lien de confirmation a été envoyé à ${email}.`,()=>G.showLogin());
+  // ── INSCRIPTION ──
+  async register() {
+    const name = $('reg-name')?.value.trim();
+    const phone = $('reg-phone')?.value.trim();
+    const email = $('reg-email')?.value.trim();
+    const pin = $('reg-pin')?.value.trim();
+
+    if (!name || name.length < 2) { G.toast('Nom complet requis', 'err'); return; }
+    if (!phone || phone.length < 8) { G.toast('Numéro de téléphone requis', 'err'); return; }
+    if (!email || !email.includes('@') || !email.includes('.')) { G.toast('Adresse email valide requise', 'err'); return; }
+    if (!pin || pin.length !== 4 || !/^\d{4}$/.test(pin)) { G.toast('PIN de 4 chiffres requis', 'err'); return; }
+
+    G.toast('Création du compte...', 'inf');
+
+    const password = pin + 'GhettoPay2024';
+
+    const { data: authData, error: authError } = await db.auth.signUp({ email, password });
+    if (authError) {
+      G.toast('Erreur: ' + authError.message, 'err'); return;
+    }
+
+    // Email de confirmation requis — pas encore de session
+    if (!authData.session) {
+      G.ok(
+        'Vérifie ton email !',
+        `Un lien de confirmation a été envoyé à ${email}. Clique dessus puis reviens te connecter.`,
+        () => G.showLogin()
+      );
       return;
     }
-    const session=authData.session;
-    const avatar=name[0].toUpperCase();
-    const {data:existingUser}=await db.from('users').select('id').eq('phone',phone).single();
+
+    const session = authData.session;
+    const avatar = name[0].toUpperCase();
+
+    // Vérifier si profil existe déjà (inscription partielle)
+    const { data: existingUser } = await db.from('users').select('id').eq('phone', phone).single();
+
     let userId;
-    if(!existingUser){
-      const {data:newUser,error:userError}=await db.from('users').insert({ auth_id:session.user.id, phone, name, avatar, pin_code:pin, email, location:'Libreville, Gabon', level:'Silver' }).select().single();
-      if(userError){ G.toast('Erreur: '+userError.message,'err'); return; }
-      userId=newUser.id;
-      await db.from('wallets').insert({user_id:userId,balance:10000,coffre_balance:0,cashback:0});
-    } else userId=existingUser.id;
+    if (!existingUser) {
+      const { data: newUser, error: userError } = await db.from('users').insert({
+        auth_id: session.user.id, phone, name, avatar, pin_code: pin, email, location: 'Libreville, Gabon', level: 'Silver'
+      }).select().single();
+      if (userError) { G.toast('Erreur création profil: ' + userError.message, 'err'); return; }
+      userId = newUser.id;
+      await db.from('wallets').insert({ user_id: userId, balance: 10000, coffre_balance: 0, cashback: 0 });
+    } else {
+      userId = existingUser.id;
+    }
+
     await loadUserData(session.user.id);
-    S.set('user',{name,phone,email,pin,avatar,loc:'Libreville, Gabon',level:'Silver'});
-    S.set('bills',[{id:1,name:'SEEG Eau',ref:'Réf: EAU-2024',amount:28000,due:'31 déc.'},{id:2,name:'SEEG Électricité',ref:'Réf: ELEC-2024',amount:35000,due:'31 déc.'}]);
-    S.set('notifs',[{id:1,title:'Bienvenue sur GhettoPay !',desc:'10 000 FCFA offerts sur ton compte',time:"À l'instant",read:false,icon:'z',color:'var(--gold2)',bg:'rgba(212,160,23,.12)'},{id:2,title:'Sécurité activée',desc:'PIN configuré · Compte vérifié',time:"À l'instant",read:false,icon:'shield',color:'var(--green)',bg:'rgba(22,163,74,.12)'}]);
-    S.set('txs',[]); S.set('coffres',[]); S.set('tontines',[]); S.set('ok',true);
-    G.ok('Compte créé !',`Bienvenue ${name} · 10 000 FCFA offerts`,()=>G.go('pin'));
+
+    // Initialiser les données locales
+    S.set('user', { name, phone, email, pin, avatar, loc: 'Libreville, Gabon', level: 'Silver' });
+    S.set('bills', [
+      { id: 1, name: 'SEEG Eau', ref: 'Réf: EAU-2024', amount: 28000, due: '31 déc.' },
+      { id: 2, name: 'SEEG Électricité', ref: 'Réf: ELEC-2024', amount: 35000, due: '31 déc.' }
+    ]);
+    S.set('notifs', [
+      { id: 1, title: 'Bienvenue sur GhettoPay !', desc: 'Ton compte est créé · 10 000 FCFA offerts', time: "À l'instant", read: false, icon: 'z', color: 'var(--gold2)', bg: 'rgba(212,160,23,.12)' },
+      { id: 2, title: 'Sécurité activée', desc: 'PIN configuré · Compte vérifié', time: "À l'instant", read: false, icon: 'shield', color: 'var(--green)', bg: 'rgba(22,163,74,.12)' }
+    ]);
+    S.set('txs', []);
+    S.set('coffres', []);
+    S.set('tontines', []);
+    S.set('ok', true);
+
+    G.ok('Compte créé !', `Bienvenue ${name} · 10 000 FCFA offerts`, () => G.go('pin'));
   },
 
-  showLogin(){ document.getElementById('login-form').style.display='flex'; },
-  hideLogin(){ document.getElementById('login-form').style.display='none'; },
+  // ── OVERLAY / TOAST / MODAL ──
+  _okCb: null,
+  ok(title, sub, cb) {
+    $('ov-title').textContent = title;
+    $('ov-sub').textContent = sub || '';
+    $('overlay').classList.add('on');
+    G._okCb = cb || null;
+  },
+  closeOk() {
+    $('overlay').classList.remove('on');
+    if (G._okCb) { G._okCb(); G._okCb = null; }
+    else G.render(cur);
+  },
+  toast(msg, type) {
+    const t = $('toast-el');
+    t.textContent = msg;
+    t.className = 'toast ' + (type || '') + ' on';
+    clearTimeout(t._t);
+    t._t = setTimeout(() => t.classList.remove('on'), 3000);
+  },
 
-  async login(){
-    const email=document.getElementById('login-email')?.value.trim();
-    const pin=document.getElementById('login-pin')?.value.trim();
-    if(!email||!pin){ G.toast('Email et PIN requis','err'); return; }
-    G.toast('Connexion...','inf');
-    const password=pin+'GhettoPay2024';
-    const {data,error}=await db.auth.signInWithPassword({email,password});
-    if(error){ G.toast(error.message.includes('not confirmed')?'Confirme ton email':'Email ou PIN incorrect','err'); return; }
-    if(!data?.user){ G.toast('Confirme ton email avant de te connecter','err'); return; }
+  showLogin() {
+    const f = document.getElementById('login-form');
+    f.style.display = 'flex';
+  },
+  hideLogin() {
+    document.getElementById('login-form').style.display = 'none';
+  },
+  async login() {
+    const email = document.getElementById('login-email')?.value.trim();
+    const pin = document.getElementById('login-pin')?.value.trim();
+    if (!email || !pin) { G.toast('Email et PIN requis', 'err'); return; }
+
+    G.toast('Connexion...', 'inf');
+    const password = pin + 'GhettoPay2024';
+
+    const { data, error } = await db.auth.signInWithPassword({ email, password });
+    if (error) {
+      if (error.message.includes('Email not confirmed') || error.message.includes('email_not_confirmed')) {
+        G.toast('Confirme ton email avant de te connecter', 'err');
+      } else {
+        G.toast('Email ou PIN incorrect', 'err');
+      }
+      return;
+    }
+
+    if (!data?.user) {
+      G.toast('Confirme ton email avant de te connecter', 'err');
+      return;
+    }
+
     await loadUserData(data.user.id);
     G.go('pin');
   },
-
-  // ── MODALS ──
-  _okCb:null,
-  ok(title,sub,cb){ $('ov-title').textContent=title; $('ov-sub').textContent=sub||''; $('overlay').classList.add('on'); G._okCb=cb||null; },
-  closeOk(){ $('overlay').classList.remove('on'); if(G._okCb){ G._okCb(); G._okCb=null; } else G.render(cur); },
-  toast(msg,type){ const t=$('toast-el'); t.textContent=msg; t.className='toast '+(type||'')+' on'; clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('on'),3000); },
-  showModal(id){ $(id).classList.add('on'); if(id==='mc') setTimeout(()=>G.initCal(),50); },
-  closeModal(id){ $(id).classList.remove('on'); },
+  showModal(id) { $(id).classList.add('on'); },
+  closeModal(id) { $(id).classList.remove('on'); },
 };
 
-function setBudTab(btn){ btn.closest('.bud-tabs').querySelectorAll('.btab').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); G.render('budget'); }
+function setBudTab(btn) {
+  btn.closest('.bud-tabs').querySelectorAll('.btab').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  G.render('budget');
+}
 
-// HORLOGE
-function tick(){ const n=new Date(); const t=`${n.getHours().toString().padStart(2,'0')}:${n.getMinutes().toString().padStart(2,'0')}`; document.querySelectorAll('[id^="clk"]').forEach(el=>el.textContent=t); }
-tick(); setInterval(tick,30000);
+// ── HORLOGE ──
+function tick() {
+  const n = new Date();
+  const t = `${n.getHours().toString().padStart(2, '0')}:${n.getMinutes().toString().padStart(2, '0')}`;
+  document.querySelectorAll('[id^="clk"]').forEach(el => el.textContent = t);
+}
+tick();
+setInterval(tick, 30000);
 
-// PWA
+// ── PWA INSTALL ──
 let dp;
-window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); dp=e; setTimeout(()=>$('install-banner')?.classList.add('on'),4000); });
-$('install-btn')?.addEventListener('click',async()=>{ $('install-banner').classList.remove('on'); if(dp){ dp.prompt(); await dp.userChoice; dp=null; } });
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); dp = e;
+  setTimeout(() => $('install-banner')?.classList.add('on'), 4000);
+});
+$('install-btn')?.addEventListener('click', async () => {
+  $('install-banner').classList.remove('on');
+  if (dp) { dp.prompt(); await dp.userChoice; dp = null; }
+});
 
 </script>
+
 </body>
 </html>
