@@ -2058,12 +2058,21 @@ const G = {
   async _loadTontines() {
     let tontines = [];
     if (currentUser) {
-      const { data: memberships } = await db.from('tontine_members').select('tontine_id').eq('user_id', currentUser.id);
-      if (memberships?.length) {
-        const ids = memberships.map(m => m.tontine_id);
-        const { data } = await db.from('tontines').select('*, tontine_members(count)').in('id', ids);
-        tontines = data || [];
-      }
+      try {
+        const { data: memberships } = await db.from('tontine_members').select('tontine_id').eq('user_id', currentUser.id);
+        if (memberships?.length) {
+          const ids = memberships.map(m => m.tontine_id);
+          const { data } = await db.from('tontines').select('*, tontine_members(count)').in('id', ids);
+          tontines = data || [];
+        }
+        // Also check tontines where user is creator (in case member insert failed)
+        if (!tontines.length) {
+          const { data: created } = await db.from('tontines').select('*').eq('creator_id', currentUser.id).order('created_at', { ascending: false });
+          tontines = created || [];
+        }
+      } catch(e) {}
+      // Fall back to localStorage if DB returned nothing
+      if (!tontines.length) tontines = S.get('tontines', []);
     } else {
       tontines = S.get('tontines', []);
     }
@@ -2222,11 +2231,10 @@ const G = {
         }
       } catch(e) { /* fall through to localStorage */ }
     }
-    if (!savedToDb) {
-      const tontines = S.get('tontines', []);
-      tontines.unshift({ id: Date.now().toString(), name, amount_per_cycle: amount, frequency: freq, members_count: rawMembers.length, members_paid: 0, members: rawMembers, start_date: new Date().toISOString() });
-      S.set('tontines', tontines);
-    }
+    // Always save to localStorage (cache + offline fallback)
+    const tontines = S.get('tontines', []);
+    tontines.unshift({ id: Date.now().toString(), name, amount_per_cycle: amount, frequency: freq, members_count: rawMembers.length, members_paid: 0, members: rawMembers, start_date: new Date().toISOString() });
+    S.set('tontines', tontines);
 
     G._tontineMembers = [];
     G.closeModal('mt');
