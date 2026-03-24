@@ -1346,37 +1346,30 @@ async function appStart() {
 async function loadUserData(authId) {
   let { data: user } = await db.from('users').select('*').eq('auth_id', authId).single();
 
-  // Profil introuvable — compléter l'inscription si des données sont en attente
   if (!user) {
+    // Tenter de compléter l'inscription avec les données en attente
     const p = S.get('pending_reg', null);
     if (p && authId) {
       const { data: newUser, error } = await db.from('users').insert({
         auth_id: authId, phone: p.phone, name: p.name,
-        avatar: p.avatar, pin_code: p.pin, email: p.email,
+        avatar: p.avatar, pin_code: String(p.pin), email: p.email,
         location: 'Libreville, Gabon', level: 'Silver'
       }).select().single();
       if (!error && newUser) {
         await db.from('wallets').insert({ user_id: newUser.id, balance: 10000, coffre_balance: 0, cashback: 0 });
-        S.set('bills', [
-          { id: 1, name: 'SEEG Eau', ref: 'Réf: EAU-2024', amount: 28000, due: '31 déc.' },
-          { id: 2, name: 'SEEG Électricité', ref: 'Réf: ELEC-2024', amount: 35000, due: '31 déc.' }
-        ]);
-        S.set('notifs', [
-          { id: 1, title: 'Bienvenue sur GhettoPay !', desc: 'Ton compte est créé · 10 000 FCFA offerts', time: "À l'instant", read: false, icon: 'z', color: 'var(--gold2)', bg: 'rgba(212,160,23,.12)' },
-          { id: 2, title: 'Sécurité activée', desc: 'PIN configuré · Compte vérifié', time: "À l'instant", read: false, icon: 'shield', color: 'var(--green)', bg: 'rgba(22,163,74,.12)' }
-        ]);
-        S.set('txs', []); S.set('coffres', []); S.set('tontines', []);
         S.set('pending_reg', null);
         user = newUser;
       }
     }
+    // Si toujours pas de user DB → garder les données locales existantes (ne pas effacer)
     if (!user) return;
   }
 
   const { data: wallet } = await db.from('wallets').select('*').eq('user_id', user.id).single();
   currentUser = { ...user, wallet };
 
-  S.set('user', { name: user.name, phone: user.phone, pin: user.pin_code, avatar: user.avatar, loc: user.location, level: user.level });
+  // pin_code peut être int ou string selon la DB → toujours stocker en string
+  S.set('user', { name: user.name, phone: user.phone, pin: String(user.pin_code || ''), avatar: user.avatar, loc: user.location, level: user.level });
   S.set('bal', wallet?.balance || 0);
   S.set('coffre', wallet?.coffre_balance || 0);
   S.set('cash', wallet?.cashback || 0);
@@ -2159,7 +2152,7 @@ const G = {
         setTimeout(() => { G.go('onboard'); G.showLogin(); }, 1200);
         return;
       }
-      if (pinBuf === u.pin) {
+      if (String(pinBuf) === String(u.pin)) {
         hist = [];
         G.go('home');
       } else {
@@ -2195,9 +2188,23 @@ const G = {
       G.toast('Erreur: ' + authError.message, 'err'); return;
     }
 
-    // Email de confirmation requis — sauvegarder les données pour les utiliser après confirmation
+    // Email de confirmation requis — sauvegarder tout localement pour que le PIN fonctionne dès la connexion
     if (!authData.session) {
-      S.set('pending_reg', { name, phone, pin, email, avatar: name[0].toUpperCase() });
+      const avatar = name[0].toUpperCase();
+      S.set('pending_reg', { name, phone, pin, email, avatar });
+      // Données complètes en local dès maintenant — le profil DB sera créé après confirmation
+      S.set('user', { name, phone, email, pin: String(pin), avatar, loc: 'Libreville, Gabon', level: 'Silver' });
+      S.set('bal', 10000);
+      S.set('coffre', 0); S.set('cash', 0);
+      S.set('bills', [
+        { id: 1, name: 'SEEG Eau', ref: 'Réf: EAU-2024', amount: 28000, due: '31 déc.' },
+        { id: 2, name: 'SEEG Électricité', ref: 'Réf: ELEC-2024', amount: 35000, due: '31 déc.' }
+      ]);
+      S.set('notifs', [
+        { id: 1, title: 'Bienvenue sur GhettoPay !', desc: 'Ton compte est créé · 10 000 FCFA offerts', time: "À l'instant", read: false, icon: 'z', color: 'var(--gold2)', bg: 'rgba(212,160,23,.12)' },
+        { id: 2, title: 'Sécurité activée', desc: 'PIN configuré · Compte vérifié', time: "À l'instant", read: false, icon: 'shield', color: 'var(--green)', bg: 'rgba(22,163,74,.12)' }
+      ]);
+      S.set('txs', []); S.set('coffres', []); S.set('tontines', []);
       G.ok(
         'Vérifie ton email !',
         `Un lien de confirmation a été envoyé à ${email}. Clique dessus puis reviens te connecter.`,
@@ -2227,7 +2234,7 @@ const G = {
     await loadUserData(session.user.id);
 
     // Initialiser les données locales
-    S.set('user', { name, phone, email, pin, avatar, loc: 'Libreville, Gabon', level: 'Silver' });
+    S.set('user', { name, phone, email, pin: String(pin), avatar, loc: 'Libreville, Gabon', level: 'Silver' });
     S.set('bills', [
       { id: 1, name: 'SEEG Eau', ref: 'Réf: EAU-2024', amount: 28000, due: '31 déc.' },
       { id: 2, name: 'SEEG Électricité', ref: 'Réf: ELEC-2024', amount: 35000, due: '31 déc.' }
