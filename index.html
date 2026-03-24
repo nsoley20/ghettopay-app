@@ -744,42 +744,76 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 </div>
 
 <!-- ONBOARDING / INSCRIPTION -->
-<div class="sc" id="sc-onboard" style="background:linear-gradient(155deg,var(--forest) 0%,var(--ink) 70%)">
-  <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:0">
-    <!-- Logo -->
-    <div style="width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;box-shadow:0 8px 28px rgba(212,160,23,.4);margin-bottom:20px">
-      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--forest)" stroke-width="2.5"><use href="#z"/></svg>
+<div class="sc" id="sc-onboard" style="background:linear-gradient(155deg,var(--forest) 0%,var(--ink) 75%)">
+  <div style="height:100%;overflow-y:auto;display:flex;flex-direction:column;padding:0 22px">
+    <!-- Branding -->
+    <div style="display:flex;flex-direction:column;align-items:center;padding-top:max(env(safe-area-inset-top,0px),36px);padding-bottom:24px">
+      <div style="width:72px;height:72px;border-radius:22px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;box-shadow:0 10px 36px rgba(212,160,23,.45);margin-bottom:16px">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="var(--forest)" stroke-width="2.5"><use href="#z"/></svg>
+      </div>
+      <div style="font-family:var(--fd);font-size:2.1rem;font-weight:900;font-style:italic;color:#fff;line-height:1;margin-bottom:5px">GhettoPay</div>
+      <div style="font-family:var(--fm);font-size:.56rem;color:rgba(255,255,255,.32);letter-spacing:.22em;text-transform:uppercase">LIBREVILLE · GABON</div>
     </div>
-    <div style="font-family:var(--fd);font-size:2rem;font-weight:900;font-style:italic;color:#fff;margin-bottom:6px">GhettoPay</div>
-    <div style="font-family:var(--fm);font-size:.6rem;color:rgba(255,255,255,.4);letter-spacing:.18em;text-transform:uppercase;margin-bottom:32px">LIBREVILLE · GABON</div>
-
-    <!-- Form -->
-    <div style="width:100%;display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
-      <input id="reg-name" class="inp" placeholder="Ton nom complet" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.12);color:#fff" />
-      <input id="reg-phone" class="inp" type="tel" placeholder="Numéro de téléphone (+241...)" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.12);color:#fff" />
-      <input id="reg-email" class="inp" type="email" placeholder="Ton adresse email" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.12);color:#fff" />
-      <input id="reg-pin" class="inp" type="password" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="Choisis un code PIN (4 chiffres)" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.12);color:#fff" />
+    <!-- Carte formulaire -->
+    <div style="background:rgba(255,255,255,.07);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.11);border-radius:24px;padding:22px 18px;display:flex;flex-direction:column;gap:13px;margin-bottom:18px">
+      <div style="font-size:.98rem;font-weight:800;color:#fff;margin-bottom:2px">Créer mon compte</div>
+      <div>
+        <div style="font-size:.59rem;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px">Nom complet</div>
+        <input id="reg-name" class="inp" autocomplete="name" placeholder="Jean-Baptiste Moukala" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.13);color:#fff"/>
+      </div>
+      <div>
+        <div style="font-size:.59rem;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px">Téléphone</div>
+        <input id="reg-phone" class="inp" type="tel" autocomplete="tel" placeholder="+241 77 00 00 00" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.13);color:#fff"/>
+      </div>
+      <div>
+        <div style="font-size:.59rem;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px">Adresse email</div>
+        <input id="reg-email" class="inp" type="email" autocomplete="email" placeholder="ton@email.com" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.13);color:#fff"/>
+      </div>
+      <div>
+        <div style="font-size:.59rem;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px">Code PIN (4 chiffres)</div>
+        <input id="reg-pin" class="inp" type="password" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" placeholder="• • • •" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.13);color:#fff;letter-spacing:.28em;font-size:1.05rem"/>
+      </div>
+      <button class="btn btn-gold" onclick="G.register()" style="width:100%;margin-top:2px">
+        <svg><use href="#ar"/></svg>Créer mon compte gratuit
+      </button>
     </div>
-
-    <button class="btn btn-gold" onclick="G.register()" style="width:100%;margin-bottom:12px">
-      <svg><use href="#ar"/></svg>Créer mon compte gratuit
-    </button>
-
-    <div style="font-size:.72rem;color:rgba(255,255,255,.35);text-align:center;line-height:1.7">
-      Déjà un compte ? <span onclick="G.showLogin()" style="color:var(--gold2);cursor:pointer;font-weight:700">Se connecter</span>
+    <div style="text-align:center;padding-bottom:max(env(safe-area-inset-bottom,0px),22px)">
+      <div style="font-size:.72rem;color:rgba(255,255,255,.38)">Déjà un compte ? <span onclick="G.go('login')" style="color:var(--gold2);cursor:pointer;font-weight:800">Se connecter</span></div>
+      <div style="font-family:var(--fm);font-size:.49rem;color:rgba(255,255,255,.18);margin-top:12px">Certifié CEMAC · 100% Gabonais · Chiffrement 256-bit</div>
     </div>
+  </div>
+</div>
 
-    <!-- Login form (caché par défaut) -->
-    <div id="login-form" style="display:none;width:100%;flex-direction:column;gap:12px;margin-top:16px">
-      <div style="font-size:.82rem;font-weight:800;color:#fff;text-align:center;margin-bottom:4px">Connexion</div>
-      <input id="login-email" class="inp" type="email" placeholder="Ton adresse email" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.12);color:#fff" />
-      <input id="login-pin" class="inp" type="password" maxlength="4" inputmode="numeric" placeholder="Code PIN" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.12);color:#fff" />
-      <button class="btn btn-gold" onclick="G.login()" style="width:100%">Se connecter</button>
-      <button class="btn btn-ghost" onclick="G.hideLogin()" style="width:100%;color:rgba(255,255,255,.5)">Annuler</button>
+<!-- CONNEXION -->
+<div class="sc" id="sc-login" style="background:linear-gradient(155deg,var(--forest) 0%,var(--ink) 75%)">
+  <div style="height:100%;display:flex;flex-direction:column;padding:0 22px">
+    <div style="padding-top:max(env(safe-area-inset-top,0px),16px);padding-bottom:6px">
+      <button class="back-btn dk" onclick="G.back()"><svg><use href="#al"/></svg></button>
     </div>
-
-    <div style="font-family:var(--fm);font-size:.52rem;color:rgba(255,255,255,.2);text-align:center;margin-top:20px">
-      Certifié CEMAC · 100% Gabonais · Chiffrement 256-bit
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:48px">
+      <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:30px">
+        <div style="width:58px;height:58px;border-radius:19px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;box-shadow:0 8px 26px rgba(212,160,23,.42);margin-bottom:14px">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--forest)" stroke-width="2.5"><use href="#z"/></svg>
+        </div>
+        <div style="font-family:var(--fd);font-size:1.55rem;font-weight:900;font-style:italic;color:#fff;margin-bottom:5px">Bon retour !</div>
+        <div style="font-size:.68rem;color:rgba(255,255,255,.38)">Entre ton email et ton code PIN</div>
+      </div>
+      <div style="background:rgba(255,255,255,.07);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.11);border-radius:24px;padding:22px 18px;display:flex;flex-direction:column;gap:13px">
+        <div>
+          <div style="font-size:.59rem;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px">Adresse email</div>
+          <input id="login-email" class="inp" type="email" autocomplete="email" placeholder="ton@email.com" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.13);color:#fff"/>
+        </div>
+        <div>
+          <div style="font-size:.59rem;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px">Code PIN</div>
+          <input id="login-pin" class="inp" type="password" maxlength="4" inputmode="numeric" placeholder="• • • •" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.13);color:#fff;letter-spacing:.28em;font-size:1.05rem"/>
+        </div>
+        <button class="btn btn-gold" onclick="G.login()" style="width:100%;margin-top:2px">
+          <svg><use href="#ar"/></svg>Se connecter
+        </button>
+      </div>
+      <div style="text-align:center;font-size:.7rem;color:rgba(255,255,255,.35);margin-top:20px">
+        Pas encore de compte ? <span onclick="G.back()" style="color:var(--gold2);cursor:pointer;font-weight:800">Créer un compte</span>
+      </div>
     </div>
   </div>
 </div>
@@ -1281,7 +1315,7 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
     <div class="modal-handle"></div>
     <div class="modal-title">Nouveau coffre</div>
     <input id="nc-name" class="inp" placeholder="Nom (ex: Voyage en France)"/>
-    <input id="nc-target" class="inp" type="number" placeholder="Objectif en FCFA (optionnel)"/>
+    <input id="nc-target" class="inp" type="number" placeholder="Objectif en FCFA (optionnel)" oninput="G._coffreCalc()"/>
     <div>
       <div class="lbl" style="margin-bottom:10px">Durée de blocage</div>
       <div class="pills">
@@ -1291,6 +1325,24 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
         <div class="pill" onclick="G.setDur(this,24)">2 ans</div>
       </div>
       <input id="nc-months" type="hidden" value="3"/>
+    </div>
+    <!-- Assistant épargne -->
+    <div id="nc-assistant" style="display:none;background:linear-gradient(135deg,rgba(10,74,46,.08),rgba(22,163,74,.05));border:1px solid rgba(22,163,74,.18);border-radius:14px;padding:14px 12px">
+      <div style="font-size:.58rem;font-weight:800;color:var(--forest);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">💰 Plan d'épargne</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+        <div style="background:var(--card);border-radius:11px;padding:10px 6px;text-align:center;border:1px solid var(--border)">
+          <div id="nc-per-day" style="font-family:var(--fd);font-weight:800;font-size:.8rem;color:var(--txt)">—</div>
+          <div style="font-size:.5rem;color:var(--txt3);margin-top:3px;font-family:var(--fm)">/ jour</div>
+        </div>
+        <div style="background:var(--card);border-radius:11px;padding:10px 6px;text-align:center;border:1px solid var(--border)">
+          <div id="nc-per-week" style="font-family:var(--fd);font-weight:800;font-size:.8rem;color:var(--txt)">—</div>
+          <div style="font-size:.5rem;color:var(--txt3);margin-top:3px;font-family:var(--fm)">/ semaine</div>
+        </div>
+        <div style="background:linear-gradient(135deg,rgba(10,74,46,.08),rgba(22,163,74,.06));border-radius:11px;padding:10px 6px;text-align:center;border:1px solid rgba(22,163,74,.2)">
+          <div id="nc-per-month" style="font-family:var(--fd);font-weight:800;font-size:.8rem;color:var(--forest)">—</div>
+          <div style="font-size:.5rem;color:var(--txt3);margin-top:3px;font-family:var(--fm)">/ mois</div>
+        </div>
+      </div>
     </div>
     <button class="btn btn-gold" onclick="G.createCoffre()"><svg><use href="#lock"/></svg>Créer ce coffre</button>
     <button class="btn btn-ghost" onclick="G.closeModal('mc')">Annuler</button>
@@ -1522,7 +1574,9 @@ const G = {
     if (!n) return;
     if (p) p.classList.remove('on');
     n.classList.add('on');
-    if (cur !== scr) hist.push(cur);
+    // Ne pas empiler les écrans d'auth dans l'historique
+    const noHist = ['onboard', 'login', 'pin'];
+    if (cur !== scr && !noHist.includes(cur)) hist.push(cur);
     cur = scr;
     G.render(scr);
     // Mettre à jour navbar
@@ -1541,6 +1595,7 @@ const G = {
   render(scr) {
     const renders = {
       home: () => G.r_home(),
+      login: () => G.r_login(),
       send: () => G.r_send(),
       coffre: () => G.r_coffre(),
       budget: () => G.r_budget(),
@@ -1568,6 +1623,29 @@ const G = {
     const unread = S.get('notifs', []).filter(n => !n.read).length;
     $('notif-dot').style.display = unread ? 'block' : 'none';
     G.r_txList();
+    // Rafraîchir le solde depuis la DB (non-bloquant, met à jour si différent)
+    if (currentUser) {
+      db.from('wallets').select('balance,coffre_balance,cashback').eq('user_id', currentUser.id).single()
+        .then(({ data }) => {
+          if (!data || cur !== 'home') return;
+          const nb = data.balance || 0, nc = data.coffre_balance || 0;
+          if (nb !== S.get('bal', 0) || nc !== S.get('coffre', 0)) {
+            S.set('bal', nb); S.set('coffre', nc); S.set('cash', data.cashback || 0);
+            if (balVis) {
+              $('bal-amt').innerHTML = `<span class="cur">FCFA </span>${f(nb)}`;
+              $('bal-sub').textContent = `+ Coffre : ${f(nc)} FCFA`;
+            }
+            $('cstrip-val').textContent = f(nc);
+            G.r_txList();
+          }
+        }).catch(() => {});
+    }
+  },
+
+  // ── LOGIN ──
+  r_login() {
+    // Mettre le focus sur le champ email après la transition
+    setTimeout(() => { $('login-email')?.focus(); }, 350);
   },
 
   _txRow(isCredit, name, ico, col, bg, cat, time, amount) {
@@ -2648,7 +2726,21 @@ const G = {
   // ── RECHARGE ──
   setOp(n, on, off) { $('rch-op').value = n; $(on).classList.add('on'); $(off).classList.remove('on'); },
   setPill(el, v) { el.closest('.pills').querySelectorAll('.pill').forEach(p => p.classList.remove('on')); el.classList.add('on'); $('rch-amt').value = v; },
-  setDur(el, m) { document.querySelectorAll('#mc .pill').forEach(p => p.classList.remove('on')); el.classList.add('on'); $('nc-months').value = m; },
+  setDur(el, m) { document.querySelectorAll('#mc .pill').forEach(p => p.classList.remove('on')); el.classList.add('on'); $('nc-months').value = m; G._coffreCalc(); },
+  _coffreCalc() {
+    const target = parseInt($('nc-target')?.value) || 0;
+    const months = parseInt($('nc-months')?.value) || 3;
+    const ass = $('nc-assistant');
+    if (!ass) return;
+    if (target <= 0) { ass.style.display = 'none'; return; }
+    ass.style.display = 'block';
+    const perDay = Math.ceil(target / (months * 30));
+    const perWeek = Math.ceil(target / (months * 4.33));
+    const perMonth = Math.ceil(target / months);
+    if ($('nc-per-day')) $('nc-per-day').textContent = f(perDay) + ' F';
+    if ($('nc-per-week')) $('nc-per-week').textContent = f(perWeek) + ' F';
+    if ($('nc-per-month')) $('nc-per-month').textContent = f(perMonth) + ' F';
+  },
 
   doRecharge() {
     const op = $('rch-op')?.value, ph = $('rch-phone')?.value.trim(), n = parseInt($('rch-amt')?.value) || 0;
@@ -2752,7 +2844,7 @@ const G = {
       // Pas de profil chargé — renvoyer vers la connexion
       if (!u.pin) {
         G.toast('Session expirée, reconnecte-toi', 'err');
-        setTimeout(() => { G.go('onboard'); G.showLogin(); }, 1200);
+        setTimeout(() => { G.go('login'); }, 1200);
         return;
       }
       if (String(pinBuf) === String(u.pin)) {
@@ -2810,8 +2902,8 @@ const G = {
       S.set('txs', []); S.set('coffres', []); S.set('tontines', []);
       G.ok(
         'Vérifie ton email !',
-        `Un lien de confirmation a été envoyé à ${email}. Clique dessus puis reviens te connecter.`,
-        () => G.showLogin()
+        `Un lien de confirmation a été envoyé à ${email}. Clique dessus puis reviens te connecter avec ton PIN.`,
+        () => G.go('login')
       );
       return;
     }
@@ -2851,7 +2943,7 @@ const G = {
     S.set('tontines', []);
     S.set('ok', true);
 
-    G.ok('Compte créé !', `Bienvenue ${name} · 10 000 FCFA offerts`, () => G.go('pin'));
+    G.ok('Compte créé !', `Bienvenue ${name} · 10 000 FCFA offerts. Connecte-toi maintenant.`, () => G.go('login'));
   },
 
   // ── OVERLAY / TOAST / MODAL ──
@@ -2875,13 +2967,8 @@ const G = {
     t._t = setTimeout(() => t.classList.remove('on'), 3000);
   },
 
-  showLogin() {
-    const f = document.getElementById('login-form');
-    f.style.display = 'flex';
-  },
-  hideLogin() {
-    document.getElementById('login-form').style.display = 'none';
-  },
+  showLogin() { G.go('login'); },
+  hideLogin() {},
   async login() {
     const email = document.getElementById('login-email')?.value.trim();
     const pin = document.getElementById('login-pin')?.value.trim();
