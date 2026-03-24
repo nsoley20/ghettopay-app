@@ -1234,12 +1234,27 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
       <input id="nt-freq" type="hidden" value="weekly"/>
     </div>
     <div>
-      <div class="lbl" style="margin-bottom:8px">Ordre des membres <span style="font-size:.6rem;font-weight:400;text-transform:none;letter-spacing:0;color:var(--txt3)">(ordre de rotation)</span></div>
-      <div id="nt-members-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
-      <div style="display:flex;gap:8px">
-        <input id="nt-member-input" class="inp" placeholder="Nom du membre..." style="flex:1"/>
-        <button onclick="G.addTontineMember()" style="padding:12px 18px;border:none;border-radius:12px;background:var(--forest);color:#fff;font-weight:800;font-size:.9rem;cursor:pointer;flex-shrink:0">+</button>
+      <div class="lbl" style="margin-bottom:10px">Membres <span style="font-size:.6rem;font-weight:400;text-transform:none;letter-spacing:0;color:var(--txt3)">(ordre de rotation)</span></div>
+      <!-- Liste des membres ajoutés -->
+      <div id="nt-members-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px"></div>
+      <!-- Recherche utilisateurs GhettoPay -->
+      <div style="position:relative;margin-bottom:8px">
+        <div class="srch" style="background:var(--bg2)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--txt3)" stroke-width="2"><use href="#srch"/></svg>
+          <input id="nt-search" type="text" placeholder="Rechercher un utilisateur GhettoPay..." oninput="G.searchTontineUsers(this.value)" autocomplete="off"/>
+        </div>
+        <div id="nt-search-results" style="display:none;position:absolute;left:0;right:0;background:var(--card);border-radius:12px;border:1px solid var(--border);box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:10;max-height:160px;overflow-y:auto;margin-top:4px"></div>
       </div>
+      <!-- Saisie manuelle nom + téléphone -->
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <input id="nt-member-name" class="inp" placeholder="Nom..." style="flex:1.2"/>
+        <input id="nt-member-phone" class="inp" type="tel" placeholder="+241..." style="flex:1"/>
+        <button onclick="G.addTontineMember()" style="padding:12px 16px;border:none;border-radius:12px;background:var(--forest);color:#fff;font-weight:800;font-size:.9rem;cursor:pointer;flex-shrink:0">+</button>
+      </div>
+      <!-- Contacts du téléphone -->
+      <button onclick="G.pickTontineContact()" style="width:100%;padding:10px;border:1.5px dashed var(--border);border-radius:12px;background:none;color:var(--txt2);font-size:.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#users"/></svg>Importer depuis les contacts du téléphone
+      </button>
     </div>
     <button class="btn btn-gold" onclick="G.createTontine()"><svg><use href="#users"/></svg>Créer la tontine</button>
     <button class="btn btn-ghost" onclick="G.closeModal('mt')">Annuler</button>
@@ -1887,13 +1902,16 @@ const G = {
       const startDate = t.start_date ? new Date(t.start_date) : new Date();
       const monthsElapsed = (now.getFullYear() - startDate.getFullYear()) * 12 + (now.getMonth() - startDate.getMonth());
       const currentTurnIdx = members.length > 0 ? monthsElapsed % members.length : 0;
-      const currentTurnName = members[currentTurnIdx] || null;
+      // membres peuvent être string ou {name, phone}
+      const mName = m => typeof m === 'string' ? m : (m?.name || '?');
+      const mPhone = m => typeof m === 'string' ? '' : (m?.phone || '');
+      const currentTurnName = members[currentTurnIdx] ? mName(members[currentTurnIdx]) : null;
       const turnBadge = currentTurnName
         ? `<div style="background:rgba(212,160,23,.2);border:1px solid rgba(212,160,23,.35);border-radius:10px;padding:8px 12px;font-size:.68rem;font-weight:700;color:var(--gold2);margin-bottom:12px">🎯 Tour du mois · <strong>${currentTurnName}</strong></div>`
         : '';
       // Member order row
       const orderRow = members.length > 0
-        ? `<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px">${members.map((m, mi) => `<div style="padding:3px 8px;border-radius:6px;font-size:.55rem;font-weight:700;background:${mi===currentTurnIdx?'rgba(212,160,23,.3)':'rgba(255,255,255,.1)'};color:${mi===currentTurnIdx?'var(--gold2)':'rgba(255,255,255,.55)'}">${mi+1}. ${m}</div>`).join('')}</div>`
+        ? `<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px">${members.map((m, mi) => `<div style="padding:3px 8px;border-radius:6px;font-size:.55rem;font-weight:700;background:${mi===currentTurnIdx?'rgba(212,160,23,.3)':'rgba(255,255,255,.1)'};color:${mi===currentTurnIdx?'var(--gold2)':'rgba(255,255,255,.55)'};" title="${mPhone(m)}">${mi+1}. ${mName(m)}</div>`).join('')}</div>`
         : '';
       return `<div style="background:${colors[i % colors.length]};border-radius:18px;padding:18px;position:relative;overflow:hidden">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
@@ -1909,14 +1927,17 @@ const G = {
     }).join('') + `<button class="btn btn-ghost" onclick="G.showModal('mt')" style="margin-top:4px"><svg><use href="#plus"/></svg>Créer une tontine</button>`;
   },
 
-  _tontineMembers: [],
+  _tontineMembers: [], // [{ name, phone }]
 
-  addTontineMember() {
-    const inp = $('nt-member-input');
-    const name = inp?.value.trim();
-    if (!name) return;
-    G._tontineMembers.push(name);
-    inp.value = '';
+  addTontineMember(name, phone) {
+    const n = name || $('nt-member-name')?.value.trim();
+    const p = phone || $('nt-member-phone')?.value.trim() || '';
+    if (!n) { G.toast('Saisis un nom', 'err'); return; }
+    // Éviter les doublons
+    if (G._tontineMembers.find(m => m.name === n && m.phone === p)) { G.toast('Déjà ajouté', 'err'); return; }
+    G._tontineMembers.push({ name: n, phone: p });
+    if ($('nt-member-name')) $('nt-member-name').value = '';
+    if ($('nt-member-phone')) $('nt-member-phone').value = '';
     G._renderTontineMembers();
   },
 
@@ -1924,17 +1945,66 @@ const G = {
     const list = $('nt-members-list');
     if (!list) return;
     list.innerHTML = G._tontineMembers.map((m, i) =>
-      `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg2);border-radius:10px">
-        <div style="width:22px;height:22px;border-radius:50%;background:var(--forest);color:#fff;font-size:.65rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</div>
-        <span style="flex:1;font-size:.8rem;font-weight:700;color:var(--txt)">${m}</span>
-        <button onclick="G._removeTontineMember(${i})" style="border:none;background:none;color:var(--txt3);cursor:pointer;font-size:.85rem;padding:2px 6px">✕</button>
+      `<div style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--bg2);border-radius:12px">
+        <div style="width:24px;height:24px;border-radius:50%;background:var(--forest);color:#fff;font-size:.65rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.8rem;font-weight:700;color:var(--txt)">${m.name}</div>
+          ${m.phone ? `<div style="font-size:.6rem;color:var(--txt3);font-family:var(--fm)">${m.phone}</div>` : ''}
+        </div>
+        <button onclick="G._removeTontineMember(${i})" style="border:none;background:rgba(220,38,38,.08);color:#dc2626;cursor:pointer;font-size:.75rem;padding:4px 8px;border-radius:8px;font-weight:700">✕</button>
       </div>`
-    ).join('');
+    ).join('') || '';
   },
 
   _removeTontineMember(i) {
     G._tontineMembers.splice(i, 1);
     G._renderTontineMembers();
+  },
+
+  async searchTontineUsers(q) {
+    const res = $('nt-search-results');
+    if (!res) return;
+    if (!q || q.length < 2) { res.style.display = 'none'; return; }
+    let users = [];
+    if (currentUser) {
+      const { data } = await db.from('users').select('id,name,phone,avatar')
+        .neq('id', currentUser.id)
+        .or(`name.ilike.%${q}%,phone.ilike.%${q}%`)
+        .limit(8);
+      users = data || [];
+    } else {
+      users = (S.get('contacts', [])).filter(u => (u.name||'').toLowerCase().includes(q.toLowerCase()) || (u.phone||'').includes(q));
+    }
+    if (!users.length) { res.style.display = 'none'; return; }
+    res.style.display = 'block';
+    res.innerHTML = users.map(u =>
+      `<div onclick="G.addTontineMember('${u.name.replace(/'/g,"\\'")}','${(u.phone||'').replace(/'/g,"\\'")}');document.getElementById('nt-search').value='';document.getElementById('nt-search-results').style.display='none';"
+        style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:.1s" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='none'">
+        <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--forest),var(--green));display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:.85rem;flex-shrink:0">${(u.name||'?')[0].toUpperCase()}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.8rem;font-weight:700;color:var(--txt)">${u.name}</div>
+          <div style="font-size:.6rem;color:var(--txt3);font-family:var(--fm)">${u.phone||'GhettoPay'}</div>
+        </div>
+        <div style="font-size:.6rem;font-weight:700;color:var(--forest)">+ Ajouter</div>
+      </div>`
+    ).join('');
+  },
+
+  async pickTontineContact() {
+    if (!('contacts' in navigator && 'ContactsManager' in window)) {
+      G.toast('Non disponible · Saisie manuelle', 'err'); return;
+    }
+    try {
+      const contacts = await navigator.contacts.select(['name', 'tel'], { multiple: true });
+      if (contacts?.length) {
+        contacts.forEach(c => {
+          const name = c.name?.[0] || '';
+          const phone = c.tel?.[0] || '';
+          if (name || phone) G.addTontineMember(name || phone, phone);
+        });
+        G.toast(`${contacts.length} contact${contacts.length > 1 ? 's' : ''} ajouté${contacts.length > 1 ? 's' : ''}`, 'inf');
+      }
+    } catch(e) { G.toast('Accès contacts refusé', 'err'); }
   },
 
   async createTontine() {
@@ -1944,27 +2014,37 @@ const G = {
     if (!name) { G.toast('Nom requis', 'err'); return; }
     if (amount <= 0) { G.toast('Montant requis', 'err'); return; }
 
-    const members = G._tontineMembers.length > 0 ? [...G._tontineMembers] : ['Moi'];
+    // members = [{ name, phone }] ou ['Moi'] si vide
+    const rawMembers = G._tontineMembers.length > 0 ? [...G._tontineMembers] : [{ name: 'Moi', phone: currentUser?.phone || '' }];
+    // Noms pour affichage et DB
+    const memberNames = rawMembers.map(m => typeof m === 'string' ? m : m.name);
 
     if (currentUser) {
       const { data: t, error } = await db.from('tontines').insert({
         name, creator_id: currentUser.id,
         amount_per_cycle: amount, frequency: freq,
         current_turn_user_id: currentUser.id,
-        members_count: members.length
+        members_count: rawMembers.length
       }).select().single();
       if (error) { G.toast('Erreur création', 'err'); return; }
-      const inserts = members.map((m, i) => ({ tontine_id: t.id, user_id: currentUser.id, member_name: m, turn_order: i + 1, has_paid: false }));
+      const inserts = rawMembers.map((m, i) => ({
+        tontine_id: t.id, user_id: currentUser.id,
+        member_name: typeof m === 'string' ? m : m.name,
+        member_phone: typeof m === 'string' ? '' : (m.phone || ''),
+        turn_order: i + 1, has_paid: false
+      }));
       await db.from('tontine_members').insert(inserts);
     } else {
       const tontines = S.get('tontines', []);
-      tontines.unshift({ id: Date.now().toString(), name, amount_per_cycle: amount, frequency: freq, members_count: members.length, members_paid: 0, members, start_date: new Date().toISOString() });
+      tontines.unshift({ id: Date.now().toString(), name, amount_per_cycle: amount, frequency: freq, members_count: rawMembers.length, members_paid: 0, members: rawMembers, start_date: new Date().toISOString() });
       S.set('tontines', tontines);
     }
 
     G._tontineMembers = [];
     G.closeModal('mt');
     $('nt-name').value = ''; $('nt-amount').value = '';
+    if ($('nt-search')) $('nt-search').value = '';
+    if ($('nt-search-results')) $('nt-search-results').style.display = 'none';
     if ($('nt-members-list')) $('nt-members-list').innerHTML = '';
     G.r_tontine();
     G.toast('Tontine créée !', 'ok');
