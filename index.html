@@ -1270,45 +1270,67 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 </div>
 
 <!-- MODAL TONTINE -->
-<div class="modal" id="mt" onclick="if(event.target===this)G.closeModal('mt')">
-  <div class="modal-box" style="max-height:88vh;overflow-y:auto">
+<div class="modal" id="mt" onclick="if(event.target===this)G._closeTontineModal()">
+  <div class="modal-box" style="max-height:92vh;overflow-y:auto">
     <div class="modal-handle"></div>
-    <div class="modal-title">Nouvelle tontine</div>
-    <input id="nt-name" class="inp" placeholder="Nom (ex: Amis Libreville)"/>
-    <input id="nt-amount" class="inp" type="number" placeholder="Montant par cycle (FCFA)"/>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div class="modal-title" style="text-align:left;margin:0">Nouvelle tontine</div>
+      <div id="nt-count-badge" style="background:var(--forest);color:#fff;font-size:.6rem;font-weight:800;padding:3px 10px;border-radius:100px;display:none">0 membre</div>
+    </div>
+
+    <!-- Infos de base -->
     <div>
-      <div class="lbl" style="margin-bottom:10px">Fréquence</div>
-      <div class="pills" id="nt-pills">
-        <div class="pill on" id="nt-freq-w" onclick="document.getElementById('nt-freq-w').classList.add('on');document.getElementById('nt-freq-m').classList.remove('on');document.getElementById('nt-freq').value='weekly'">Hebdo</div>
-        <div class="pill" id="nt-freq-m" onclick="document.getElementById('nt-freq-m').classList.add('on');document.getElementById('nt-freq-w').classList.remove('on');document.getElementById('nt-freq').value='monthly'">Mensuel</div>
-      </div>
-      <input id="nt-freq" type="hidden" value="weekly"/>
+      <div class="lbl" style="margin-bottom:6px">Nom de la tontine</div>
+      <input id="nt-name" class="inp" placeholder="Ex : Amis Libreville, Famille 2025…"/>
     </div>
     <div>
-      <div class="lbl" style="margin-bottom:10px">Membres <span style="font-size:.6rem;font-weight:400;text-transform:none;letter-spacing:0;color:var(--txt3)">(ordre de rotation)</span></div>
-      <!-- Liste des membres ajoutés -->
-      <div id="nt-members-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px"></div>
-      <!-- Recherche utilisateurs GhettoPay -->
+      <div class="lbl" style="margin-bottom:6px">Montant par cycle (FCFA)</div>
+      <input id="nt-amount" class="inp" type="number" inputmode="numeric" placeholder="Ex : 50 000"/>
+    </div>
+    <div>
+      <div class="lbl" style="margin-bottom:8px">Fréquence</div>
+      <div class="pills">
+        <div class="pill" id="nt-freq-w" onclick="G._setFreq('weekly')">Hebdomadaire</div>
+        <div class="pill on" id="nt-freq-m" onclick="G._setFreq('monthly')">Mensuelle</div>
+      </div>
+      <input id="nt-freq" type="hidden" value="monthly"/>
+    </div>
+
+    <!-- Liste des membres -->
+    <div style="background:var(--bg2);border-radius:16px;padding:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="lbl" style="margin:0">Membres <span style="font-size:.58rem;font-weight:400;color:var(--txt3);text-transform:none;letter-spacing:0">(ordre de rotation)</span></div>
+        <span id="nt-count-txt" style="font-size:.62rem;font-weight:700;color:var(--forest)">0 membre</span>
+      </div>
+      <!-- Membres ajoutés -->
+      <div id="nt-members-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px"></div>
+
+      <!-- Ajouter par nom/tel -->
+      <div style="display:flex;gap:6px;margin-bottom:8px">
+        <input id="nt-member-name" class="inp" placeholder="Nom…" style="flex:1.3;font-size:.82rem"/>
+        <input id="nt-member-phone" class="inp" type="tel" placeholder="+241…" style="flex:1;font-size:.82rem"/>
+        <button onclick="G.addTontineMember()" style="padding:0 14px;border:none;border-radius:12px;background:var(--forest);color:#fff;font-weight:900;font-size:1.1rem;cursor:pointer;flex-shrink:0;height:44px">+</button>
+      </div>
+
+      <!-- Recherche GhettoPay -->
       <div style="position:relative;margin-bottom:8px">
-        <div class="srch" style="background:var(--bg2)">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--txt3)" stroke-width="2"><use href="#srch"/></svg>
-          <input id="nt-search" type="text" placeholder="Rechercher un utilisateur GhettoPay..." oninput="G.searchTontineUsers(this.value)" autocomplete="off"/>
+        <div class="srch" style="background:var(--card)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--txt3)" stroke-width="2"><use href="#srch"/></svg>
+          <input id="nt-search" type="text" placeholder="Rechercher un utilisateur GhettoPay…" oninput="G.searchTontineUsers(this.value)" autocomplete="off" style="font-size:.8rem"/>
         </div>
-        <div id="nt-search-results" style="display:none;position:absolute;left:0;right:0;background:var(--card);border-radius:12px;border:1px solid var(--border);box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:10;max-height:160px;overflow-y:auto;margin-top:4px"></div>
+        <div id="nt-search-results" style="display:none;position:absolute;left:0;right:0;background:var(--card);border-radius:12px;border:1px solid var(--border);box-shadow:0 8px 24px rgba(0,0,0,.15);z-index:50;max-height:180px;overflow-y:auto;margin-top:4px"></div>
       </div>
-      <!-- Saisie manuelle nom + téléphone -->
-      <div style="display:flex;gap:8px;margin-bottom:8px">
-        <input id="nt-member-name" class="inp" placeholder="Nom..." style="flex:1.2"/>
-        <input id="nt-member-phone" class="inp" type="tel" placeholder="+241..." style="flex:1"/>
-        <button onclick="G.addTontineMember()" style="padding:12px 16px;border:none;border-radius:12px;background:var(--forest);color:#fff;font-weight:800;font-size:.9rem;cursor:pointer;flex-shrink:0">+</button>
-      </div>
-      <!-- Contacts du téléphone -->
-      <button onclick="G.pickTontineContact()" style="width:100%;padding:10px;border:1.5px dashed var(--border);border-radius:12px;background:none;color:var(--txt2);font-size:.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#users"/></svg>Importer depuis les contacts du téléphone
+
+      <!-- Contacts téléphone -->
+      <button onclick="G.pickTontineContact()" style="width:100%;padding:9px;border:1.5px dashed var(--border);border-radius:10px;background:none;color:var(--txt3);font-size:.72rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#users"/></svg>Importer depuis les contacts du téléphone
       </button>
     </div>
-    <button class="btn btn-gold" onclick="G.createTontine()"><svg><use href="#users"/></svg>Créer la tontine</button>
-    <button class="btn btn-ghost" onclick="G.closeModal('mt')">Annuler</button>
+
+    <button class="btn btn-gold" onclick="G.createTontine()">
+      <svg><use href="#users"/></svg>Créer la tontine
+    </button>
+    <button class="btn btn-ghost" onclick="G._closeTontineModal()">Annuler</button>
   </div>
 </div>
 
