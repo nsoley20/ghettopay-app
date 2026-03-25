@@ -258,6 +258,7 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
   padding:20px 20px calc(26px + var(--sab));width:100%;
   transform:translateY(50px);transition:transform .28s cubic-bezier(.25,.8,.25,1);
   display:flex;flex-direction:column;gap:14px;
+  max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
 }
 .modal.on .modal-box{transform:translateY(0)}
 .modal-handle{width:44px;height:4px;background:var(--bg3);border-radius:100px;margin:0 auto 6px}
@@ -1443,16 +1444,20 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 </div>
 
 <!-- SCANNER QR — caméra -->
-<div class="sc" id="sc-scan" style="background:#000;display:flex;flex-direction:column">
-  <div class="sbar dk"><span class="sbar-t" id="clkD">09:41</span></div>
-  <div class="snav dk" style="background:rgba(0,0,0,.6);border:none;position:relative;z-index:20">
-    <button class="back-btn dk" onclick="G.stopScan();G.back()"><svg><use href="#al"/></svg></button>
-    <span class="snav-t" style="color:#fff">Scanner un QR</span>
-    <span id="scan-status" style="font-size:.62rem;color:rgba(255,255,255,.5);font-family:var(--fm)"></span>
+<div class="sc" id="sc-scan" style="background:#000">
+  <!-- Bouton retour flottant (z-index:100 garantit qu'il passe au-dessus de tout) -->
+  <button onclick="G.back()" style="position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);left:14px;z-index:100;width:46px;height:46px;border-radius:50%;border:none;background:rgba(0,0,0,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;cursor:pointer">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><use href="#al"/></svg>
+  </button>
+  <div style="position:absolute;top:calc(env(safe-area-inset-top,0px) + 22px);left:0;right:0;text-align:center;z-index:90;pointer-events:none">
+    <span style="font-size:.84rem;font-weight:800;color:#fff">Scanner un QR</span>
+  </div>
+  <div style="position:absolute;top:calc(env(safe-area-inset-top,0px) + 26px);right:14px;z-index:90;pointer-events:none">
+    <span id="scan-status" style="font-size:.58rem;color:rgba(255,255,255,.5);font-family:var(--fm)"></span>
   </div>
 
   <!-- Zone caméra -->
-  <div style="flex:1;position:relative;background:#000;overflow:hidden;display:flex;align-items:center;justify-content:center">
+  <div style="position:absolute;inset:0;background:#000;overflow:hidden;display:flex;align-items:center;justify-content:center">
     <!-- Vidéo en fond plein écran -->
     <video id="scan-video" playsinline muted style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0"></video>
     <canvas id="scan-canvas" style="display:none"></canvas>
@@ -1483,7 +1488,7 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
   </div>
 
   <!-- Bas : info + fallback manuel -->
-  <div style="background:#111;padding:18px 16px 24px;display:flex;flex-direction:column;gap:12px">
+  <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.85);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);padding:18px 16px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px;z-index:10">
     <div id="scan-hint" style="font-size:.68rem;color:rgba(255,255,255,.4);text-align:center;font-family:var(--fm)">Place le QR code dans le cadre — détection automatique</div>
     <div style="display:flex;align-items:center;gap:10px">
       <div style="flex:1;height:1px;background:rgba(255,255,255,.1)"></div>
@@ -1868,26 +1873,34 @@ const G = {
   },
 
   stopScan() {
-    clearInterval(G._scanInterval);
+    G._scanActive = false;
+    try { clearInterval(G._scanInterval); } catch(e) {}
     G._scanInterval = null;
-    if (G._scanStream) {
-      G._scanStream.getTracks().forEach(t => t.stop());
-      G._scanStream = null;
-    }
+    try { G._scanStream?.getTracks().forEach(t => t.stop()); } catch(e) {}
+    G._scanStream = null;
   },
 
   _handleQRResult(data) {
     try {
-      // Format attendu : ghettopay:pay?phone=...&name=...
-      const qs = data.includes('?') ? data.split('?')[1] : data;
-      const params = new URLSearchParams(qs);
-      const phone = params.get('phone') || '';
-      const name = params.get('name') || phone || data;
+      let phone = '', name = '';
+      // Format 1: ghettopay:pay?phone=...&name=... (custom scheme)
+      // Format 2: https://...?phone=...&name=... (URL)
+      // Format 3: plain phone number
+      if (data.includes('?')) {
+        const qs = data.split('?')[1];
+        const params = new URLSearchParams(qs);
+        phone = params.get('phone') || '';
+        name = params.get('name') || phone;
+      } else if (/^\+?[\d\s\-]{7,}$/.test(data.trim())) {
+        // Plain phone number
+        phone = data.trim();
+        name = phone;
+      }
       if (!phone && !name) { G.toast('QR non reconnu par GhettoPay', 'err'); return; }
-      selC = { id: 'qr_' + phone, name: decodeURIComponent(name), phone: decodeURIComponent(phone), av: (name[0]||'?').toUpperCase() };
+      const av = ((name || phone)[0] || '?').toUpperCase();
+      selC = { id: 'qr_' + phone, name: name || phone, phone, av };
       G.go('send');
       G.toast(`Destinataire : ${selC.name}`, 'inf');
-      // Pré-remplir le champ destinataire dans send
       setTimeout(() => {
         if ($('rec-av')) $('rec-av').textContent = selC.av;
         if ($('rec-name')) $('rec-name').textContent = selC.name;
@@ -1895,7 +1908,7 @@ const G = {
         if ($('rec-row')) $('rec-row').style.display = 'flex';
       }, 150);
     } catch(e) {
-      G.toast('QR invalide', 'err');
+      G.toast('QR non reconnu', 'err');
     }
   },
 
@@ -2079,9 +2092,12 @@ const G = {
         <div class="ci-bar-bg"><div class="ci-bar" style="width:${pct}%;background:var(--green)"></div></div>
         <div class="ci-bar-lbls"><span>${f(c.saved)} FCFA épargnés</span><span>Objectif : ${f(c.target)} FCFA</span></div>
         ${calHTML}
-        <button class="btn btn-ghost" style="margin-top:10px;font-size:.75rem" onclick="G.depositCoffre('${c.id}','${c.name}')">
-          <svg><use href="#plus"/></svg>Ajouter des fonds
-        </button>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-ghost" style="flex:1;font-size:.75rem" onclick="G.depositCoffre('${c.id}','${c.name}')">
+            <svg><use href="#plus"/></svg>Ajouter des fonds
+          </button>
+          <button onclick="G.deleteCoffre('${c.id}','${c.name}')" style="padding:0 14px;border:1px solid rgba(220,38,38,.2);border-radius:12px;background:rgba(220,38,38,.07);color:#dc2626;font-size:.75rem;font-weight:700;cursor:pointer;flex-shrink:0">Supprimer</button>
+        </div>
       </div>`;
     }).join('');
   },
@@ -2111,6 +2127,41 @@ const G = {
     $('nc-name').value = ''; $('nc-target').value = '';
     G.r_coffre();
     G.toast('Coffre créé !', 'ok');
+  },
+
+  async deleteCoffre(coffreId, name) {
+    if (!confirm(`Supprimer le coffre "${name}" ? Les fonds seront remboursés sur ton solde.`)) return;
+    const coffres = S.get('coffres', []);
+    const c = coffres.find(x => String(x.id) === String(coffreId));
+    const saved = c?.saved || 0;
+    if (currentUser) {
+      await db.from('coffres').delete().eq('id', coffreId);
+      if (saved > 0) {
+        const bal = S.get('bal', 0);
+        await db.from('wallets').update({ balance: bal + saved }).eq('user_id', currentUser.id);
+        S.set('bal', bal + saved);
+      }
+    }
+    const newCoffres = coffres.filter(x => String(x.id) !== String(coffreId));
+    S.set('coffres', newCoffres);
+    if (saved > 0) S.set('coffre', Math.max(0, S.get('coffre',0) - saved));
+    G.r_coffre();
+    G.toast('Coffre supprimé', 'inf');
+  },
+
+  async deleteTontine(tontineId, name) {
+    if (!confirm(`Quitter/supprimer la tontine "${name}" ?`)) return;
+    if (currentUser) {
+      await db.from('tontine_members').delete().eq('tontine_id', tontineId).eq('user_id', currentUser.id);
+      // Supprimer la tontine si créateur
+      const t = G._curTontine;
+      if (t?.creator_id === currentUser.id) await db.from('tontines').delete().eq('id', tontineId);
+    }
+    const tontines = S.get('tontines', []).filter(t => String(t.id) !== String(tontineId));
+    S.set('tontines', tontines);
+    G._curTontine = null;
+    G.go('tontine');
+    G.toast('Tontine supprimée', 'inf');
   },
 
   depositCoffre(coffreId, coffreName) {
@@ -2194,6 +2245,18 @@ const G = {
           });
           if ($('bud-out')) $('bud-out').textContent = f(dbOut) + ' F';
           if ($('bud-in')) $('bud-in').textContent = f(dbIn) + ' F';
+          // Recalculer les catégories depuis les données DB
+          const dbCats = [
+            { name: 'Transferts', ico: 'send', col: '#D4A017', bg: 'rgba(212,160,23,.12)', types: ['transfer'] },
+            { name: 'Paiements', ico: 'pay', col: '#3b82f6', bg: 'rgba(59,130,246,.12)', types: ['qr', 'bill'] },
+            { name: 'Recharges', ico: 'phone', col: '#dc2626', bg: 'rgba(220,38,38,.12)', types: ['recharge'] },
+            { name: 'Coffre', ico: 'lock', col: '#0A4A2E', bg: 'rgba(10,74,46,.12)', types: ['coffre_deposit'] },
+          ];
+          if ($('cat-list')) $('cat-list').innerHTML = dbCats.map(cat => {
+            const total = txs2.filter(t => t.from_user_id === currentUser.id && cat.types.includes(t.type)).reduce((s,t) => s+(t.amount||0), 0);
+            const pct = dbOut > 0 ? Math.round(total / dbOut * 100) : 0;
+            return `<div class="cat-item"><div class="cat-ic" style="background:${cat.bg}">${si(cat.ico, cat.col, 15)}</div><div style="flex:1"><div class="cat-name">${cat.name}</div><div class="cat-bar-wrap" style="margin-top:5px"><div class="cat-bar-fill" style="width:${pct}%;background:${cat.col}"></div></div></div><div class="cat-right"><div class="cat-val">${f(total)} F</div><div class="cat-pct">${pct}%</div></div></div>`;
+          }).join('');
           $('all-tx').innerHTML = txs2.map(t => {
             const isCredit = t.to_user_id === currentUser.id;
             const other = isCredit ? t.from_user : t.to_user;
@@ -2566,17 +2629,29 @@ const G = {
     const manageHTML = G._tontineManageOpen && isCreator ? `
       <div style="background:var(--card);border-radius:16px;padding:16px;border:1.5px solid var(--border)">
         <div class="lbl" style="margin-bottom:12px">Membres de la tontine</div>
-        ${members.map((m, i) => `
-          <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg2);border-radius:12px;margin-bottom:8px">
-            <div style="width:28px;height:28px;border-radius:50%;background:${i===currentTurnIdx%members.length?'var(--gold2)':'var(--forest)'};color:${i===currentTurnIdx%members.length?'#000':'#fff'};font-size:.68rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</div>
-            <div style="flex:1"><div style="font-size:.8rem;font-weight:700;color:var(--txt)">${mName(m)}</div>${mPhone(m)?`<div style="font-size:.6rem;color:var(--txt3)">${mPhone(m)}</div>`:''}</div>
-            ${members.length > 1 ? `<button onclick="G._removeTontineDetailMember(${i})" style="border:none;background:rgba(220,38,38,.1);color:#dc2626;padding:5px 10px;border-radius:8px;font-size:.72rem;font-weight:700;cursor:pointer">Retirer</button>` : ''}
-          </div>`).join('')}
+        ${members.map((m, i) => {
+          const hasPaid = t.paid_by?.includes(mName(m));
+          const isCurrentRecip = i === currentTurnIdx % members.length;
+          return `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg2);border-radius:12px;margin-bottom:8px;border:1px solid ${isCurrentRecip?'rgba(212,160,23,.3)':'transparent'}">
+            <div style="width:28px;height:28px;border-radius:50%;background:${isCurrentRecip?'var(--gold2)':hasPaid?'var(--green)':'var(--forest)'};color:${isCurrentRecip?'#000':'#fff'};font-size:.65rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</div>
+            <div style="flex:1">
+              <div style="font-size:.8rem;font-weight:700;color:var(--txt)">${mName(m)}${isCurrentRecip?' <span style="font-size:.55rem;background:rgba(212,160,23,.15);color:var(--gold2);padding:2px 6px;border-radius:4px;font-weight:700">Tour</span>':''}</div>
+              ${mPhone(m)?`<div style="font-size:.6rem;color:var(--txt3)">${mPhone(m)}</div>`:''}
+              <div style="font-size:.58rem;font-weight:700;margin-top:2px;color:${hasPaid?'var(--green)':'#dc2626'}">${hasPaid?'Cotisation reçue':'En attente de cotisation'}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+              ${!hasPaid&&mPhone(m)?`<button onclick="G._remindMember('${mName(m)}','${mPhone(m)}','${t.name}')" style="border:none;background:rgba(212,160,23,.12);color:var(--gold2);padding:4px 8px;border-radius:7px;font-size:.6rem;font-weight:700;cursor:pointer">Rappeler</button>`:''}
+              ${isCurrentRecip?`<button onclick="G._sendToRecipient('${mName(m)}','${mPhone(m)}',${t.amount_per_cycle})" style="border:none;background:var(--gold2);color:#000;padding:4px 8px;border-radius:7px;font-size:.6rem;font-weight:700;cursor:pointer">Envoyer</button>`:''}
+              ${members.length>1?`<button onclick="G._removeTontineDetailMember(${i})" style="border:none;background:rgba(220,38,38,.08);color:#dc2626;padding:4px 8px;border-radius:7px;font-size:.6rem;font-weight:700;cursor:pointer">Retirer</button>`:''}
+            </div>
+          </div>`;
+        }).join('')}
         <div style="display:flex;gap:8px;margin-top:8px">
           <input id="td-add-name" class="inp" placeholder="Nom..." style="flex:1"/>
           <input id="td-add-phone" class="inp" type="tel" placeholder="+241..." style="flex:1"/>
           <button onclick="G._addTontineDetailMember()" style="padding:10px 14px;border:none;border-radius:12px;background:var(--forest);color:#fff;font-weight:800;font-size:.85rem;cursor:pointer">+</button>
         </div>
+        <button onclick="G.deleteTontine('${t.id}','${t.name}')" style="width:100%;margin-top:8px;padding:10px;border:1px solid rgba(220,38,38,.2);border-radius:12px;background:rgba(220,38,38,.07);color:#dc2626;font-size:.78rem;font-weight:700;cursor:pointer">Supprimer cette tontine</button>
       </div>` : '';
 
     $('td-body').innerHTML = `
@@ -2683,6 +2758,37 @@ const G = {
     S.set('notifs', notifs);
 
     G.r_tontine_detail();
+  },
+
+  _remindMember(name, phone, tontineName) {
+    // Notification locale
+    const notifs = S.get('notifs', []);
+    notifs.unshift({ id: Date.now(), type: 'tontine', icon: 'users', bg: 'rgba(212,160,23,.1)', color: 'var(--gold2)', title: `Rappel envoyé à ${name}`, desc: `Rappel de cotiser "${tontineName}" envoyé`, time: 'À l\'instant', read: false });
+    S.set('notifs', notifs);
+    // Rappel via DB si user GhettoPay
+    if (currentUser && phone) {
+      db.from('users').select('id').eq('phone', phone).maybeSingle().then(({ data: u }) => {
+        if (u) {
+          db.from('notifications').insert({ user_id: u.id, type: 'tontine_reminder', title: `Rappel tontine`, body: `${S.get('user',{}).name||'Le créateur'} te rappelle de cotiser pour "${tontineName}"`, read: false }).catch(()=>{});
+        }
+      });
+    }
+    G.toast(`Rappel envoyé à ${name}`, 'ok');
+  },
+
+  _sendToRecipient(name, phone, amount) {
+    // Pre-fill send screen with recipient
+    selC = { id: 'tontine_' + phone, name, phone, av: (name[0]||'?').toUpperCase() };
+    G.go('send');
+    setTimeout(() => {
+      if ($('rec-av')) $('rec-av').textContent = selC.av;
+      if ($('rec-name')) $('rec-name').textContent = selC.name;
+      if ($('rec-phone')) $('rec-phone').textContent = selC.phone;
+      if ($('rec-row')) $('rec-row').style.display = 'flex';
+      // Pre-fill amount
+      aStr = String(amount);
+      if ($('amt-disp')) $('amt-disp').textContent = f(amount);
+    }, 150);
   },
 
   _removeTontineDetailMember(i) {
