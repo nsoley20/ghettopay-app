@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(grep -n \"_tontinesList = tontines\\\\|_doDeposit\\\\|id=\"\"mdep\"\"\\\\|av: ''''#''''\" index.html)"
     ]
   }
 }
