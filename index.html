@@ -1309,6 +1309,19 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
   </div>
 </div>
 
+<!-- MODAL DÉPÔT COFFRE -->
+<div class="modal" id="mdep" onclick="if(event.target===this)G.closeModal('mdep')">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="mdep-title">Ajouter des fonds</div>
+    <div style="font-size:.72rem;color:var(--txt3);margin-bottom:12px" id="mdep-sub">Montant à déposer dans ce coffre</div>
+    <input id="mdep-amount" class="inp" type="number" inputmode="decimal" placeholder="Montant en FCFA"/>
+    <div style="font-size:.68rem;color:var(--txt3);margin-top:4px">Solde disponible : <strong id="mdep-bal">—</strong></div>
+    <button class="btn btn-gold" onclick="G._doDeposit()"><svg><use href="#plus"/></svg>Déposer</button>
+    <button class="btn btn-ghost" onclick="G.closeModal('mdep')">Annuler</button>
+  </div>
+</div>
+
 <!-- MODAL COFFRE -->
 <div class="modal" id="mc" onclick="if(event.target===this)G.closeModal('mc')">
   <div class="modal-box">
@@ -1328,7 +1341,7 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
     </div>
     <!-- Assistant épargne -->
     <div id="nc-assistant" style="display:none;background:linear-gradient(135deg,rgba(10,74,46,.08),rgba(22,163,74,.05));border:1px solid rgba(22,163,74,.18);border-radius:14px;padding:14px 12px">
-      <div style="font-size:.58rem;font-weight:800;color:var(--forest);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">💰 Plan d'épargne</div>
+      <div style="font-size:.58rem;font-weight:800;color:var(--forest);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;display:flex;align-items:center;gap:6px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--forest)" stroke-width="2.5"><use href="#lock"/></svg>Plan d'épargne</div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
         <div style="background:var(--card);border-radius:11px;padding:10px 6px;text-align:center;border:1px solid var(--border)">
           <div id="nc-per-day" style="font-family:var(--fd);font-weight:800;font-size:.8rem;color:var(--txt)">—</div>
@@ -1889,7 +1902,7 @@ const G = {
   scanManualSend() {
     const phone = $('scan-phone')?.value.trim();
     if (!phone) { G.toast('Saisis un numéro', 'err'); return; }
-    selC = { id: 'manual_' + phone, name: phone, phone, av: '📞' };
+    selC = { id: 'manual_' + phone, name: phone, phone, av: '#' };
     G.go('send');
     setTimeout(() => {
       if ($('rec-av')) $('rec-av').textContent = selC.av;
@@ -1956,7 +1969,7 @@ const G = {
   selManualPhone() {
     const phone = $('manual-phone')?.value.trim();
     if (!phone || phone.length < 6) { G.toast('Numéro invalide', 'err'); return; }
-    selC = { id: 'manual_' + phone, name: phone, phone, av: '📞' };
+    selC = { id: 'manual_' + phone, name: phone, phone, av: '#' };
     $('rec-av').textContent = selC.av;
     $('rec-name').textContent = selC.name;
     $('rec-phone').textContent = selC.phone;
@@ -2100,17 +2113,29 @@ const G = {
     G.toast('Coffre créé !', 'ok');
   },
 
-  async depositCoffre(coffreId, coffreName) {
-    const amount = parseInt(prompt(`Combien veux-tu déposer dans "${coffreName}" ? (FCFA)`)) || 0;
-    if (amount <= 0) return;
+  depositCoffre(coffreId, coffreName) {
+    G._depCoffreId = coffreId;
+    G._depCoffreName = coffreName;
+    if ($('mdep-title')) $('mdep-title').textContent = coffreName;
+    if ($('mdep-sub')) $('mdep-sub').textContent = `Ajouter des fonds dans "${coffreName}"`;
+    if ($('mdep-bal')) $('mdep-bal').textContent = f(S.get('bal', 0)) + ' FCFA';
+    if ($('mdep-amount')) $('mdep-amount').value = '';
+    G.showModal('mdep');
+    setTimeout(() => $('mdep-amount')?.focus(), 300);
+  },
+
+  async _doDeposit() {
+    const coffreId = G._depCoffreId;
+    const coffreName = G._depCoffreName;
+    const amount = parseInt($('mdep-amount')?.value) || 0;
+    if (amount <= 0) { G.toast('Saisis un montant', 'err'); return; }
     const bal = S.get('bal', 0);
     if (amount > bal) { G.toast('Solde insuffisant', 'err'); return; }
 
+    G.closeModal('mdep');
+
     if (currentUser) {
-      // Débiter wallet, créditer coffre
       await db.from('wallets').update({ balance: bal - amount }).eq('user_id', currentUser.id);
-      await db.from('coffres').update({ saved: db.rpc('increment', { row_id: coffreId, x: amount }) }).eq('id', coffreId);
-      // Plus simple : fetch saved actuel puis update
       const { data: cof } = await db.from('coffres').select('saved').eq('id', coffreId).single();
       await db.from('coffres').update({ saved: (cof?.saved || 0) + amount }).eq('id', coffreId);
       await db.from('transactions').insert({ from_user_id: currentUser.id, amount, type: 'coffre_deposit', merchant_name: coffreName, status: 'completed' });
@@ -2126,7 +2151,7 @@ const G = {
     }
 
     G.r_coffre();
-    G.toast(`${f(amount)} FCFA déposés`, 'ok');
+    G.toast(`${f(amount)} FCFA déposés dans ${coffreName}`, 'ok');
   },
 
   // ── BUDGET ──
@@ -2253,7 +2278,7 @@ const G = {
       const mPhone = m => typeof m === 'string' ? '' : (m?.phone || '');
       const currentTurnName = members[currentTurnIdx] ? mName(members[currentTurnIdx]) : null;
       const turnBadge = currentTurnName
-        ? `<div style="background:rgba(212,160,23,.2);border:1px solid rgba(212,160,23,.35);border-radius:10px;padding:8px 12px;font-size:.68rem;font-weight:700;color:var(--gold2);margin-bottom:12px">🎯 Tour du mois · <strong>${currentTurnName}</strong></div>`
+        ? `<div style="background:rgba(212,160,23,.2);border:1px solid rgba(212,160,23,.35);border-radius:10px;padding:8px 12px;font-size:.68rem;font-weight:700;color:var(--gold2);margin-bottom:12px;display:flex;align-items:center;gap:6px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--gold2)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>Tour du mois · <strong>${currentTurnName}</strong></div>`
         : '';
       // Member order row
       const orderRow = members.length > 0
@@ -2385,10 +2410,16 @@ const G = {
         }
       } catch(e) { /* fall through to localStorage */ }
     }
-    // Always save to localStorage (cache + offline fallback)
-    const tontines = S.get('tontines', []);
-    tontines.unshift({ id: Date.now().toString(), name, amount_per_cycle: amount, frequency: freq, members_count: rawMembers.length, members_paid: 0, members: rawMembers, start_date: new Date().toISOString() });
-    S.set('tontines', tontines);
+    // Always save to localStorage (cache, and fallback if DB not available)
+    {
+      const tontines = S.get('tontines', []);
+      const dbId = savedToDb ? null : Date.now().toString();
+      // Avoid duplicates: only add if not already in localStorage
+      if (!tontines.find(t => t.name === name && t.amount_per_cycle === amount)) {
+        tontines.unshift({ id: dbId || Date.now().toString(), name, amount_per_cycle: amount, frequency: freq, members_count: rawMembers.length, members_paid: 0, paid_by: [], members: rawMembers, start_date: new Date().toISOString() });
+        S.set('tontines', tontines);
+      }
+    }
 
     G._tontineMembers = [];
     G.closeModal('mt');
@@ -2420,13 +2451,16 @@ const G = {
       S.set('bal', bal - n);
     }
 
-    // Update progress in localStorage
-    if (lt) {
-      if (!lt.paid_by) lt.paid_by = [];
-      lt.paid_by.push(u.name || 'Moi');
-      lt.members_paid = lt.paid_by.length;
-      S.set('tontines', tontines);
-      if (G._curTontine?.id == tontineId) G._curTontine = lt;
+    // Update progress in localStorage AND in _curTontine (covers DB tontines too)
+    const tgt = lt || G._curTontine;
+    if (tgt) {
+      if (!tgt.paid_by) tgt.paid_by = [];
+      if (!tgt.paid_by.includes(u.name || 'Moi')) {
+        tgt.paid_by.push(u.name || 'Moi');
+        tgt.members_paid = (tgt.members_paid || 0) + 1;
+      }
+      if (lt) { lt.paid_by = tgt.paid_by; lt.members_paid = tgt.members_paid; S.set('tontines', tontines); }
+      if (G._curTontine) { G._curTontine.paid_by = tgt.paid_by; G._curTontine.members_paid = tgt.members_paid; }
     }
 
     const txList = S.get('txs', []);
@@ -2572,7 +2606,7 @@ const G = {
         <div style="font-size:.95rem;font-weight:900;color:var(--txt)">${currentRecipient} <span style="font-size:.68rem;font-weight:600;color:var(--txt3)">reçoit ce cycle</span></div>
         <div style="font-size:.65rem;color:var(--txt3);margin-top:3px">Cagnotte : ${f(t.amount_per_cycle * total)} FCFA</div>
         <button onclick="G.payTontine('${t.id}','${t.amount_per_cycle}','${t.name}')" style="width:100%;margin-top:12px;padding:11px;border:none;border-radius:12px;background:${alreadyPaid?'var(--bg2)':'var(--gold2)'};color:${alreadyPaid?'var(--txt3)':'#000'};font-size:.8rem;font-weight:900;font-family:var(--f);cursor:${alreadyPaid?'default':'pointer'}">
-          ${alreadyPaid ? '✓ Cotisation payée ce cycle' : 'Cotiser maintenant'}
+          ${alreadyPaid ? 'Cotisation payée ce cycle' : 'Cotiser maintenant'}
         </button>
       </div>
 
@@ -2679,7 +2713,7 @@ const G = {
         <div><div class="bill-name">${b.name}</div><div class="bill-ref">${b.ref || 'Réf: —'}</div></div>
         <div class="bill-right"><div class="bill-val">${f(b.amount)} F</div><div class="bill-due">${b.due || '—'}</div></div>
         <button onclick="G.payBill('${b.id}')" style="margin-left:8px;padding:6px 12px;background:var(--forest);color:#fff;border:none;border-radius:8px;font-size:.72rem;font-weight:700;cursor:pointer">Payer</button>
-      </div>`).join('') || '<div style="padding:20px;text-align:center;color:var(--txt3);font-size:.82rem">Toutes les factures sont payées 🎉</div>';
+      </div>`).join('') || '<div style="padding:20px;text-align:center;color:var(--txt3);font-size:.82rem">Toutes les factures sont à jour</div>';
   },
 
   payBill(id) {
