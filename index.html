@@ -691,6 +691,8 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 .mi-tag.red{background:rgba(220,38,38,.1);color:#dc2626}
 
 @keyframes loadbar{0%{transform:translateX(-100%)}100%{transform:translateX(300%)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+.skel{background:var(--bg3);border-radius:8px;animation:pulse 1.4s ease-in-out infinite}
 </style>
 </head>
 <body>
@@ -2044,15 +2046,27 @@ const G = {
     G.r_coffreList();
   },
 
-  async r_coffreList() {
-    let coffres = [];
-    if (currentUser) {
-      const { data } = await db.from('coffres').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-      coffres = data || [];
-    } else {
-      coffres = S.get('coffres', []);
-    }
+  r_coffreList() {
+    // Affichage instantané depuis le cache
+    const cached = S.get('coffres', []);
+    G._renderCoffreList(cached);
 
+    if (!currentUser) return;
+    // Mise à jour silencieuse depuis la DB
+    db.from('coffres').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false })
+      .then(({ data }) => {
+        if (!data) return;
+        S.set('coffres', data);
+        G._renderCoffreList(data);
+        // Mettre à jour le total coffre
+        const total = data.reduce((s, c) => s + (c.saved || 0), 0);
+        S.set('coffre', total);
+        if ($('coffre-total')) $('coffre-total').textContent = f(total) + ' FCFA';
+      }).catch(() => {});
+  },
+
+  _renderCoffreList(coffres) {
+    if (!$('coffre-list')) return;
     if (!coffres.length) {
       $('coffre-list').innerHTML = '<div style="text-align:center;padding:32px 16px;color:var(--txt3);font-size:.82rem">Aucun coffre. Crée le tien !</div>';
       return;
@@ -2284,80 +2298,116 @@ const G = {
   // ── TONTINE ──
   r_tontine() { G._loadTontines(); },
 
-  async _loadTontines() {
-    let tontines = [];
-    if (currentUser) {
-      try {
-        const { data: memberships } = await db.from('tontine_members').select('tontine_id').eq('user_id', currentUser.id);
-        if (memberships?.length) {
-          const ids = memberships.map(m => m.tontine_id);
-          const { data } = await db.from('tontines').select('*, tontine_members(count)').in('id', ids);
-          tontines = data || [];
-        }
-        // Also check tontines where user is creator (in case member insert failed)
-        if (!tontines.length) {
-          const { data: created } = await db.from('tontines').select('*').eq('creator_id', currentUser.id).order('created_at', { ascending: false });
-          tontines = created || [];
-        }
-        // Sync notifications from Supabase to localStorage
-        db.from('notifications').select('*').eq('user_id', currentUser.id).eq('read', false).then(({ data: dbNotifs }) => {
-          if (!dbNotifs?.length) return;
-          const existing = S.get('notifs', []);
-          const existingIds = new Set(existing.map(n => String(n.id)));
-          const newOnes = dbNotifs.filter(n => !existingIds.has(String(n.id))).map(n => ({
-            id: n.id, type: n.type || 'tontine', icon: 'users',
-            bg: 'rgba(10,74,46,.12)', color: 'var(--forest)',
-            title: n.title, desc: n.body || n.desc || '', time: new Date(n.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}), read: false
-          }));
-          if (newOnes.length) { S.set('notifs', [...newOnes, ...existing]); G.r_home && G.r_home(); }
-        }).catch(()=>{});
-      } catch(e) {}
-      // Fall back to localStorage if DB returned nothing
-      if (!tontines.length) tontines = S.get('tontines', []);
+  // Affiche immédiatement le cache local, puis rafraîchit depuis la DB en parallèle
+  _loadTontines() {
+    const cached = S.get('tontines', []);
+    G._tontinesList = cached;
+
+    // Rendu instantané depuis le cache
+    if (cached.length) {
+      G._renderTontinesList(cached);
     } else {
-      tontines = S.get('tontines', []);
+      // Skeleton si aucune donnée en cache et utilisateur connecté
+      $('tontine-list').innerHTML = currentUser
+        ? [0,0].map(() => `<div style="background:var(--card);border-radius:18px;padding:18px;border:1px solid var(--border)">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+              <div class="skel" style="width:38px;height:38px;border-radius:50%;flex-shrink:0"></div>
+              <div style="flex:1"><div class="skel" style="height:11px;width:55%;margin-bottom:7px"></div><div class="skel" style="height:9px;width:35%"></div></div>
+              <div class="skel" style="width:52px;height:20px"></div>
+            </div>
+            <div class="skel" style="height:6px;border-radius:100px;margin-bottom:8px"></div>
+            <div class="skel" style="height:34px;border-radius:10px;margin-top:6px"></div>
+          </div>`).join('')
+        : '<div style="text-align:center;padding:32px;color:var(--txt3);font-size:.82rem">Aucune tontine. Crée ou rejoins-en une !</div><button class="btn btn-gold" onclick="G.showModal(\'mt\')" style="margin:0 16px"><svg><use href="#plus"/></svg>Créer une tontine</button>';
     }
 
-    G._tontinesList = tontines; // cache for openTontine()
+    if (!currentUser) return;
 
+    // Rechargement DB en fond (non-bloquant) — 2 requêtes en parallèle
+    Promise.all([
+      db.from('tontine_members').select('tontine_id').eq('user_id', currentUser.id),
+      db.from('tontines').select('*').eq('creator_id', currentUser.id).order('created_at', { ascending: false })
+    ]).then(async ([memRes, creatorRes]) => {
+      const memberships = memRes.data || [];
+      let dbTontines = creatorRes.data ? [...creatorRes.data] : [];
+
+      if (memberships.length) {
+        const ids = memberships.map(m => m.tontine_id);
+        const { data } = await db.from('tontines').select('*').in('id', ids);
+        for (const t of (data || [])) {
+          if (!dbTontines.find(x => x.id === t.id)) dbTontines.push(t);
+        }
+      }
+
+      if (!dbTontines.length) return; // cache already shown
+
+      // Fusionner les données DB avec membres/paid_by du cache local
+      const merged = dbTontines.map(dt => {
+        const lt = cached.find(x => String(x.id) === String(dt.id));
+        return { ...dt, members: lt?.members || [], paid_by: lt?.paid_by || [], members_paid: lt?.members_paid || 0 };
+      });
+
+      S.set('tontines', merged);
+      G._tontinesList = merged;
+      G._renderTontinesList(merged);
+
+      // Sync notifications DB → local (fire-and-forget)
+      G._syncNotifs();
+    }).catch(() => {});
+  },
+
+  _renderTontinesList(tontines) {
+    if (!$('tontine-list')) return;
     if (!tontines.length) {
       $('tontine-list').innerHTML = '<div style="text-align:center;padding:32px;color:var(--txt3);font-size:.82rem">Aucune tontine. Crée ou rejoins-en une !</div><button class="btn btn-gold" onclick="G.showModal(\'mt\')" style="margin:0 16px"><svg><use href="#plus"/></svg>Créer une tontine</button>';
       return;
     }
-
     const colors = ['linear-gradient(135deg,#7c3aed,#a78bfa)', 'linear-gradient(135deg,#0284c7,#38bdf8)', 'linear-gradient(135deg,var(--forest),var(--forest2))'];
     const now = new Date();
     $('tontine-list').innerHTML = tontines.map((t, i) => {
       const paid = t.members_paid || 0;
-      const total = t.tontine_members?.[0]?.count || t.members_count || (t.members?.length || 5);
+      const total = t.tontine_members?.[0]?.count || t.members_count || (t.members?.length || 1);
       const pct = total > 0 ? Math.round(paid / total * 100) : 0;
-      // Calculate whose turn it is this month
       const members = t.members || [];
       const startDate = t.start_date ? new Date(t.start_date) : new Date();
       const monthsElapsed = (now.getFullYear() - startDate.getFullYear()) * 12 + (now.getMonth() - startDate.getMonth());
       const currentTurnIdx = members.length > 0 ? monthsElapsed % members.length : 0;
-      // membres peuvent être string ou {name, phone}
       const mName = m => typeof m === 'string' ? m : (m?.name || '?');
       const mPhone = m => typeof m === 'string' ? '' : (m?.phone || '');
       const currentTurnName = members[currentTurnIdx] ? mName(members[currentTurnIdx]) : null;
       const turnBadge = currentTurnName
         ? `<div style="background:rgba(212,160,23,.2);border:1px solid rgba(212,160,23,.35);border-radius:10px;padding:8px 12px;font-size:.68rem;font-weight:700;color:var(--gold2);margin-bottom:12px;display:flex;align-items:center;gap:6px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--gold2)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>Tour du mois · <strong>${currentTurnName}</strong></div>`
         : '';
-      // Member order row
       const orderRow = members.length > 0
-        ? `<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px">${members.map((m, mi) => `<div style="padding:3px 8px;border-radius:6px;font-size:.55rem;font-weight:700;background:${mi===currentTurnIdx?'rgba(212,160,23,.3)':'rgba(255,255,255,.1)'};color:${mi===currentTurnIdx?'var(--gold2)':'rgba(255,255,255,.55)'};" title="${mPhone(m)}">${mi+1}. ${mName(m)}</div>`).join('')}</div>`
+        ? `<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px">${members.map((m, mi) => `<div style="padding:3px 8px;border-radius:6px;font-size:.55rem;font-weight:700;background:${mi===currentTurnIdx?'rgba(212,160,23,.3)':'rgba(255,255,255,.1)'};color:${mi===currentTurnIdx?'var(--gold2)':'rgba(255,255,255,.55)'}">${mi+1}. ${mName(m)}</div>`).join('')}</div>`
         : '';
-      return `<div style="background:${colors[i % colors.length]};border-radius:18px;padding:18px;position:relative;overflow:hidden;cursor:pointer" onclick="G.openTontine('${t.id}')">
+      return `<div style="background:${colors[i % colors.length]};border-radius:18px;padding:18px;cursor:pointer" onclick="G.openTontine('${t.id}')">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
           <div style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.9rem;color:#fff">${t.name[0]}</div>
-          <div style="flex:1"><div style="font-size:.82rem;font-weight:800;color:#fff">${t.name}</div><div style="font-size:.6rem;color:rgba(255,255,255,.55);font-family:var(--fm)">${total} membres · ${t.frequency === 'weekly' ? 'Hebdo' : 'Mensuel'}</div></div>
+          <div style="flex:1"><div style="font-size:.82rem;font-weight:800;color:#fff">${t.name}</div><div style="font-size:.6rem;color:rgba(255,255,255,.55);font-family:var(--fm)">${total} membre${total>1?'s':''} · ${t.frequency === 'weekly' ? 'Hebdo' : 'Mensuel'}</div></div>
           <div style="text-align:right"><div style="font-family:var(--fd);font-size:.88rem;font-weight:900;color:#fff">${f(t.amount_per_cycle)}</div><div style="font-size:.54rem;color:rgba(255,255,255,.5)">FCFA/cycle</div></div>
         </div>
         ${turnBadge}${orderRow}
-        <div style="background:rgba(255,255,255,.15);border-radius:100px;height:6px;overflow:hidden;margin-bottom:6px"><div style="width:${pct}%;height:100%;border-radius:100px;background:var(--gold2)"></div></div>
-        <div style="display:flex;justify-content:space-between;font-family:var(--fm);font-size:.56rem;color:rgba(255,255,255,.5);margin-bottom:12px"><span>${paid} / ${total} ont cotisé</span><span>Appuyer pour voir le détail →</span></div>
+        <div style="background:rgba(255,255,255,.15);border-radius:100px;height:6px;overflow:hidden;margin-bottom:6px"><div style="width:${pct}%;height:100%;border-radius:100px;background:var(--gold2);transition:width .5s ease"></div></div>
+        <div style="display:flex;justify-content:space-between;font-family:var(--fm);font-size:.56rem;color:rgba(255,255,255,.5)"><span>${paid}/${total} cotisés</span><span>Voir détail →</span></div>
       </div>`;
     }).join('') + `<button class="btn btn-ghost" onclick="G.showModal('mt')" style="margin-top:4px"><svg><use href="#plus"/></svg>Créer une tontine</button>`;
+  },
+
+  _syncNotifs() {
+    if (!currentUser) return;
+    db.from('notifications').select('*').eq('user_id', currentUser.id).eq('read', false)
+      .then(({ data: dbNotifs }) => {
+        if (!dbNotifs?.length) return;
+        const existing = S.get('notifs', []);
+        const existingIds = new Set(existing.map(n => String(n.id)));
+        const newOnes = dbNotifs.filter(n => !existingIds.has(String(n.id))).map(n => ({
+          id: n.id, type: n.type || 'tontine', icon: 'users',
+          bg: 'rgba(10,74,46,.12)', color: 'var(--forest)',
+          title: n.title, desc: n.body || '', time: new Date(n.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}), read: false
+        }));
+        if (newOnes.length) S.set('notifs', [...newOnes, ...existing]);
+      }).catch(() => {});
   },
 
   _tontineMembers: [], // [{ name, phone }]
