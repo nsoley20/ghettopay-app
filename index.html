@@ -2360,55 +2360,52 @@ const G = {
 
     if (!currentUser) return;
 
-    // Rechargement DB en fond (non-bloquant) — 2 requêtes en parallèle
-    Promise.all([
-      db.from('tontine_members').select('tontine_id').eq('user_id', currentUser.id),
-      db.from('tontines').select('*').eq('creator_id', currentUser.id).order('created_at', { ascending: false })
-    ]).then(async ([memRes, creatorRes]) => {
-      const memberships = memRes.data || [];
-      let dbTontines = creatorRes.data ? [...creatorRes.data] : [];
-
-      if (memberships.length) {
-        const memberIds = memberships.map(m => m.tontine_id);
-        const { data } = await db.from('tontines').select('*').in('id', memberIds);
-        for (const t of (data || [])) {
-          if (!dbTontines.find(x => x.id === t.id)) dbTontines.push(t);
+    // JOIN tontine_members → tontines en une seule requête
+    // Fonctionne même si RLS tontines n'autorise que creator_id,
+    // car on passe par la table où l'utilisateur a sa propre ligne.
+    db.from('tontine_members')
+      .select('tontine_id, member_name, member_phone, has_paid, turn_order, tontine:tontines(*)')
+      .eq('user_id', currentUser.id)
+      .order('turn_order', { ascending: true })
+      .then(({ data: rows, error }) => {
+        if (error) {
+          // Erreur DB : rester sur le cache ou afficher état vide
+          if (!cached.length) G._renderTontinesList([]);
+          return;
         }
-      }
+        if (!rows?.length) {
+          if (!cached.length) G._renderTontinesList([]);
+          return;
+        }
 
-      if (!dbTontines.length) return;
+        // Grouper les membres par tontine
+        const tontineMap = {};
+        for (const row of rows) {
+          if (!row.tontine) continue;
+          const tid = row.tontine_id;
+          if (!tontineMap[tid]) tontineMap[tid] = { ...row.tontine, members: [], paid_by: [] };
+          if (row.member_name) {
+            tontineMap[tid].members.push({ name: row.member_name, phone: row.member_phone || '', has_paid: row.has_paid });
+            if (row.has_paid) tontineMap[tid].paid_by.push(row.member_name);
+          }
+        }
 
-      // Charger les membres depuis tontine_members pour toutes les tontines
-      const allIds = dbTontines.map(t => t.id);
-      const { data: allMembersRows } = await db.from('tontine_members')
-        .select('tontine_id,member_name,member_phone,has_paid,turn_order')
-        .in('tontine_id', allIds)
-        .order('turn_order', { ascending: true });
+        const dbTontines = Object.values(tontineMap).map(t => ({
+          ...t,
+          members_paid: t.paid_by.length,
+          members_count: t.members.length
+        }));
 
-      const membersByTontine = {};
-      for (const m of (allMembersRows || [])) {
-        if (!membersByTontine[m.tontine_id]) membersByTontine[m.tontine_id] = [];
-        membersByTontine[m.tontine_id].push({ name: m.member_name || '?', phone: m.member_phone || '', has_paid: m.has_paid });
-      }
+        if (!dbTontines.length) {
+          if (!cached.length) G._renderTontinesList([]);
+          return;
+        }
 
-      const merged = dbTontines.map(dt => {
-        const lt = cached.find(x => String(x.id) === String(dt.id));
-        const dbMembers = membersByTontine[dt.id] || [];
-        const members = dbMembers.length > 0 ? dbMembers : (lt?.members || []);
-        const paidByDb = dbMembers.filter(m => m.has_paid).map(m => m.name);
-        return {
-          ...dt,
-          members,
-          paid_by: paidByDb.length > 0 ? paidByDb : (lt?.paid_by || []),
-          members_paid: paidByDb.length > 0 ? paidByDb.length : (lt?.members_paid || 0)
-        };
+        S.set('tontines', dbTontines);
+        G._tontinesList = dbTontines;
+        G._renderTontinesList(dbTontines);
+        G._syncNotifs();
       });
-
-      S.set('tontines', merged);
-      G._tontinesList = merged;
-      G._renderTontinesList(merged);
-      G._syncNotifs();
-    }).catch(() => {});
   },
 
   _renderTontinesList(tontines) {
@@ -3064,7 +3061,40 @@ const G = {
 
   // ── NOTIFS ──
   r_notifs() {
-    const notifs = S.get('notifs', []);
+    // Affichage immédiat depuis le cache
+    G._renderNotifsList(S.get('notifs', []));
+    // Puis sync depuis la DB
+    if (!currentUser) return;
+    db.from('notifications')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false })
+      .limit(50)
+      .then(({ data: dbNotifs }) => {
+        if (!dbNotifs?.length) return;
+        const iconFor  = t => ({ tontine_invite:'users', tontine_reminder:'users' }[t] || 'bell');
+        const bgFor    = t => t === 'tontine_reminder' ? 'rgba(212,160,23,.1)' : 'rgba(10,74,46,.12)';
+        const colorFor = t => t === 'tontine_reminder' ? 'var(--gold2)' : 'var(--forest)';
+        const existing = S.get('notifs', []);
+        const existingIds = new Set(existing.map(n => String(n.id)));
+        const newOnes = dbNotifs.filter(n => !existingIds.has(String(n.id))).map(n => ({
+          id: n.id, type: n.type || 'tontine',
+          icon: iconFor(n.type), bg: bgFor(n.type), color: colorFor(n.type),
+          title: n.title || '', desc: n.body || '',
+          time: new Date(n.created_at).toLocaleDateString('fr-FR', { day:'numeric', month:'short' }),
+          read: n.read || false
+        }));
+        if (!newOnes.length) return;
+        const merged = [...newOnes, ...existing];
+        S.set('notifs', merged);
+        G._renderNotifsList(merged);
+        const unread = merged.filter(n => !n.read).length;
+        if ($('notif-dot')) $('notif-dot').style.display = unread ? 'block' : 'none';
+      }).catch(() => {});
+  },
+
+  _renderNotifsList(notifs) {
+    if (!$('notif-list')) return;
     $('notif-list').innerHTML = notifs.map(n => `
       <div class="notif-item ${n.read ? '' : 'unread'}">
         <div class="notif-ic" style="background:${n.bg}">${si(n.icon, n.color, 17)}</div>
