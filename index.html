@@ -2185,6 +2185,11 @@ const G = {
     G.toast('Coffre supprimé', 'inf');
   },
 
+  _deleteCurrentTontine() {
+    const t = G._curTontine; if (!t) return;
+    G.deleteTontine(t.id, t.name);
+  },
+
   async deleteTontine(tontineId, name) {
     if (!confirm(`Quitter/supprimer la tontine "${name}" ?`)) return;
     if (currentUser) {
@@ -2354,26 +2359,44 @@ const G = {
       let dbTontines = creatorRes.data ? [...creatorRes.data] : [];
 
       if (memberships.length) {
-        const ids = memberships.map(m => m.tontine_id);
-        const { data } = await db.from('tontines').select('*').in('id', ids);
+        const memberIds = memberships.map(m => m.tontine_id);
+        const { data } = await db.from('tontines').select('*').in('id', memberIds);
         for (const t of (data || [])) {
           if (!dbTontines.find(x => x.id === t.id)) dbTontines.push(t);
         }
       }
 
-      if (!dbTontines.length) return; // cache already shown
+      if (!dbTontines.length) return;
 
-      // Fusionner les données DB avec membres/paid_by du cache local
+      // Charger les membres depuis tontine_members pour toutes les tontines
+      const allIds = dbTontines.map(t => t.id);
+      const { data: allMembersRows } = await db.from('tontine_members')
+        .select('tontine_id,member_name,member_phone,has_paid,turn_order')
+        .in('tontine_id', allIds)
+        .order('turn_order', { ascending: true });
+
+      const membersByTontine = {};
+      for (const m of (allMembersRows || [])) {
+        if (!membersByTontine[m.tontine_id]) membersByTontine[m.tontine_id] = [];
+        membersByTontine[m.tontine_id].push({ name: m.member_name || '?', phone: m.member_phone || '', has_paid: m.has_paid });
+      }
+
       const merged = dbTontines.map(dt => {
         const lt = cached.find(x => String(x.id) === String(dt.id));
-        return { ...dt, members: lt?.members || [], paid_by: lt?.paid_by || [], members_paid: lt?.members_paid || 0 };
+        const dbMembers = membersByTontine[dt.id] || [];
+        const members = dbMembers.length > 0 ? dbMembers : (lt?.members || []);
+        const paidByDb = dbMembers.filter(m => m.has_paid).map(m => m.name);
+        return {
+          ...dt,
+          members,
+          paid_by: paidByDb.length > 0 ? paidByDb : (lt?.paid_by || []),
+          members_paid: paidByDb.length > 0 ? paidByDb.length : (lt?.members_paid || 0)
+        };
       });
 
       S.set('tontines', merged);
       G._tontinesList = merged;
       G._renderTontinesList(merged);
-
-      // Sync notifications DB → local (fire-and-forget)
       G._syncNotifs();
     }).catch(() => {});
   },
@@ -2558,44 +2581,36 @@ const G = {
     // Noms pour affichage et DB
     const memberNames = rawMembers.map(m => typeof m === 'string' ? m : m.name);
 
-    let savedToDb = false;
+    let localId = Date.now().toString();
     if (currentUser) {
       try {
-        const { data: t, error } = await db.from('tontines').insert({
+        const { data: dbT, error } = await db.from('tontines').insert({
           name, creator_id: currentUser.id,
           amount_per_cycle: amount, frequency: freq
         }).select().single();
-        if (!error && t) {
+        if (!error && dbT) {
+          localId = dbT.id; // UUID réel de la DB
           const inserts = rawMembers.map((m, i) => {
-            const row = { tontine_id: t.id, user_id: currentUser.id, turn_order: i + 1, has_paid: false };
-            const mName = typeof m === 'string' ? m : m.name;
-            const mPhone = typeof m === 'string' ? '' : (m.phone || '');
-            if (mName) row.member_name = mName;
-            if (mPhone) row.member_phone = mPhone;
+            const row = { tontine_id: dbT.id, user_id: currentUser.id, turn_order: i + 1, has_paid: false };
+            const mn = typeof m === 'string' ? m : m.name;
+            const mp = typeof m === 'string' ? '' : (m.phone || '');
+            if (mn) row.member_name = mn;
+            if (mp) row.member_phone = mp;
             return row;
           });
           await db.from('tontine_members').insert(inserts);
-          savedToDb = true;
         }
       } catch(e) { /* fall through to localStorage */ }
     }
-    // Always save to localStorage (cache, and fallback if DB not available)
-    {
-      const tontines = S.get('tontines', []);
-      const dbId = savedToDb ? null : Date.now().toString();
-      // Avoid duplicates: only add if not already in localStorage
-      if (!tontines.find(t => t.name === name && t.amount_per_cycle === amount)) {
-        tontines.unshift({ id: dbId || Date.now().toString(), name, amount_per_cycle: amount, frequency: freq, members_count: rawMembers.length, members_paid: 0, paid_by: [], members: rawMembers, start_date: new Date().toISOString() });
-        S.set('tontines', tontines);
-      }
+
+    const tontines = S.get('tontines', []);
+    if (!tontines.find(t => String(t.id) === String(localId))) {
+      tontines.unshift({ id: localId, name, amount_per_cycle: amount, frequency: freq, members_count: rawMembers.length, members_paid: 0, paid_by: [], members: rawMembers, start_date: new Date().toISOString() });
+      S.set('tontines', tontines);
     }
 
     G._tontineMembers = [];
-    G.closeModal('mt');
-    $('nt-name').value = ''; $('nt-amount').value = '';
-    if ($('nt-search')) $('nt-search').value = '';
-    if ($('nt-search-results')) $('nt-search-results').style.display = 'none';
-    if ($('nt-members-list')) $('nt-members-list').innerHTML = '';
+    G._closeTontineModal();
     G.r_tontine();
     G.toast('Tontine créée !', 'ok');
   },
@@ -2727,7 +2742,7 @@ const G = {
       }
     }
 
-    const calDays = ['D','L','M','M','J','V','S'];
+    const calDays = ['L','M','M','J','V','S','D'];
     let calCells = '';
     for (let i = 0; i < (firstDay === 0 ? 6 : firstDay - 1); i++) calCells += '<div></div>';
     for (let d = 1; d <= daysInMonth; d++) {
@@ -2762,7 +2777,7 @@ const G = {
           <input id="td-add-phone" class="inp" type="tel" placeholder="+241..." style="flex:1"/>
           <button onclick="G._addTontineDetailMember()" style="padding:10px 14px;border:none;border-radius:12px;background:var(--forest);color:#fff;font-weight:800;font-size:.85rem;cursor:pointer">+</button>
         </div>
-        <button onclick="G.deleteTontine('${t.id}','${t.name}')" style="width:100%;margin-top:8px;padding:10px;border:1px solid rgba(220,38,38,.2);border-radius:12px;background:rgba(220,38,38,.07);color:#dc2626;font-size:.78rem;font-weight:700;cursor:pointer">Supprimer cette tontine</button>
+        <button onclick="G._deleteCurrentTontine()" style="width:100%;margin-top:8px;padding:10px;border:1px solid rgba(220,38,38,.2);border-radius:12px;background:rgba(220,38,38,.07);color:#dc2626;font-size:.78rem;font-weight:700;cursor:pointer">Supprimer cette tontine</button>
       </div>` : '';
 
     $('td-body').innerHTML = `
