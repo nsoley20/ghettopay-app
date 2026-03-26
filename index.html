@@ -2481,9 +2481,10 @@ const G = {
       users = (S.get('contacts', [])).filter(u => (u.name||'').toLowerCase().includes(q.toLowerCase()) || (u.phone||'').includes(q));
     }
     if (!users.length) { res.style.display = 'none'; return; }
+    G._ntSearchCache = users;
     res.style.display = 'block';
-    res.innerHTML = users.map(u =>
-      `<div onclick="G.addTontineMember('${u.name.replace(/'/g,"\\'")}','${(u.phone||'').replace(/'/g,"\\'")}');document.getElementById('nt-search').value='';document.getElementById('nt-search-results').style.display='none';"
+    res.innerHTML = users.map((u, idx) =>
+      `<div onclick="G._pickNtSearchResult(${idx})"
         style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:.1s" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='none'">
         <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--forest),var(--green));display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:.85rem;flex-shrink:0">${(u.name||'?')[0].toUpperCase()}</div>
         <div style="flex:1;min-width:0">
@@ -2493,6 +2494,15 @@ const G = {
         <div style="font-size:.6rem;font-weight:700;color:var(--forest)">+ Ajouter</div>
       </div>`
     ).join('');
+  },
+
+  _ntSearchCache: [],
+  _pickNtSearchResult(idx) {
+    const u = G._ntSearchCache[idx];
+    if (!u) return;
+    G.addTontineMember(u.name, u.phone || '');
+    const inp = $('nt-search'); if (inp) inp.value = '';
+    const res = $('nt-search-results'); if (res) res.style.display = 'none';
   },
 
   async pickTontineContact() {
@@ -2712,8 +2722,8 @@ const G = {
               <div style="font-size:.58rem;font-weight:700;margin-top:2px;color:${hasPaid?'var(--green)':'#dc2626'}">${hasPaid?'Cotisation reçue':'En attente de cotisation'}</div>
             </div>
             <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
-              ${!hasPaid&&mPhone(m)?`<button onclick="G._remindMember('${mName(m)}','${mPhone(m)}','${t.name}')" style="border:none;background:rgba(212,160,23,.12);color:var(--gold2);padding:4px 8px;border-radius:7px;font-size:.6rem;font-weight:700;cursor:pointer">Rappeler</button>`:''}
-              ${isCurrentRecip?`<button onclick="G._sendToRecipient('${mName(m)}','${mPhone(m)}',${t.amount_per_cycle})" style="border:none;background:var(--gold2);color:#000;padding:4px 8px;border-radius:7px;font-size:.6rem;font-weight:700;cursor:pointer">Envoyer</button>`:''}
+              ${!hasPaid&&mPhone(m)?`<button onclick="G._remindMemberByIdx(${i})" style="border:none;background:rgba(212,160,23,.12);color:var(--gold2);padding:4px 8px;border-radius:7px;font-size:.6rem;font-weight:700;cursor:pointer">Rappeler</button>`:''}
+              ${isCurrentRecip?`<button onclick="G._sendToRecipientByIdx(${i})" style="border:none;background:var(--gold2);color:#000;padding:4px 8px;border-radius:7px;font-size:.6rem;font-weight:700;cursor:pointer">Envoyer</button>`:''}
               ${members.length>1?`<button onclick="G._removeTontineDetailMember(${i})" style="border:none;background:rgba(220,38,38,.08);color:#dc2626;padding:4px 8px;border-radius:7px;font-size:.6rem;font-weight:700;cursor:pointer">Retirer</button>`:''}
             </div>
           </div>`;
@@ -2860,6 +2870,22 @@ const G = {
       aStr = String(amount);
       if ($('amt-disp')) $('amt-disp').textContent = f(amount);
     }, 150);
+  },
+
+  _remindMemberByIdx(i) {
+    const t = G._curTontine; if (!t) return;
+    const mName = m => typeof m === 'string' ? m : (m?.name || '?');
+    const mPhone = m => typeof m === 'string' ? '' : (m?.phone || '');
+    const m = t.members?.[i]; if (!m) return;
+    G._remindMember(mName(m), mPhone(m), t.name);
+  },
+
+  _sendToRecipientByIdx(i) {
+    const t = G._curTontine; if (!t) return;
+    const mName = m => typeof m === 'string' ? m : (m?.name || '?');
+    const mPhone = m => typeof m === 'string' ? '' : (m?.phone || '');
+    const m = t.members?.[i]; if (!m) return;
+    G._sendToRecipient(mName(m), mPhone(m), t.amount_per_cycle);
   },
 
   _removeTontineDetailMember(i) {
