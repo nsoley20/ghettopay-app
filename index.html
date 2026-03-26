@@ -1630,8 +1630,18 @@ const G = {
   },
 
   back() {
-    if (hist.length) G.go(hist.pop());
-    else G.go('home');
+    const scr = hist.length ? hist.pop() : 'home';
+    // Navigation directe sans passer par go() pour ne pas re-empiler dans hist
+    if (cur === 'scan' && scr !== 'scan') G.stopScan();
+    const p = $('sc-' + cur), n = $('sc-' + scr);
+    if (!n) return;
+    if (p) p.classList.remove('on');
+    n.classList.add('on');
+    cur = scr;
+    G.render(scr);
+    document.querySelectorAll('.bt').forEach(b => b.classList.remove('on'));
+    const map = { home: 0, budget: 1, coffre: 3, profil: 4 };
+    if (map[scr] !== undefined) document.querySelectorAll('.bt')[map[scr]]?.classList.add('on');
   },
 
   render(scr) {
