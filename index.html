@@ -2599,14 +2599,20 @@ const G = {
           amount_per_cycle: amount, frequency: freq
         }).select().single();
         if (!error && dbT) {
-          localId = dbT.id; // UUID réel de la DB
+          localId = dbT.id;
+          // Résoudre les user_id réels pour les membres GhettoPay (par téléphone)
+          const phones = rawMembers.map(m => (typeof m === 'string' ? '' : m.phone || '')).filter(p => p);
+          let phoneToUid = {};
+          if (phones.length) {
+            const { data: found } = await db.from('users').select('id,phone').in('phone', phones);
+            for (const u of (found || [])) phoneToUid[u.phone] = u.id;
+          }
           const inserts = rawMembers.map((m, i) => {
-            const row = { tontine_id: dbT.id, user_id: currentUser.id, turn_order: i + 1, has_paid: false };
             const mn = typeof m === 'string' ? m : m.name;
             const mp = typeof m === 'string' ? '' : (m.phone || '');
-            if (mn) row.member_name = mn;
-            if (mp) row.member_phone = mp;
-            return row;
+            // Utiliser le vrai user_id si le membre est un utilisateur GhettoPay
+            const uid = (mp && phoneToUid[mp]) ? phoneToUid[mp] : currentUser.id;
+            return { tontine_id: dbT.id, user_id: uid, turn_order: i + 1, has_paid: false, member_name: mn || null, member_phone: mp || null };
           });
           await db.from('tontine_members').insert(inserts);
         }
@@ -2865,23 +2871,32 @@ const G = {
     t.members_count = t.members.length;
     G._saveCurTontine();
 
-    // Notifier + ajouter dans Supabase si membre GhettoPay
-    if (currentUser && phone) {
+    // Ajouter dans Supabase avec le vrai user_id si le membre est un utilisateur GhettoPay
+    if (currentUser) {
       try {
-        const { data: invited } = await db.from('users').select('id,name').eq('phone', phone).maybeSingle();
-        if (invited) {
-          // Ajouter à tontine_members pour que la tontine apparaisse chez lui
-          await db.from('tontine_members').insert({
-            tontine_id: t.id, user_id: invited.id,
-            turn_order: t.members.length, has_paid: false
-          });
-          // Notification dans Supabase (silencieux si table inexistante)
+        let invitedId = null;
+        if (phone) {
+          const { data: found } = await db.from('users').select('id').eq('phone', phone).maybeSingle();
+          if (found) invitedId = found.id;
+        }
+        // Insérer dans tontine_members avec member_name et member_phone
+        await db.from('tontine_members').insert({
+          tontine_id: t.id,
+          user_id: invitedId || currentUser.id,
+          turn_order: t.members.length,
+          has_paid: false,
+          member_name: name,
+          member_phone: phone || null
+        });
+        // Notifier l'utilisateur GhettoPay invité
+        if (invitedId) {
+          const creator = S.get('user', {});
           await db.from('notifications').insert({
-            user_id: invited.id, type: 'tontine_invite',
+            user_id: invitedId, type: 'tontine_invite',
             title: `Tu as été ajouté à "${t.name}"`,
-            body: `${S.get('user',{}).name || 'Quelqu\'un'} t\'a invité dans la tontine "${t.name}" — ${t.frequency === 'weekly' ? 'Hebdo' : 'Mensuel'} · ${f(t.amount_per_cycle)} FCFA`,
+            body: `${creator.name || 'Quelqu\'un'} t\'a invité dans la tontine "${t.name}" — ${t.frequency === 'weekly' ? 'Hebdo' : 'Mensuel'} · ${f(t.amount_per_cycle)} FCFA`,
             read: false
-          }).throwOnError().catch(()=>{});
+          }).catch(() => {});
           G.toast(`${name} notifié !`, 'ok');
         }
       } catch(e) {}
