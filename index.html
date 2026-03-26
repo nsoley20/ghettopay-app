@@ -2459,11 +2459,35 @@ const G = {
         <button onclick="G._removeTontineMember(${i})" style="border:none;background:rgba(220,38,38,.08);color:#dc2626;cursor:pointer;font-size:.75rem;padding:4px 8px;border-radius:8px;font-weight:700">✕</button>
       </div>`
     ).join('') || '';
+    G._updateNtCount();
   },
 
   _removeTontineMember(i) {
     G._tontineMembers.splice(i, 1);
     G._renderTontineMembers();
+  },
+
+  _closeTontineModal() {
+    G._tontineMembers = [];
+    G.closeModal('mt');
+    ['nt-name','nt-amount','nt-search'].forEach(id => { const el = $(id); if (el) el.value = ''; });
+    const res = $('nt-search-results'); if (res) res.style.display = 'none';
+    const list = $('nt-members-list'); if (list) list.innerHTML = '';
+    G._updateNtCount();
+  },
+
+  _setFreq(v) {
+    const inp = $('nt-freq'); if (inp) inp.value = v;
+    const w = $('nt-freq-w'), m = $('nt-freq-m');
+    if (w) w.classList.toggle('on', v === 'weekly');
+    if (m) m.classList.toggle('on', v === 'monthly');
+  },
+
+  _updateNtCount() {
+    const n = G._tontineMembers.length;
+    const badge = $('nt-count-badge'), txt = $('nt-count-txt');
+    if (badge) { badge.textContent = n + ' membre' + (n > 1 ? 's' : ''); badge.style.display = n ? '' : 'none'; }
+    if (txt) txt.textContent = n + ' membre' + (n > 1 ? 's' : '');
   },
 
   async searchTontineUsers(q) {
@@ -2574,6 +2598,11 @@ const G = {
     if ($('nt-members-list')) $('nt-members-list').innerHTML = '';
     G.r_tontine();
     G.toast('Tontine créée !', 'ok');
+  },
+
+  _payCurrentTontine() {
+    const t = G._curTontine; if (!t) return;
+    G.payTontine(t.id, t.amount_per_cycle, t.name);
   },
 
   async payTontine(tontineId, amount, name) {
@@ -2761,7 +2790,7 @@ const G = {
         <div style="font-size:.65rem;font-weight:800;color:var(--gold2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Tour en cours</div>
         <div style="font-size:.95rem;font-weight:900;color:var(--txt)">${currentRecipient} <span style="font-size:.68rem;font-weight:600;color:var(--txt3)">reçoit ce cycle</span></div>
         <div style="font-size:.65rem;color:var(--txt3);margin-top:3px">Cagnotte : ${f(t.amount_per_cycle * total)} FCFA</div>
-        <button onclick="G.payTontine('${t.id}','${t.amount_per_cycle}','${t.name}')" style="width:100%;margin-top:12px;padding:11px;border:none;border-radius:12px;background:${alreadyPaid?'var(--bg2)':'var(--gold2)'};color:${alreadyPaid?'var(--txt3)':'#000'};font-size:.8rem;font-weight:900;font-family:var(--f);cursor:${alreadyPaid?'default':'pointer'}">
+        <button onclick="G._payCurrentTontine()" style="width:100%;margin-top:12px;padding:11px;border:none;border-radius:12px;background:${alreadyPaid?'var(--bg2)':'var(--gold2)'};color:${alreadyPaid?'var(--txt3)':'#000'};font-size:.8rem;font-weight:900;font-family:var(--f);cursor:${alreadyPaid?'default':'pointer'}">
           ${alreadyPaid ? 'Cotisation payée ce cycle' : 'Cotiser maintenant'}
         </button>
       </div>
