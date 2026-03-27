@@ -2201,18 +2201,66 @@ const G = {
   },
 
   async deleteTontine(tontineId, name) {
-    if (!confirm(`Quitter/supprimer la tontine "${name}" ?`)) return;
-    if (currentUser) {
-      await db.from('tontine_members').delete().eq('tontine_id', tontineId).eq('user_id', currentUser.id);
-      // Supprimer la tontine si créateur
-      const t = G._curTontine;
-      if (t?.creator_id === currentUser.id) await db.from('tontines').delete().eq('id', tontineId);
+    const t = G._curTontine;
+    const isCreator = currentUser && t?.creator_id === currentUser.id;
+
+    if (isCreator) {
+      if (!confirm(`Supprimer la tontine "${name}" ?\nLes membres ayant cotisé seront remboursés automatiquement.`)) return;
+
+      // Récupérer tous les membres qui ont cotisé
+      const { data: paidRows } = await db.from('tontine_members')
+        .select('user_id, member_name, has_paid')
+        .eq('tontine_id', tontineId)
+        .eq('has_paid', true);
+
+      const amt = t.amount_per_cycle || 0;
+      let selfRefunded = false;
+
+      for (const row of (paidRows || [])) {
+        if (!row.user_id || row.user_id === currentUser.id) {
+          // Rembourser le créateur localement
+          if (row.user_id === currentUser.id) {
+            const bal = S.get('bal', 0);
+            S.set('bal', bal + amt);
+            await db.from('wallets').update({ balance: bal + amt }).eq('user_id', currentUser.id).catch(() => {});
+            if ($('bal-amt')) $('bal-amt').textContent = f(bal + amt);
+            selfRefunded = true;
+          }
+          continue;
+        }
+        // Rembourser le membre
+        const { data: w } = await db.from('wallets').select('balance').eq('user_id', row.user_id).maybeSingle();
+        if (w) {
+          await db.from('wallets').update({ balance: w.balance + amt }).eq('user_id', row.user_id).catch(() => {});
+        }
+        // Notification de remboursement
+        await db.from('notifications').insert({
+          user_id: row.user_id, type: 'tontine_refund',
+          title: `Remboursement — ${name}`,
+          body: `La tontine "${name}" a été supprimée. ${f(amt)} FCFA ont été remboursés sur ton solde.`,
+          read: false
+        }).catch(() => {});
+      }
+
+      await db.from('tontine_members').delete().eq('tontine_id', tontineId).catch(() => {});
+      await db.from('tontines').delete().eq('id', tontineId).catch(() => {});
+      if (selfRefunded) G.toast(`Tontine supprimée · +${f(amt)} FCFA remboursés`, 'ok');
+      else G.toast('Tontine supprimée', 'inf');
+
+    } else {
+      // Membre non-créateur : quitter seulement
+      if (!confirm(`Quitter la tontine "${name}" ?`)) return;
+      if (currentUser) {
+        await db.from('tontine_members').delete()
+          .eq('tontine_id', tontineId).eq('user_id', currentUser.id).catch(() => {});
+      }
+      G.toast('Tontine quittée', 'inf');
     }
-    const tontines = S.get('tontines', []).filter(t => String(t.id) !== String(tontineId));
+
+    const tontines = S.get('tontines', []).filter(x => String(x.id) !== String(tontineId));
     S.set('tontines', tontines);
     G._curTontine = null;
     G.go('tontine');
-    G.toast('Tontine supprimée', 'inf');
   },
 
   depositCoffre(coffreId, coffreName) {
@@ -2673,21 +2721,60 @@ const G = {
     if (n > bal) { G.toast('Solde insuffisant', 'err'); return; }
     const u = S.get('user', {});
 
-    // Check already paid
-    const tontines = S.get('tontines', []);
-    const lt = tontines.find(x => x.id == tontineId);
-    if (lt?.paid_by?.includes(u.name || 'Moi')) { G.toast('Tu as déjà cotisé ce cycle', 'err'); return; }
+    // Vérifier si déjà payé (DB d'abord, cache ensuite)
+    if (currentUser) {
+      const { data: myRow } = await db.from('tontine_members')
+        .select('has_paid').eq('tontine_id', tontineId).eq('user_id', currentUser.id).maybeSingle();
+      if (myRow?.has_paid) { G.toast('Tu as déjà cotisé ce cycle', 'err'); return; }
+    } else {
+      const lt = S.get('tontines', []).find(x => String(x.id) === String(tontineId));
+      if (lt?.paid_by?.includes(u.name || 'Moi')) { G.toast('Tu as déjà cotisé ce cycle', 'err'); return; }
+    }
 
     if (currentUser) {
+      // 1. Débiter le wallet
       await db.from('wallets').update({ balance: bal - n }).eq('user_id', currentUser.id);
-      await db.from('tontine_members').update({ has_paid: true }).eq('tontine_id', tontineId).eq('user_id', currentUser.id);
-      await db.from('transactions').insert({ from_user_id: currentUser.id, amount: n, type: 'tontine', merchant_name: name, status: 'completed' });
+      // 2. Marquer has_paid dans tontine_members
+      await db.from('tontine_members').update({ has_paid: true })
+        .eq('tontine_id', tontineId).eq('user_id', currentUser.id);
+      // 3. Incrémenter members_paid + récupérer creator_id
+      const { data: tData } = await db.from('tontines')
+        .select('members_paid, creator_id').eq('id', tontineId).maybeSingle();
+      await db.from('tontines')
+        .update({ members_paid: (tData?.members_paid || 0) + 1 }).eq('id', tontineId);
+      // 4. Transaction
+      await db.from('transactions').insert({
+        from_user_id: currentUser.id, amount: n, type: 'tontine', merchant_name: name, status: 'completed'
+      });
+      // 5. Notification au créateur
+      if (tData?.creator_id && tData.creator_id !== currentUser.id) {
+        await db.from('notifications').insert({
+          user_id: tData.creator_id, type: 'tontine_payment',
+          title: `Cotisation reçue — ${name}`,
+          body: `${u.name || 'Un membre'} a cotisé ${f(n)} FCFA pour la tontine "${name}".`,
+          read: false
+        }).catch(() => {});
+      }
+      // 6. Notifications aux autres membres GhettoPay
+      const { data: otherRows } = await db.from('tontine_members')
+        .select('user_id').eq('tontine_id', tontineId).neq('user_id', currentUser.id);
+      const otherIds = [...new Set((otherRows || []).map(r => r.user_id).filter(id => id !== tData?.creator_id))];
+      if (otherIds.length) {
+        await db.from('notifications').insert(otherIds.map(uid => ({
+          user_id: uid, type: 'tontine_payment',
+          title: `Cotisation — ${name}`,
+          body: `${u.name || 'Un membre'} a cotisé pour ce cycle.`,
+          read: false
+        }))).catch(() => {});
+      }
       S.set('bal', bal - n);
     } else {
       S.set('bal', bal - n);
     }
 
-    // Update progress in localStorage AND in _curTontine (covers DB tontines too)
+    // Mettre à jour le cache local
+    const tontines = S.get('tontines', []);
+    const lt = tontines.find(x => String(x.id) === String(tontineId));
     const tgt = lt || G._curTontine;
     if (tgt) {
       if (!tgt.paid_by) tgt.paid_by = [];
@@ -2696,13 +2783,15 @@ const G = {
         tgt.members_paid = (tgt.members_paid || 0) + 1;
       }
       if (lt) { lt.paid_by = tgt.paid_by; lt.members_paid = tgt.members_paid; S.set('tontines', tontines); }
-      if (G._curTontine) { G._curTontine.paid_by = tgt.paid_by; G._curTontine.members_paid = tgt.members_paid; }
+      if (G._curTontine) { G._curTontine.paid_by = [...(tgt.paid_by||[])]; G._curTontine.members_paid = tgt.members_paid; }
     }
 
     const txList = S.get('txs', []);
     txList.unshift({ id: Date.now(), type: 'tontine', name, amount: n, time: new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'short'}), cat: 'Tontine' });
     S.set('txs', txList);
-    S.set('bal', bal - n);
+
+    // Actualiser l'affichage solde
+    if ($('bal-amt')) $('bal-amt').textContent = f(bal - n);
 
     if (cur === 'tontine-detail') G.r_tontine_detail();
     else G.r_tontine();
@@ -2732,7 +2821,7 @@ const G = {
     const members = t.members || [];
     const mName = m => typeof m === 'string' ? m : (m?.name || '?');
     const mPhone = m => typeof m === 'string' ? '' : (m?.phone || '');
-    const isCreator = !t.creator_id || t.creator_id === currentUser?.id || (members.length > 0 && mName(members[0]) === (u.name || 'Moi'));
+    const isCreator = !!(currentUser && t.creator_id === currentUser.id);
     if ($('td-manage-btn')) $('td-manage-btn').style.display = isCreator ? '' : 'none';
 
     const paid = t.members_paid || 0;
@@ -2858,6 +2947,8 @@ const G = {
       </div>
 
       ${manageHTML}
+
+      ${!isCreator ? `<button onclick="G.deleteTontine('${t.id}','${t.name}')" style="width:100%;padding:11px;border:1px solid rgba(220,38,38,.25);border-radius:12px;background:rgba(220,38,38,.07);color:#dc2626;font-size:.8rem;font-weight:700;cursor:pointer">Quitter cette tontine</button>` : ''}
 
       <!-- CALENDRIER MENSUEL -->
       <div style="background:var(--card);border-radius:16px;padding:16px">
@@ -2988,12 +3079,31 @@ const G = {
     G._sendToRecipient(mName(m), mPhone(m), t.amount_per_cycle);
   },
 
-  _removeTontineDetailMember(i) {
+  async _removeTontineDetailMember(i) {
     const t = G._curTontine;
     if (!t?.members) return;
+    const m = t.members[i];
+    const mn = typeof m === 'string' ? m : (m?.name || '');
+    const mp = typeof m === 'string' ? '' : (m?.phone || '');
     t.members.splice(i, 1);
     t.members_count = t.members.length;
     G._saveCurTontine();
+    // Supprimer de la DB (par phone → user_id, sinon par member_name)
+    if (currentUser && t.id) {
+      if (mp) {
+        const { data: found } = await db.from('users').select('id').eq('phone', mp).maybeSingle();
+        if (found) {
+          await db.from('tontine_members').delete()
+            .eq('tontine_id', t.id).eq('user_id', found.id).catch(() => {});
+        } else {
+          await db.from('tontine_members').delete()
+            .eq('tontine_id', t.id).eq('member_name', mn).catch(() => {});
+        }
+      } else if (mn) {
+        await db.from('tontine_members').delete()
+          .eq('tontine_id', t.id).eq('member_name', mn).catch(() => {});
+      }
+    }
     G.r_tontine_detail();
   },
 
