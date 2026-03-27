@@ -36,6 +36,13 @@
   --sat: env(safe-area-inset-top,0px);
   --sab: env(safe-area-inset-bottom,0px);
 }
+html.dark{
+  --bg:#111213;--bg2:#1A1B1D;--bg3:#232527;
+  --card:#161718;--txt:#E5E8E5;--txt2:#8A9480;--txt3:#525A50;
+  --border:rgba(255,255,255,.07);
+}
+html.dark body{background:linear-gradient(135deg,#020806 0%,#071009 40%,#060D08 100%)}
+html.dark .shell{background:#080A08}
 html,body{height:100%;font-family:var(--f);overflow:hidden}
 body{
   background:linear-gradient(135deg,var(--forest) 0%,var(--forest2) 40%,#1A5C38 100%);
@@ -870,7 +877,7 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
       <button class="pin-k" onclick="G.pinKey('0')" style="grid-column:2">0</button>
       <button class="pin-k" onclick="G.pinDel()"><svg><use href="#del"/></svg></button>
     </div>
-    <div class="pin-skip" onclick="G.toast('Empreinte non disponible sur ce navigateur','err')">Utiliser l'empreinte digitale</div>
+    <div class="pin-skip" id="pin-bio-btn" onclick="G._bioAuth()" style="display:none">Utiliser l'empreinte / Face ID</div>
   </div>
 </div>
 
@@ -1142,9 +1149,13 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
           <div class="bud-card-ic" style="background:rgba(255,255,255,.15)"><svg style="stroke:white"><use href="#recv"/></svg></div>
         </div>
       </div>
+      <div id="bud-chart"></div>
       <div class="lbl">Par catégorie</div>
       <div class="g10" id="cat-list"></div>
-      <div class="lbl">Toutes les transactions</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px">
+        <div class="lbl">Toutes les transactions</div>
+        <button onclick="G.exportCSV()" style="border:none;background:var(--bg2);color:var(--txt2);font-size:.62rem;font-weight:700;padding:5px 10px;border-radius:8px;cursor:pointer;font-family:var(--f);display:flex;align-items:center;gap:4px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>CSV</button>
+      </div>
       <div class="card" style="overflow:hidden" id="all-tx"></div>
     </div>
   </div>
@@ -1279,7 +1290,8 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
         <div class="mi" onclick="G.go('notifs')"><div class="mi-ic" style="background:rgba(22,163,74,.1)"><svg style="stroke:var(--green)"><use href="#bell"/></svg></div><div><div class="mi-title">Notifications</div><div class="mi-sub" id="notif-sub">2 non lues</div></div><div class="mi-right"><div class="mi-arr"><svg><use href="#ar"/></svg></div></div></div>
       </div>
       <div class="menu-grp">
-        <div class="mi" onclick="G.toast('Sécurité : Empreinte · PIN · Face ID','inf')"><div class="mi-ic" style="background:rgba(0,0,0,.05)"><svg style="stroke:var(--txt3)"><use href="#cog"/></svg></div><div><div class="mi-title">Sécurité & PIN</div><div class="mi-sub">Empreinte, Face ID, 2FA</div></div><div class="mi-right"><div class="mi-arr"><svg><use href="#ar"/></svg></div></div></div>
+        <div class="mi" onclick="G._bioRegister()"><div class="mi-ic" style="background:rgba(0,0,0,.05)"><svg style="stroke:var(--txt3)"><use href="#cog"/></svg></div><div><div class="mi-title">Sécurité & PIN</div><div class="mi-sub" id="bio-sub">Empreinte, Face ID, 2FA</div></div><div class="mi-right"><div class="mi-arr"><svg><use href="#ar"/></svg></div></div></div>
+        <div class="mi" onclick="G.toggleDark()"><div class="mi-ic" style="background:rgba(99,102,241,.1)"><svg style="stroke:#818cf8" viewBox="0 0 24 24" fill="none" stroke-width="1.9"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div><div><div class="mi-title">Mode sombre</div><div class="mi-sub" id="dark-sub">Désactivé</div></div><div class="mi-right"><div id="dark-toggle" style="width:38px;height:22px;border-radius:100px;background:var(--bg3);position:relative;transition:.25s;cursor:pointer"><div id="dark-knob" style="position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.25s;box-shadow:0 1px 4px rgba(0,0,0,.3)"></div></div></div></div>
         <div class="mi" onclick="G.toast('Support · 24h/24 · 7j/7','inf')"><div class="mi-ic" style="background:rgba(0,0,0,.05)"><svg style="stroke:var(--txt3)"><use href="#help"/></svg></div><div><div class="mi-title">Aide & Support</div><div class="mi-sub">24h/24 · 7j/7 en français</div></div><div class="mi-right"><div class="mi-arr"><svg><use href="#ar"/></svg></div></div></div>
       </div>
       <button class="btn btn-danger" onclick="G.logout()"><svg><use href="#logout"/></svg>Se déconnecter</button>
@@ -1292,6 +1304,32 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
     <div class="bt-qr" onclick="G.go('qrhub')"><svg><use href="#qric"/></svg></div>
     <div class="bt" onclick="G.go('coffre')"><svg><use href="#lock"/></svg><span class="bt-lbl">Coffre</span></div>
     <div class="bt on" onclick="G.go('profil')"><svg><use href="#user"/></svg><span class="bt-lbl">Profil</span></div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMATION TRANSFERT -->
+<div class="modal" id="m-pin-confirm" onclick="if(event.target===this)G.closeModal('m-pin-confirm')">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Confirmer le transfert</div>
+    <div id="mpc-desc" style="text-align:center;font-size:.82rem;color:var(--txt2);margin-bottom:16px"></div>
+    <div class="pin-dots" id="mpc-dots" style="margin:0 auto 16px">
+      <div class="pin-dot"></div><div class="pin-dot"></div>
+      <div class="pin-dot"></div><div class="pin-dot"></div>
+    </div>
+    <div class="pin-pad" style="max-width:280px;margin:0 auto">
+      <button class="pin-k" onclick="G._mpcKey('1')">1</button>
+      <button class="pin-k" onclick="G._mpcKey('2')">2</button>
+      <button class="pin-k" onclick="G._mpcKey('3')">3</button>
+      <button class="pin-k" onclick="G._mpcKey('4')">4</button>
+      <button class="pin-k" onclick="G._mpcKey('5')">5</button>
+      <button class="pin-k" onclick="G._mpcKey('6')">6</button>
+      <button class="pin-k" onclick="G._mpcKey('7')">7</button>
+      <button class="pin-k" onclick="G._mpcKey('8')">8</button>
+      <button class="pin-k" onclick="G._mpcKey('9')">9</button>
+      <button class="pin-k" onclick="G._mpcKey('0')" style="grid-column:2">0</button>
+      <button class="pin-k" onclick="G._mpcDel()"><svg><use href="#del"/></svg></button>
+    </div>
   </div>
 </div>
 
@@ -1833,6 +1871,7 @@ const G = {
     if (fd) fd.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5"><use href="#chk"/></svg>Frais : ${fee > 0 ? f(fee) + ' FCFA (1,5%)' : '0 FCFA'}`;
   },
 
+  _pendingSend: null, _mpcBuf: '',
   async doSend() {
     if (!selC) { G.toast('Choisis un destinataire', 'err'); return; }
     const n = parseInt(aStr) || 0;
@@ -1842,6 +1881,17 @@ const G = {
     const bal = S.get('bal', 0);
     if (total > bal) { G.toast('Solde insuffisant (frais inclus)', 'err'); return; }
     const note = $('send-note')?.value || '';
+
+    // PIN confirmation si montant > 100 000 FCFA
+    const PIN_THRESHOLD = 100000;
+    if (n >= PIN_THRESHOLD && S.get('user', {}).pin) {
+      G._pendingSend = { selC, n, fee, total, bal, note };
+      G._mpcBuf = '';
+      G._mpcUpdateDots();
+      if ($('mpc-desc')) $('mpc-desc').textContent = `Transfert de ${f(n)} FCFA à ${selC.name} — Entre ton PIN pour valider`;
+      G.showModal('m-pin-confirm');
+      return;
+    }
 
     if (currentUser) {
       G.toast('Envoi en cours...', 'inf');
@@ -2353,6 +2403,9 @@ const G = {
       return `<div class="cat-item"><div class="cat-ic" style="background:${cat.bg}">${si(cat.ico, cat.col, 15)}</div><div style="flex:1"><div class="cat-name">${cat.name}</div><div class="cat-bar-wrap" style="margin-top:5px"><div class="cat-bar-fill" style="width:${pct}%;background:${cat.col}"></div></div></div><div class="cat-right"><div class="cat-val">${f(total)} F</div><div class="cat-pct">${pct}%</div></div></div>`;
     }).join('');
 
+    // Bar chart local (transactions localStorage)
+    G._renderBudgetChart(txs.map(t => ({ from_user_id: t.type !== 'recv' ? 'me' : null, amount: t.amount, created_at: new Date().toISOString(), type: t.type })), 'me');
+
     // All transactions
     if (currentUser) {
       db.from('transactions')
@@ -2362,6 +2415,7 @@ const G = {
         .limit(50)
         .then(({ data: txs2 }) => {
           if (!txs2?.length) { $('all-tx').innerHTML = '<div style="padding:16px;text-align:center;color:var(--txt3);font-size:.8rem">Aucune transaction</div>'; return; }
+          G._renderBudgetChart(txs2, currentUser.id);
           // Recalculate totals from DB data
           let dbOut = 0, dbIn = 0;
           txs2.forEach(t => {
@@ -2939,6 +2993,10 @@ const G = {
           <input id="td-add-phone" class="inp" type="tel" placeholder="+241..." style="flex:1"/>
           <button onclick="G._addTontineDetailMember()" style="padding:10px 14px;border:none;border-radius:12px;background:var(--forest);color:#fff;font-weight:800;font-size:.85rem;cursor:pointer">+</button>
         </div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button onclick="G._closeTontineCycle()" style="flex:1;padding:10px;border:1px solid rgba(212,160,23,.25);border-radius:12px;background:rgba(212,160,23,.08);color:var(--gold2);font-size:.78rem;font-weight:700;cursor:pointer">Clôturer le cycle</button>
+          <button onclick="G._shareTontine()" style="padding:10px 14px;border:1px solid var(--border);border-radius:12px;background:var(--bg2);color:var(--txt2);font-size:.78rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#share"/></svg>Partager</button>
+        </div>
         <button onclick="G._deleteCurrentTontine()" style="width:100%;margin-top:8px;padding:10px;border:1px solid rgba(220,38,38,.2);border-radius:12px;background:rgba(220,38,38,.07);color:#dc2626;font-size:.78rem;font-weight:700;cursor:pointer">Supprimer cette tontine</button>
       </div>` : '';
 
@@ -3503,6 +3561,235 @@ const G = {
   },
   showModal(id) { $(id).classList.add('on'); },
   closeModal(id) { $(id).classList.remove('on'); },
+
+  // ── DARK MODE ──
+  toggleDark() {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('gp_dark', isDark ? '1' : '0');
+    G._updateDarkUI(isDark);
+  },
+  _updateDarkUI(isDark) {
+    const sub = $('dark-sub'), knob = $('dark-knob'), track = $('dark-toggle');
+    if (sub) sub.textContent = isDark ? 'Activé' : 'Désactivé';
+    if (knob) knob.style.transform = isDark ? 'translateX(16px)' : 'translateX(0)';
+    if (track) track.style.background = isDark ? 'var(--green)' : 'var(--bg3)';
+  },
+
+  // ── EXPORT CSV ──
+  exportCSV() {
+    const rows = [['Date','Type','Nom','Montant (FCFA)','Catégorie']];
+    if (currentUser) {
+      db.from('transactions')
+        .select('*, from_user:from_user_id(name), to_user:to_user_id(name)')
+        .or(`from_user_id.eq.${currentUser.id},to_user_id.eq.${currentUser.id}`)
+        .order('created_at', { ascending: false })
+        .limit(500)
+        .then(({ data: txs }) => {
+          (txs || []).forEach(t => {
+            const isCredit = t.to_user_id === currentUser.id;
+            const other = isCredit ? t.from_user : t.to_user;
+            const name = other?.name || t.merchant_name || 'GhettoPay';
+            const cat = { transfer:'Transfert', qr:'QR Pay', recharge:'Recharge', bill:'Facture', coffre_deposit:'Coffre', tontine:'Tontine' }[t.type] || t.type;
+            const date = new Date(t.created_at).toLocaleDateString('fr-FR');
+            rows.push([date, isCredit ? 'Crédit' : 'Débit', name, t.amount, cat]);
+          });
+          G._downloadCSV(rows);
+        });
+    } else {
+      const txs = S.get('txs', []);
+      txs.forEach(t => {
+        const cat = t.cat || t.type || '';
+        rows.push([t.time || '', t.type === 'recv' ? 'Crédit' : 'Débit', t.name || '', t.amount || 0, cat]);
+      });
+      G._downloadCSV(rows);
+    }
+  },
+  _downloadCSV(rows) {
+    const bom = '\uFEFF';
+    const csv = bom + rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `ghettopay_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    G.toast('Export CSV téléchargé', 'ok');
+  },
+
+  // ── BUDGET BAR CHART ──
+  _renderBudgetChart(txs2, userId) {
+    const el = $('bud-chart');
+    if (!el) return;
+    const now = new Date();
+    const months = Array.from({length:6}, (_, i) => {
+      const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
+      return { year: d.getFullYear(), month: d.getMonth(), label: d.toLocaleDateString('fr-FR',{month:'short'}), total: 0 };
+    });
+    txs2.forEach(t => {
+      const isOut = userId ? t.from_user_id === userId : (t.type !== 'recv');
+      if (!isOut) return;
+      const d = t.created_at ? new Date(t.created_at) : null;
+      if (!d) return;
+      const m = months.find(m => m.year === d.getFullYear() && m.month === d.getMonth());
+      if (m) m.total += (t.amount || 0);
+    });
+    const max = Math.max(...months.map(m => m.total), 1);
+    const W = 300, H = 80, bw = 32, gap = 14;
+    const totalW = months.length * (bw + gap) - gap;
+    const offsetX = (W - totalW) / 2;
+    const bars = months.map((m, i) => {
+      const bh = Math.max(4, Math.round((m.total / max) * H));
+      const x = offsetX + i * (bw + gap);
+      const y = H - bh;
+      const isLast = i === months.length - 1;
+      return `<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="6" fill="${isLast ? 'var(--gold2)' : 'var(--forest)'}"/>
+        <text x="${x + bw/2}" y="${H + 14}" text-anchor="middle" font-size="8" fill="var(--txt3)" font-family="var(--fm)">${m.label}</text>
+        ${m.total > 0 ? `<text x="${x + bw/2}" y="${y - 4}" text-anchor="middle" font-size="7.5" fill="${isLast ? 'var(--gold2)' : 'var(--txt2)'}" font-family="var(--fm)">${m.total >= 1000 ? Math.round(m.total/1000)+'k' : m.total}</text>` : ''}`;
+    }).join('');
+    el.innerHTML = `<div style="background:var(--card);border-radius:16px;padding:16px;border:1px solid var(--border)">
+      <div style="font-size:.68rem;font-weight:800;color:var(--txt2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Dépenses — 6 derniers mois</div>
+      <svg width="100%" viewBox="0 0 ${W} ${H+20}" style="overflow:visible">${bars}</svg>
+    </div>`;
+  },
+
+  // ── RESET CYCLE TONTINE ──
+  async _closeTontineCycle() {
+    const t = G._curTontine;
+    if (!t) return;
+    if (!confirm) { G.toast('Non disponible', 'err'); return; }
+    const ok = window.confirm(`Clôturer le cycle de "${t.name}" ?\nTous les membres seront remis à zéro.`);
+    if (!ok) return;
+    if (currentUser) {
+      await db.from('tontine_members').update({ has_paid: false }).eq('tontine_id', t.id);
+      await db.from('tontines').update({ members_paid: 0 }).eq('id', t.id);
+      // Notifications aux membres
+      const { data: mRows } = await db.from('tontine_members').select('user_id').eq('tontine_id', t.id);
+      if (mRows?.length) {
+        const notifs = mRows.filter(r => r.user_id !== currentUser.id).map(r => ({
+          user_id: r.user_id, type: 'tontine_reminder',
+          title: `Nouveau cycle — ${t.name}`,
+          body: `Le créateur a clôturé le cycle. Un nouveau cycle commence maintenant.`,
+          read: false
+        }));
+        if (notifs.length) await db.from('notifications').insert(notifs).catch(()=>{});
+      }
+    }
+    // Mettre à jour le cache
+    if (G._curTontine) {
+      G._curTontine.members_paid = 0;
+      G._curTontine.paid_by = [];
+      if (G._curTontine.members) G._curTontine.members.forEach(m => { if (typeof m === 'object') m.has_paid = false; });
+    }
+    const ts = S.get('tontines', []);
+    const lt = ts.find(x => String(x.id) === String(t.id));
+    if (lt) { lt.members_paid = 0; lt.paid_by = []; S.set('tontines', ts); }
+    G.r_tontine_detail();
+    G.toast('Cycle clôturé — nouveau cycle démarré', 'ok');
+  },
+
+  // ── PARTAGE LIEN TONTINE ──
+  _shareTontine() {
+    const t = G._curTontine;
+    if (!t) return;
+    const url = `${location.origin}${location.pathname}?join=${t.id}`;
+    const text = `Rejoins ma tontine "${t.name}" sur GhettoPay !\n${url}`;
+    if (navigator.share) {
+      navigator.share({ title: t.name, text, url }).catch(() => {});
+    } else {
+      navigator.clipboard?.writeText(text).then(() => G.toast('Lien copié dans le presse-papiers', 'ok')).catch(() => G.toast(url, 'inf'));
+    }
+  },
+
+  // ── BIOMÉTRIE WebAuthn ──
+  async _bioRegister() {
+    if (!window.PublicKeyCredential) { G.toast('WebAuthn non supporté sur ce navigateur', 'err'); return; }
+    const u = S.get('user', {});
+    try {
+      const challenge = crypto.getRandomValues(new Uint8Array(32));
+      const cred = await navigator.credentials.create({ publicKey: {
+        challenge, rp: { name: 'GhettoPay', id: location.hostname },
+        user: { id: new TextEncoder().encode(currentUser?.id || u.phone || 'user'), name: u.phone || 'user', displayName: u.name || 'Utilisateur' },
+        pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+        authenticatorSelection: { userVerification: 'required' },
+        timeout: 60000
+      }});
+      if (cred) {
+        localStorage.setItem('gp_bio_id', btoa(String.fromCharCode(...new Uint8Array(cred.rawId))));
+        if ($('bio-sub')) $('bio-sub').textContent = 'Empreinte enregistrée';
+        if ($('pin-bio-btn')) $('pin-bio-btn').style.display = '';
+        G.toast('Biométrie enregistrée avec succès', 'ok');
+      }
+    } catch(e) { G.toast('Biométrie annulée ou non disponible', 'err'); }
+  },
+  async _bioAuth() {
+    if (!window.PublicKeyCredential) { G.toast('WebAuthn non supporté', 'err'); return; }
+    const rawId = localStorage.getItem('gp_bio_id');
+    if (!rawId) { G.toast('Enregistre d\'abord ton empreinte dans le Profil', 'err'); return; }
+    try {
+      const credId = Uint8Array.from(atob(rawId), c => c.charCodeAt(0));
+      const challenge = crypto.getRandomValues(new Uint8Array(32));
+      const assertion = await navigator.credentials.get({ publicKey: {
+        challenge, allowCredentials: [{ type: 'public-key', id: credId }],
+        userVerification: 'required', timeout: 60000
+      }});
+      if (assertion) {
+        // Auth biométrique réussie → connecter
+        pinBuf = S.get('user', {}).pin || '0000';
+        G._checkPin();
+      }
+    } catch(e) { G.toast('Biométrie échouée ou annulée', 'err'); }
+  },
+
+  // ── PIN CONFIRMATION GROS TRANSFERT ──
+  _mpcUpdateDots() {
+    const dots = document.querySelectorAll('#mpc-dots .pin-dot');
+    dots.forEach((d, i) => d.classList.toggle('on', i < G._mpcBuf.length));
+  },
+  _mpcKey(k) {
+    if (G._mpcBuf.length >= 4) return;
+    G._mpcBuf += k;
+    G._mpcUpdateDots();
+    if (G._mpcBuf.length === 4) {
+      const pin = S.get('user', {}).pin || '';
+      if (G._mpcBuf === String(pin)) {
+        G.closeModal('m-pin-confirm');
+        G._mpcBuf = '';
+        // Exécuter le transfert en attente
+        const ps = G._pendingSend;
+        if (!ps) return;
+        G._pendingSend = null;
+        selC = ps.selC;
+        aStr = String(ps.n);
+        G._execSend(ps);
+      } else {
+        G._mpcBuf = '';
+        G._mpcUpdateDots();
+        G.toast('PIN incorrect', 'err');
+      }
+    }
+  },
+  _mpcDel() {
+    G._mpcBuf = G._mpcBuf.slice(0, -1);
+    G._mpcUpdateDots();
+  },
+  async _execSend({ selC: sc, n, fee, total, bal, note }) {
+    if (currentUser) {
+      G.toast('Envoi en cours...', 'inf');
+      const { data, error } = await db.rpc('transfer_money', {
+        p_from_user_id: currentUser.id, p_to_user_id: sc.id, p_amount: n, p_note: note
+      });
+      if (error || !data?.success) { G.toast(data?.error || 'Erreur de transfert', 'err'); return; }
+      const newBal = bal - total;
+      S.set('bal', newBal);
+      if (currentUser.wallet) currentUser.wallet.balance = newBal;
+    } else {
+      S.set('bal', bal - total);
+      const txs = S.get('txs', []);
+      txs.unshift({ id: Date.now(), name: sc.name, av: sc.av, amount: n, fee, type: 'send', cat: 'Transfert', time: "À l'instant" });
+      S.set('txs', txs);
+    }
+    G.ok(`${f(n)} FCFA envoyés`, `À ${sc.name} · Frais ${f(fee)} FCFA · Confirmé ✓`, () => G.go('home'));
+  },
 };
 
 function setBudTab(btn) {
@@ -3519,6 +3806,42 @@ function tick() {
 }
 tick();
 setInterval(tick, 30000);
+
+// ── DARK MODE INIT ──
+(function(){
+  const isDark = localStorage.getItem('gp_dark') === '1';
+  if (isDark) document.documentElement.classList.add('dark');
+  // Defer UI update until DOM ready
+  document.addEventListener('DOMContentLoaded', () => G._updateDarkUI(isDark), { once: true });
+  // If already loaded, update immediately
+  if (document.readyState !== 'loading') G._updateDarkUI(isDark);
+})();
+
+// ── BIOMETRIC INIT ──
+(function(){
+  if (localStorage.getItem('gp_bio_id') && window.PublicKeyCredential) {
+    const btn = document.getElementById('pin-bio-btn');
+    if (btn) btn.style.display = '';
+  }
+})();
+
+// ── JOIN TONTINE VIA URL ──
+(function(){
+  const p = new URLSearchParams(location.search);
+  const joinId = p.get('join');
+  if (joinId) {
+    // Remove param from URL without reload
+    history.replaceState(null, '', location.pathname);
+    // After app loads, open the tontine
+    setTimeout(() => {
+      if (currentUser) {
+        G.openTontine(joinId);
+      } else {
+        G.toast('Connecte-toi pour rejoindre cette tontine', 'inf');
+      }
+    }, 2000);
+  }
+})();
 
 // ── PWA INSTALL ──
 let dp;
