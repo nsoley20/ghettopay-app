@@ -2464,13 +2464,12 @@ const G = {
 
   _tontineMembers: [], // [{ name, phone }]
 
-  addTontineMember(name, phone) {
+  addTontineMember(name, phone, userId) {
     const n = name || $('nt-member-name')?.value.trim();
     const p = phone || $('nt-member-phone')?.value.trim() || '';
     if (!n) { G.toast('Saisis un nom', 'err'); return; }
-    // Éviter les doublons
     if (G._tontineMembers.find(m => m.name === n && m.phone === p)) { G.toast('Déjà ajouté', 'err'); return; }
-    G._tontineMembers.push({ name: n, phone: p });
+    G._tontineMembers.push({ name: n, phone: p, userId: userId || null });
     if ($('nt-member-name')) $('nt-member-name').value = '';
     if ($('nt-member-phone')) $('nt-member-phone').value = '';
     G._renderTontineMembers();
@@ -2554,7 +2553,7 @@ const G = {
   _pickNtSearchResult(idx) {
     const u = G._ntSearchCache[idx];
     if (!u) return;
-    G.addTontineMember(u.name, u.phone || '');
+    G.addTontineMember(u.name, u.phone || '', u.id || null);
     const inp = $('nt-search'); if (inp) inp.value = '';
     const res = $('nt-search-results'); if (res) res.style.display = 'none';
   },
@@ -2597,21 +2596,36 @@ const G = {
         }).select().single();
         if (!error && dbT) {
           localId = dbT.id;
-          // Résoudre les user_id réels pour les membres GhettoPay (par téléphone)
-          const phones = rawMembers.map(m => (typeof m === 'string' ? '' : m.phone || '')).filter(p => p);
+          // Résoudre les user_id : 1) ID stocké lors de la recherche, 2) recherche par téléphone
+          const needPhone = rawMembers.filter(m => !(m.userId) && (m.phone || ''));
           let phoneToUid = {};
-          if (phones.length) {
+          if (needPhone.length) {
+            const phones = needPhone.map(m => m.phone).filter(Boolean);
             const { data: found } = await db.from('users').select('id,phone').in('phone', phones);
             for (const u of (found || [])) phoneToUid[u.phone] = u.id;
           }
+
           const inserts = rawMembers.map((m, i) => {
             const mn = typeof m === 'string' ? m : m.name;
             const mp = typeof m === 'string' ? '' : (m.phone || '');
-            // Utiliser le vrai user_id si le membre est un utilisateur GhettoPay
-            const uid = (mp && phoneToUid[mp]) ? phoneToUid[mp] : currentUser.id;
+            const uid = m.userId || (mp && phoneToUid[mp]) || currentUser.id;
             return { tontine_id: dbT.id, user_id: uid, turn_order: i + 1, has_paid: false, member_name: mn || null, member_phone: mp || null };
           });
           await db.from('tontine_members').insert(inserts);
+
+          // Envoyer une notification DB à chaque membre GhettoPay (sauf le créateur)
+          const notifInserts = inserts
+            .filter(r => r.user_id !== currentUser.id && r.member_name)
+            .map(r => ({
+              user_id: r.user_id,
+              type: 'tontine_invite',
+              title: `Tu as été ajouté à "${name}"`,
+              body: `${S.get('user',{}).name || 'Quelqu\'un'} t\'a invité dans la tontine "${name}" · ${freq === 'weekly' ? 'Hebdo' : 'Mensuel'} · ${f(amount)} FCFA`,
+              read: false
+            }));
+          if (notifInserts.length) {
+            await db.from('notifications').insert(notifInserts).catch(() => {});
+          }
         }
       } catch(e) { /* fall through to localStorage */ }
     }
