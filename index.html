@@ -2360,52 +2360,72 @@ const G = {
 
     if (!currentUser) return;
 
-    // JOIN tontine_members → tontines en une seule requête
-    // Fonctionne même si RLS tontines n'autorise que creator_id,
-    // car on passe par la table où l'utilisateur a sa propre ligne.
-    db.from('tontine_members')
-      .select('tontine_id, member_name, member_phone, has_paid, turn_order, tontine:tontines(*)')
-      .eq('user_id', currentUser.id)
-      .order('turn_order', { ascending: true })
-      .then(({ data: rows, error }) => {
-        if (error) {
-          // Erreur DB : rester sur le cache ou afficher état vide
-          if (!cached.length) G._renderTontinesList([]);
-          return;
-        }
-        if (!rows?.length) {
-          if (!cached.length) G._renderTontinesList([]);
-          return;
-        }
+    // 3 requêtes en parallèle pour couvrir tous les cas :
+    // A) tontines créées par l'utilisateur (toujours accessible)
+    // B) IDs des tontines où l'utilisateur est membre (tontine_members)
+    // C) membres de toutes les tontines connues (pour affichage)
+    Promise.all([
+      db.from('tontines').select('*').eq('creator_id', currentUser.id),
+      db.from('tontine_members').select('tontine_id').eq('user_id', currentUser.id)
+    ]).then(async ([{ data: ownTontines }, { data: memberships }]) => {
 
-        // Grouper les membres par tontine
-        const tontineMap = {};
-        for (const row of rows) {
-          if (!row.tontine) continue;
-          const tid = row.tontine_id;
-          if (!tontineMap[tid]) tontineMap[tid] = { ...row.tontine, members: [], paid_by: [] };
-          if (row.member_name) {
-            tontineMap[tid].members.push({ name: row.member_name, phone: row.member_phone || '', has_paid: row.has_paid });
-            if (row.has_paid) tontineMap[tid].paid_by.push(row.member_name);
-          }
+      // IDs des tontines où l'utilisateur est membre mais pas créateur
+      const ownIds = new Set((ownTontines || []).map(t => t.id));
+      const memberIds = (memberships || [])
+        .map(m => m.tontine_id)
+        .filter(id => !ownIds.has(id));
+
+      // Fetch les tontines d'invitation si nécessaire
+      let invitedTontines = [];
+      if (memberIds.length) {
+        const { data } = await db.from('tontines').select('*').in('id', [...new Set(memberIds)]);
+        invitedTontines = data || [];
+      }
+
+      // Merge : tontines créées + tontines invitées
+      const allTontines = [...(ownTontines || [])];
+      for (const t of invitedTontines) {
+        if (!allTontines.find(x => x.id === t.id)) allTontines.push(t);
+      }
+
+      // Fallback cache pour tontines invitées introuvables (RLS)
+      for (const id of [...new Set(memberIds)]) {
+        if (!allTontines.find(t => t.id === id)) {
+          const c = cached.find(x => String(x.id) === String(id));
+          if (c) allTontines.push(c);
         }
+      }
 
-        const dbTontines = Object.values(tontineMap).map(t => ({
-          ...t,
-          members_paid: t.paid_by.length,
-          members_count: t.members.length
-        }));
+      if (!allTontines.length) { if (!cached.length) G._renderTontinesList([]); return; }
 
-        if (!dbTontines.length) {
-          if (!cached.length) G._renderTontinesList([]);
-          return;
+      // Fetch tous les membres en une requête
+      const allIds = allTontines.map(t => t.id);
+      const { data: memberRows } = await db.from('tontine_members')
+        .select('tontine_id, member_name, member_phone, has_paid, turn_order')
+        .in('tontine_id', allIds)
+        .order('turn_order', { ascending: true });
+
+      const mByT = {};
+      for (const row of (memberRows || [])) {
+        if (!mByT[row.tontine_id]) mByT[row.tontine_id] = [];
+        if (row.member_name) {
+          mByT[row.tontine_id].push({
+            name: row.member_name, phone: row.member_phone || '', has_paid: !!row.has_paid
+          });
         }
+      }
 
-        S.set('tontines', dbTontines);
-        G._tontinesList = dbTontines;
-        G._renderTontinesList(dbTontines);
-        G._syncNotifs();
+      const result = allTontines.map(t => {
+        const members = mByT[t.id] || cached.find(c => c.id === t.id)?.members || [];
+        const paid_by = members.filter(m => m.has_paid).map(m => m.name);
+        return { ...t, members, paid_by, members_paid: paid_by.length, members_count: members.length };
       });
+
+      S.set('tontines', result);
+      G._tontinesList = result;
+      G._renderTontinesList(result);
+      G._syncNotifs();
+    }).catch(() => { if (!cached.length) G._renderTontinesList([]); });
   },
 
   _renderTontinesList(tontines) {
