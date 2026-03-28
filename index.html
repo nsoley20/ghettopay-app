@@ -2936,6 +2936,83 @@ const G = {
     G.payTontine(t.id, t.amount_per_cycle, t.name);
   },
 
+  async _checkAutoDistribute(tontineId, newPaid, tData) {
+    if (!currentUser || !tData) return;
+    // Récupérer tous les membres dans l'ordre
+    const { data: members } = await db.from('tontine_members')
+      .select('user_id, member_name, turn_order')
+      .eq('tontine_id', tontineId)
+      .order('turn_order', { ascending: true });
+    const total = members?.length || 0;
+    if (total === 0 || newPaid < total) return; // Pas encore tout le monde
+
+    // Calculer qui reçoit ce cycle
+    const startDate = tData.start_date ? new Date(tData.start_date) : new Date();
+    const now = new Date();
+    const isWeekly = tData.frequency === 'weekly';
+    let cycleIdx = 0;
+    if (isWeekly) cycleIdx = Math.floor((now - startDate) / 604800000);
+    else cycleIdx = (now.getFullYear() - startDate.getFullYear()) * 12 + (now.getMonth() - startDate.getMonth());
+    const turnIdx = cycleIdx % total;
+    const recipient = members[turnIdx];
+    const recipientName = recipient?.member_name || `Membre ${turnIdx + 1}`;
+    const totalAmount = (tData.amount_per_cycle || 0) * total;
+    const tontineName = tData.name || 'Tontine';
+
+    if (!recipient?.user_id) {
+      // Pas de compte GhettoPay — notifier seulement
+      G.toast(`🎉 Tout le monde a cotisé ! ${f(totalAmount)} FCFA à remettre à ${recipientName}`, 'ok');
+      return;
+    }
+
+    // Créditer le wallet du bénéficiaire
+    const { data: rWallet } = await db.from('wallets')
+      .select('balance').eq('user_id', recipient.user_id).maybeSingle();
+    if (rWallet) {
+      await db.from('wallets')
+        .update({ balance: (rWallet.balance || 0) + totalAmount })
+        .eq('user_id', recipient.user_id).catch(() => {});
+    }
+
+    // Transaction crédit pour le bénéficiaire
+    await db.from('transactions').insert({
+      to_user_id: recipient.user_id,
+      amount: totalAmount,
+      type: 'transfer',
+      merchant_name: `Cagnotte tontine — ${tontineName}`,
+      status: 'completed'
+    }).catch(() => {});
+
+    // Notification au bénéficiaire
+    await db.from('notifications').insert({
+      user_id: recipient.user_id, type: 'tontine_payment',
+      title: `🎉 Cagnotte reçue — ${tontineName}`,
+      body: `Tous les membres ont cotisé ! ${f(totalAmount)} FCFA ont été versés sur ton compte.`,
+      read: false
+    }).catch(() => {});
+
+    // Notifications à tous les autres membres
+    const others = members.filter(m => m.user_id && m.user_id !== recipient.user_id);
+    if (others.length) {
+      await db.from('notifications').insert(others.map(m => ({
+        user_id: m.user_id, type: 'tontine_payment',
+        title: `Cagnotte distribuée — ${tontineName}`,
+        body: `${recipientName} a reçu ${f(totalAmount)} FCFA (tous ont cotisé ce cycle).`,
+        read: false
+      }))).catch(() => {});
+    }
+
+    // Si c'est le current user qui reçoit, mettre à jour son solde local
+    if (recipient.user_id === currentUser.id) {
+      const newBal = S.get('bal', 0) + totalAmount;
+      S.set('bal', newBal);
+      if ($('bal-amt')) $('bal-amt').textContent = f(newBal);
+      setTimeout(() => G.ok(`🎉 Tu as reçu la cagnotte !`, `${f(totalAmount)} FCFA de "${tontineName}" ont été versés sur ton compte.`, () => G.go('home')), 1500);
+    } else {
+      G.toast(`🎉 Cagnotte versée à ${recipientName} — ${f(totalAmount)} FCFA`, 'ok');
+    }
+  },
+
   async payTontine(tontineId, amount, name) {
     const n = parseInt(amount) || 0;
     const bal = S.get('bal', 0);
@@ -2958,11 +3035,11 @@ const G = {
       // 2. Marquer has_paid dans tontine_members
       await db.from('tontine_members').update({ has_paid: true })
         .eq('tontine_id', tontineId).eq('user_id', currentUser.id);
-      // 3. Incrémenter members_paid + récupérer creator_id
+      // 3. Incrémenter members_paid + récupérer infos complètes
       const { data: tData } = await db.from('tontines')
-        .select('members_paid, creator_id').eq('id', tontineId).maybeSingle();
-      await db.from('tontines')
-        .update({ members_paid: (tData?.members_paid || 0) + 1 }).eq('id', tontineId);
+        .select('members_paid, creator_id, amount_per_cycle, frequency, start_date, name').eq('id', tontineId).maybeSingle();
+      const newPaid = (tData?.members_paid || 0) + 1;
+      await db.from('tontines').update({ members_paid: newPaid }).eq('id', tontineId);
       // 4. Transaction
       await db.from('transactions').insert({
         from_user_id: currentUser.id, amount: n, type: 'tontine', merchant_name: name, status: 'completed'
@@ -2988,6 +3065,8 @@ const G = {
           read: false
         }))).catch(() => {});
       }
+      // 7. Vérifier si tout le monde a payé → versement automatique
+      await G._checkAutoDistribute(tontineId, newPaid, tData);
       S.set('bal', bal - n);
     } else {
       S.set('bal', bal - n);
@@ -3043,7 +3122,10 @@ const G = {
     const mName = m => typeof m === 'string' ? m : (m?.name || '?');
     const mPhone = m => typeof m === 'string' ? '' : (m?.phone || '');
     const isCreator = !!(currentUser && t.creator_id === currentUser.id);
-    if ($('td-manage-btn')) $('td-manage-btn').style.display = isCreator ? '' : 'none';
+    if ($('td-manage-btn')) {
+      $('td-manage-btn').style.display = '';
+      $('td-manage-btn').textContent = isCreator ? 'Gérer' : 'Membres';
+    }
 
     const paid = t.members_paid || 0;
     const total = members.length || 1;
@@ -3108,27 +3190,31 @@ const G = {
       calCells += `<div style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:${isToday||isHL?'800':'500'};${isHL?'background:var(--gold2);color:#000;':''}${isToday&&!isHL?'background:var(--forest);color:#fff;':''}color:${isHL?'#000':isToday?'#fff':'var(--txt)'}">${d}</div>`;
     }
 
-    // Manage section
-    const manageHTML = G._tontineManageOpen && isCreator ? `
+    // Membres row (commun créateur + membre)
+    const membersRows = members.map((m, i) => {
+      const hasPaid = t.paid_by?.includes(mName(m));
+      const isCurrentRecip = i === currentTurnIdx % members.length;
+      return `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg2);border-radius:12px;margin-bottom:8px;border:1px solid ${isCurrentRecip?'rgba(212,160,23,.3)':'transparent'}">
+        <div style="width:28px;height:28px;border-radius:50%;background:${isCurrentRecip?'var(--gold2)':hasPaid?'var(--green)':'var(--forest)'};color:${isCurrentRecip?'#000':'#fff'};font-size:.65rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</div>
+        <div style="flex:1">
+          <div style="font-size:.8rem;font-weight:700;color:var(--txt)">${mName(m)}${isCurrentRecip?' <span style="font-size:.55rem;background:rgba(212,160,23,.15);color:var(--gold2);padding:2px 6px;border-radius:4px;font-weight:700">Tour</span>':''}</div>
+          ${mPhone(m)?`<div style="font-size:.6rem;color:var(--txt3)">${mPhone(m)}</div>`:''}
+          <div style="font-size:.58rem;font-weight:700;margin-top:2px;color:${hasPaid?'var(--green)':'#dc2626'}">${hasPaid?'✓ Cotisé':'En attente'}</div>
+        </div>
+        ${isCreator ? `<div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+          ${!hasPaid&&mPhone(m)?`<button onclick="G._remindMemberByIdx(${i})" style="border:none;background:rgba(212,160,23,.12);color:var(--gold2);padding:4px 8px;border-radius:7px;font-size:.6rem;font-weight:700;cursor:pointer">Rappeler</button>`:''}
+          ${isCurrentRecip?`<button onclick="G._sendToRecipientByIdx(${i})" style="border:none;background:var(--gold2);color:#000;padding:4px 8px;border-radius:7px;font-size:.6rem;font-weight:700;cursor:pointer">Envoyer</button>`:''}
+          ${members.length>1?`<button onclick="G._removeTontineDetailMember(${i})" style="border:none;background:rgba(220,38,38,.08);color:#dc2626;padding:4px 8px;border-radius:7px;font-size:.6rem;font-weight:700;cursor:pointer">Retirer</button>`:''}
+        </div>` : ''}
+      </div>`;
+    }).join('');
+
+    // Manage section : créateur = plein contrôle, membre = vue lecture + partage
+    const manageHTML = G._tontineManageOpen ? `
       <div style="background:var(--card);border-radius:16px;padding:16px;border:1.5px solid var(--border)">
-        <div class="lbl" style="margin-bottom:12px">Membres de la tontine</div>
-        ${members.map((m, i) => {
-          const hasPaid = t.paid_by?.includes(mName(m));
-          const isCurrentRecip = i === currentTurnIdx % members.length;
-          return `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg2);border-radius:12px;margin-bottom:8px;border:1px solid ${isCurrentRecip?'rgba(212,160,23,.3)':'transparent'}">
-            <div style="width:28px;height:28px;border-radius:50%;background:${isCurrentRecip?'var(--gold2)':hasPaid?'var(--green)':'var(--forest)'};color:${isCurrentRecip?'#000':'#fff'};font-size:.65rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</div>
-            <div style="flex:1">
-              <div style="font-size:.8rem;font-weight:700;color:var(--txt)">${mName(m)}${isCurrentRecip?' <span style="font-size:.55rem;background:rgba(212,160,23,.15);color:var(--gold2);padding:2px 6px;border-radius:4px;font-weight:700">Tour</span>':''}</div>
-              ${mPhone(m)?`<div style="font-size:.6rem;color:var(--txt3)">${mPhone(m)}</div>`:''}
-              <div style="font-size:.58rem;font-weight:700;margin-top:2px;color:${hasPaid?'var(--green)':'#dc2626'}">${hasPaid?'Cotisation reçue':'En attente de cotisation'}</div>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
-              ${!hasPaid&&mPhone(m)?`<button onclick="G._remindMemberByIdx(${i})" style="border:none;background:rgba(212,160,23,.12);color:var(--gold2);padding:4px 8px;border-radius:7px;font-size:.6rem;font-weight:700;cursor:pointer">Rappeler</button>`:''}
-              ${isCurrentRecip?`<button onclick="G._sendToRecipientByIdx(${i})" style="border:none;background:var(--gold2);color:#000;padding:4px 8px;border-radius:7px;font-size:.6rem;font-weight:700;cursor:pointer">Envoyer</button>`:''}
-              ${members.length>1?`<button onclick="G._removeTontineDetailMember(${i})" style="border:none;background:rgba(220,38,38,.08);color:#dc2626;padding:4px 8px;border-radius:7px;font-size:.6rem;font-weight:700;cursor:pointer">Retirer</button>`:''}
-            </div>
-          </div>`;
-        }).join('')}
+        <div class="lbl" style="margin-bottom:12px">Membres — ${paid}/${total} ont cotisé</div>
+        ${membersRows}
+        ${isCreator ? `
         <div style="display:flex;gap:8px;margin-top:8px">
           <input id="td-add-name" class="inp" placeholder="Nom..." style="flex:1"/>
           <input id="td-add-phone" class="inp" type="tel" placeholder="+241..." style="flex:1"/>
@@ -3139,6 +3225,9 @@ const G = {
           <button onclick="G._shareTontine()" style="padding:10px 14px;border:1px solid var(--border);border-radius:12px;background:var(--bg2);color:var(--txt2);font-size:.78rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#share"/></svg>Partager</button>
         </div>
         <button onclick="G._deleteCurrentTontine()" style="width:100%;margin-top:8px;padding:10px;border:1px solid rgba(220,38,38,.2);border-radius:12px;background:rgba(220,38,38,.07);color:#dc2626;font-size:.78rem;font-weight:700;cursor:pointer">Supprimer cette tontine</button>
+        ` : `
+        <button onclick="G._shareTontine()" style="width:100%;margin-top:4px;padding:10px;border:1px solid var(--border);border-radius:12px;background:var(--bg2);color:var(--txt2);font-size:.78rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#share"/></svg>Partager cette tontine</button>
+        `}
       </div>` : '';
 
     $('td-body').innerHTML = `
