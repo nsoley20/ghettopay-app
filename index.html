@@ -2095,25 +2095,26 @@ const G = {
     G._scanStream = null;
   },
 
-  _handleQRResult(data) {
+  async _handleQRResult(data) {
     try {
       let phone = '', name = '';
-      // Format 1: ghettopay:pay?phone=...&name=... (custom scheme)
-      // Format 2: https://...?phone=...&name=... (URL)
-      // Format 3: plain phone number
       if (data.includes('?')) {
         const qs = data.split('?')[1];
         const params = new URLSearchParams(qs);
         phone = params.get('phone') || '';
         name = params.get('name') || phone;
       } else if (/^\+?[\d\s\-]{7,}$/.test(data.trim())) {
-        // Plain phone number
         phone = data.trim();
         name = phone;
       }
-      if (!phone && !name) { G.toast('QR non reconnu par GhettoPay', 'err'); return; }
-      const av = ((name || phone)[0] || '?').toUpperCase();
-      selC = { id: 'qr_' + phone, name: name || phone, phone, av };
+      if (!phone) { G.toast('QR non reconnu par GhettoPay', 'err'); return; }
+      // Lookup real user ID by phone — required for transfer_money RPC
+      if (!currentUser) { G.toast('Connecte-toi pour envoyer de l\'argent', 'err'); return; }
+      G.toast('Recherche du destinataire…', 'inf');
+      const { data: found } = await db.from('users').select('id,name').eq('phone', phone).maybeSingle();
+      if (!found) { G.toast('Cet utilisateur n\'est pas encore sur GhettoPay', 'err'); return; }
+      const nm = found.name || name || phone;
+      selC = { id: found.id, name: nm, phone, av: (nm[0] || '?').toUpperCase() };
       G.go('send');
       G.toast(`Destinataire : ${selC.name}`, 'inf');
       setTimeout(() => {
@@ -2127,10 +2128,15 @@ const G = {
     }
   },
 
-  scanManualSend() {
+  async scanManualSend() {
     const phone = $('scan-phone')?.value.trim();
     if (!phone) { G.toast('Saisis un numéro', 'err'); return; }
-    selC = { id: 'manual_' + phone, name: phone, phone, av: '#' };
+    if (!currentUser) { G.toast('Connecte-toi pour envoyer de l\'argent', 'err'); return; }
+    G.toast('Recherche du destinataire…', 'inf');
+    const { data: found } = await db.from('users').select('id,name').eq('phone', phone).maybeSingle();
+    if (!found) { G.toast('Numéro introuvable sur GhettoPay', 'err'); return; }
+    const nm = found.name || phone;
+    selC = { id: found.id, name: nm, phone, av: (nm[0] || '?').toUpperCase() };
     G.go('send');
     setTimeout(() => {
       if ($('rec-av')) $('rec-av').textContent = selC.av;
@@ -2152,7 +2158,7 @@ const G = {
     if ($('recv-name')) $('recv-name').textContent = u.name || 'Utilisateur';
     if ($('recv-phone')) $('recv-phone').textContent = u.phone || '';
     if (!window.QRCode) return;
-    const qrData = `ghettopay:pay?phone=${encodeURIComponent(u.phone||'')}&name=${encodeURIComponent(u.name||'')}`;
+    const qrData = `${location.origin}${location.pathname}?phone=${encodeURIComponent(u.phone||'')}&name=${encodeURIComponent(u.name||'')}`;
     const qrEl = $('recv-qr-real');
     if (qrEl) {
       qrEl.innerHTML = '';
@@ -2184,13 +2190,13 @@ const G = {
 
   copyPayLink() {
     const u = S.get('user', {});
-    const link = `https://ghettopay.ga/pay?phone=${encodeURIComponent(u.phone||'')}&name=${encodeURIComponent(u.name||'')}`;
+    const link = `${location.origin}${location.pathname}?phone=${encodeURIComponent(u.phone||'')}&name=${encodeURIComponent(u.name||'')}`;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(link)
         .then(() => G.toast('Lien copié !', 'inf'))
-        .catch(() => G.toast('Lien : ' + link, 'inf'));
+        .catch(() => G.toast(link, 'inf'));
     } else {
-      G.toast('Lien copié !', 'inf');
+      G.toast(link, 'inf');
     }
   },
 
@@ -4214,15 +4220,37 @@ setInterval(tick, 30000);
   const p = new URLSearchParams(location.search);
   const joinId = p.get('join');
   if (joinId) {
-    // Remove param from URL without reload
     history.replaceState(null, '', location.pathname);
-    // After app loads, open the tontine
     setTimeout(() => {
       if (currentUser) {
         G.openTontine(joinId);
       } else {
         G.toast('Connecte-toi pour rejoindre cette tontine', 'inf');
       }
+    }, 2000);
+  }
+})();
+
+// ── PAYER VIA LIEN QR ──
+(function(){
+  const p = new URLSearchParams(location.search);
+  const phone = p.get('phone');
+  const name = p.get('name') || phone;
+  if (phone) {
+    history.replaceState(null, '', location.pathname);
+    setTimeout(async () => {
+      if (!currentUser) { G.toast('Connecte-toi pour envoyer de l\'argent', 'inf'); return; }
+      const { data: found } = await db.from('users').select('id,name').eq('phone', phone).maybeSingle();
+      if (!found) { G.toast('Cet utilisateur n\'est pas encore sur GhettoPay', 'err'); return; }
+      const nm = found.name || name;
+      selC = { id: found.id, name: nm, phone, av: (nm[0] || '?').toUpperCase() };
+      G.go('send');
+      setTimeout(() => {
+        if ($('rec-av')) $('rec-av').textContent = selC.av;
+        if ($('rec-name')) $('rec-name').textContent = selC.name;
+        if ($('rec-phone')) $('rec-phone').textContent = selC.phone;
+        if ($('rec-row')) $('rec-row').style.display = 'flex';
+      }, 200);
     }, 2000);
   }
 })();
