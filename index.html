@@ -2670,18 +2670,17 @@ const G = {
       // Fetch tous les membres en une requête
       const allIds = allTontines.map(t => t.id);
       const { data: memberRows } = await db.from('tontine_members')
-        .select('tontine_id, member_name, member_phone, has_paid, turn_order')
+        .select('tontine_id, user_id, member_name, member_phone, has_paid, turn_order')
         .in('tontine_id', allIds)
         .order('turn_order', { ascending: true });
 
       const mByT = {};
       for (const row of (memberRows || [])) {
         if (!mByT[row.tontine_id]) mByT[row.tontine_id] = [];
-        if (row.member_name) {
-          mByT[row.tontine_id].push({
-            name: row.member_name, phone: row.member_phone || '', has_paid: !!row.has_paid
-          });
-        }
+        mByT[row.tontine_id].push({
+          name: row.member_name || '', phone: row.member_phone || '',
+          has_paid: !!row.has_paid, user_id: row.user_id || null
+        });
       }
 
       const result = allTontines.map(t => {
@@ -2871,17 +2870,20 @@ const G = {
     if (!name) { G.toast('Nom requis', 'err'); return; }
     if (amount <= 0) { G.toast('Montant requis', 'err'); return; }
 
-    // members = [{ name, phone }] ou ['Moi'] si vide
-    const rawMembers = G._tontineMembers.length > 0 ? [...G._tontineMembers] : [{ name: 'Moi', phone: currentUser?.phone || '' }];
+    // Creator always first member, then invited members
+    const creatorEntry = { name: S.get('user',{}).name || 'Moi', phone: currentUser?.phone || '', userId: currentUser?.id };
+    const rawMembers = G._tontineMembers.length > 0 ? [creatorEntry, ...G._tontineMembers] : [creatorEntry];
     // Noms pour affichage et DB
     const memberNames = rawMembers.map(m => typeof m === 'string' ? m : m.name);
 
     let localId = Date.now().toString();
     if (currentUser) {
       try {
+        const startDate = new Date().toISOString();
         const { data: dbT, error } = await db.from('tontines').insert({
           name, creator_id: currentUser.id,
-          amount_per_cycle: amount, frequency: freq
+          amount_per_cycle: amount, frequency: freq,
+          start_date: startDate
         }).select().single();
         if (!error && dbT) {
           localId = dbT.id;
@@ -2897,14 +2899,14 @@ const G = {
           const inserts = rawMembers.map((m, i) => {
             const mn = typeof m === 'string' ? m : m.name;
             const mp = typeof m === 'string' ? '' : (m.phone || '');
-            const uid = m.userId || (mp && phoneToUid[mp]) || currentUser.id;
+            const uid = m.userId || (mp && phoneToUid[mp]) || null;
             return { tontine_id: dbT.id, user_id: uid, turn_order: i + 1, has_paid: false, member_name: mn || null, member_phone: mp || null };
           });
           await db.from('tontine_members').insert(inserts);
 
           // Envoyer une notification DB à chaque membre GhettoPay (sauf le créateur)
           const notifInserts = inserts
-            .filter(r => r.user_id !== currentUser.id && r.member_name)
+            .filter(r => r.user_id && r.user_id !== currentUser.id)
             .map(r => ({
               user_id: r.user_id,
               type: 'tontine_invite',
@@ -2944,7 +2946,12 @@ const G = {
       .eq('tontine_id', tontineId)
       .order('turn_order', { ascending: true });
     const total = members?.length || 0;
-    if (total === 0 || newPaid < total) return; // Pas encore tout le monde
+    if (total === 0) return;
+    // Use real DB count to avoid race conditions with concurrent payments
+    const { count: paidCount } = await db.from('tontine_members')
+      .select('id', { count: 'exact', head: true })
+      .eq('tontine_id', tontineId).eq('has_paid', true);
+    if ((paidCount || 0) < total) return;
 
     // Calculer qui reçoit ce cycle
     const startDate = tData.start_date ? new Date(tData.start_date) : new Date();
@@ -3035,10 +3042,13 @@ const G = {
       // 2. Marquer has_paid dans tontine_members
       await db.from('tontine_members').update({ has_paid: true })
         .eq('tontine_id', tontineId).eq('user_id', currentUser.id);
-      // 3. Incrémenter members_paid + récupérer infos complètes
+      // 3. Récupérer infos tontine + compter les paiements réels (évite les race conditions)
       const { data: tData } = await db.from('tontines')
-        .select('members_paid, creator_id, amount_per_cycle, frequency, start_date, name').eq('id', tontineId).maybeSingle();
-      const newPaid = (tData?.members_paid || 0) + 1;
+        .select('creator_id, amount_per_cycle, frequency, start_date, name').eq('id', tontineId).maybeSingle();
+      const { count: realPaid } = await db.from('tontine_members')
+        .select('id', { count: 'exact', head: true })
+        .eq('tontine_id', tontineId).eq('has_paid', true);
+      const newPaid = realPaid || 1;
       await db.from('tontines').update({ members_paid: newPaid }).eq('id', tontineId);
       // 4. Transaction
       await db.from('transactions').insert({
@@ -3056,7 +3066,7 @@ const G = {
       // 6. Notifications aux autres membres GhettoPay
       const { data: otherRows } = await db.from('tontine_members')
         .select('user_id').eq('tontine_id', tontineId).neq('user_id', currentUser.id);
-      const otherIds = [...new Set((otherRows || []).map(r => r.user_id).filter(id => id !== tData?.creator_id))];
+      const otherIds = [...new Set((otherRows || []).map(r => r.user_id).filter(id => id && id !== tData?.creator_id))];
       if (otherIds.length) {
         await db.from('notifications').insert(otherIds.map(uid => ({
           user_id: uid, type: 'tontine_payment',
@@ -3140,7 +3150,8 @@ const G = {
     else cycleIdx = (now.getFullYear() - startDate.getFullYear()) * 12 + (now.getMonth() - startDate.getMonth());
     const currentTurnIdx = members.length > 0 ? cycleIdx % members.length : 0;
     const currentRecipient = members[currentTurnIdx] ? mName(members[currentTurnIdx]) : '—';
-    const alreadyPaid = t.paid_by?.includes(u.name || 'Moi');
+    const myMember = members.find(m => m.user_id && currentUser && m.user_id === currentUser.id);
+    const alreadyPaid = myMember?.has_paid || t.paid_by?.includes(u.name || 'Moi');
 
     // Build schedule (show up to 12 upcoming cycles)
     const schedule = members.map((m, i) => {
@@ -3192,7 +3203,7 @@ const G = {
 
     // Membres row (commun créateur + membre)
     const membersRows = members.map((m, i) => {
-      const hasPaid = t.paid_by?.includes(mName(m));
+      const hasPaid = m.has_paid || t.paid_by?.includes(mName(m));
       const isCurrentRecip = i === currentTurnIdx % members.length;
       return `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg2);border-radius:12px;margin-bottom:8px;border:1px solid ${isCurrentRecip?'rgba(212,160,23,.3)':'transparent'}">
         <div style="width:28px;height:28px;border-radius:50%;background:${isCurrentRecip?'var(--gold2)':hasPaid?'var(--green)':'var(--forest)'};color:${isCurrentRecip?'#000':'#fff'};font-size:.65rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</div>
@@ -3318,7 +3329,7 @@ const G = {
         // Insérer dans tontine_members avec member_name et member_phone
         await db.from('tontine_members').insert({
           tontine_id: t.id,
-          user_id: invitedId || currentUser.id,
+          user_id: invitedId || null,
           turn_order: t.members.length,
           has_paid: false,
           member_name: name,
@@ -4019,19 +4030,26 @@ const G = {
   },
 
   // ── RESET CYCLE TONTINE ──
-  async _closeTontineCycle() {
+  _closeTontineCycle() {
     const t = G._curTontine;
     if (!t) return;
-    if (!confirm) { G.toast('Non disponible', 'err'); return; }
-    const ok = window.confirm(`Clôturer le cycle de "${t.name}" ?\nTous les membres seront remis à zéro.`);
-    if (!ok) return;
+    G._askConfirm(
+      `Clôturer le cycle "${t.name}" ?`,
+      `Tous les membres seront remis à zéro pour un nouveau cycle.`,
+      'Clôturer', '', () => G._doCloseTontineCycle()
+    );
+  },
+
+  async _doCloseTontineCycle() {
+    const t = G._curTontine;
+    if (!t) return;
     if (currentUser) {
       await db.from('tontine_members').update({ has_paid: false }).eq('tontine_id', t.id);
       await db.from('tontines').update({ members_paid: 0 }).eq('id', t.id);
       // Notifications aux membres
       const { data: mRows } = await db.from('tontine_members').select('user_id').eq('tontine_id', t.id);
       if (mRows?.length) {
-        const notifs = mRows.filter(r => r.user_id !== currentUser.id).map(r => ({
+        const notifs = mRows.filter(r => r.user_id && r.user_id !== currentUser.id).map(r => ({
           user_id: r.user_id, type: 'tontine_reminder',
           title: `Nouveau cycle — ${t.name}`,
           body: `Le créateur a clôturé le cycle. Un nouveau cycle commence maintenant.`,
