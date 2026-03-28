@@ -37,12 +37,35 @@
   --sab: env(safe-area-inset-bottom,0px);
 }
 html.dark{
-  --bg:#111213;--bg2:#1A1B1D;--bg3:#232527;
-  --card:#161718;--txt:#E5E8E5;--txt2:#8A9480;--txt3:#525A50;
-  --border:rgba(255,255,255,.07);
+  --bg:#0F1010;--bg2:#181A1B;--bg3:#222426;
+  --card:#141516;--txt:#E2E5E2;--txt2:#7E8A7C;--txt3:#4E5650;
+  --border:rgba(255,255,255,.08);
+  color-scheme:dark;
 }
-html.dark body{background:linear-gradient(135deg,#020806 0%,#071009 40%,#060D08 100%)}
-html.dark .shell{background:#080A08}
+html.dark body{background:linear-gradient(135deg,#010504 0%,#050D06 40%,#040B05 100%)}
+html.dark .shell{background:#060808}
+html.dark .shell-inner{background:var(--bg)}
+/* Transitions pour basculement fluide */
+.shell-inner,.sc,.card,.bnav,.snav,.modal-box,.btn-ghost,.notif-item,.mi,.inp,.back-btn,.pill,.bud-card,.bill-item{transition:background-color .25s,border-color .25s,color .2s}
+/* Boutons fantômes en mode sombre */
+html.dark .btn-ghost{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);color:var(--txt2)}
+html.dark .btn-ghost svg{stroke:var(--txt2)}
+/* Icônes de menu en mode sombre */
+html.dark .mi-ic[style*="rgba(0,0,0,.05)"]{background:rgba(255,255,255,.06) !important}
+/* Inputs en dark */
+html.dark .inp:focus{border-color:rgba(22,163,74,.4)}
+/* Notifications unread */
+html.dark .notif-item.unread{background:rgba(212,160,23,.05);border-left:3px solid rgba(212,160,23,.4)}
+html.dark .notif-item{border-bottom-color:var(--border)}
+/* Skel en dark */
+html.dark .skel{background:linear-gradient(90deg,#1e2022 25%,#2a2d2f 50%,#1e2022 75%);background-size:200% 100%}
+/* Scan frame dark */
+html.dark .qr-vf{border-color:rgba(212,160,23,.7)}
+/* Category items dark */
+html.dark .cat-item{background:var(--card);border:1px solid var(--border)}
+/* mi-tag dark */
+html.dark .mi-tag.gold{background:rgba(212,160,23,.15);color:var(--gold2)}
+html.dark .mi-tag.red{background:rgba(220,38,38,.12);color:#f87171}
 html,body{height:100%;font-family:var(--f);overflow:hidden}
 body{
   background:linear-gradient(135deg,var(--forest) 0%,var(--forest2) 40%,#1A5C38 100%);
@@ -673,7 +696,8 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
   flex-shrink:0;padding:0 20px 24px;text-align:center;position:relative;overflow:hidden;
 }
 .profil-hdr::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 70% 25%,rgba(212,160,23,.1),transparent 60%);pointer-events:none}
-.profil-av{width:82px;height:82px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--forest2));display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:2rem;font-weight:900;color:#fff;margin:0 auto 12px;border:3.5px solid rgba(255,255,255,.18)}
+.profil-av{width:82px;height:82px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--forest2));display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:2rem;font-weight:900;color:#fff;margin:0 auto 12px;border:3.5px solid rgba(255,255,255,.18);position:relative;overflow:hidden}
+.profil-av:hover #prof-av-overlay,.profil-av:active #prof-av-overlay{opacity:1 !important}
 .profil-name{font-size:1.05rem;font-weight:800;color:#fff}
 .profil-phone{font-family:var(--fm);font-size:.64rem;color:rgba(255,255,255,.42);margin-top:4px}
 .profil-loc{font-size:.66rem;color:rgba(255,255,255,.35);margin-top:3px}
@@ -1267,7 +1291,10 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
       <span class="snav-t">Mon profil</span>
       <span class="snav-a" onclick="G.showModal('mp')">Modifier</span>
     </div>
-    <div class="profil-av" id="prof-av">R</div>
+    <div class="profil-av" id="prof-av" onclick="G._pickProfilePhoto()" style="cursor:pointer;overflow:hidden;position:relative">R
+      <div style="position:absolute;inset:0;background:rgba(0,0,0,.35);border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0;transition:.2s" id="prof-av-overlay"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><use href="#edit"/></svg></div>
+    </div>
+    <input type="file" id="prof-photo-input" accept="image/*" style="display:none" onchange="G._onProfilePhotoChosen(this)"/>
     <div class="profil-name" id="prof-name">Rostand Moussavou</div>
     <div class="profil-phone" id="prof-phone">+241 06 12 34 56</div>
     <div class="profil-loc" id="prof-loc">Libreville, Gabon</div>
@@ -1282,11 +1309,11 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
       </div>
       <div class="menu-grp">
         <div class="mi" onclick="G.go('budget')"><div class="mi-ic" style="background:rgba(99,102,241,.1)"><svg style="stroke:#818cf8"><use href="#chart"/></svg></div><div><div class="mi-title">Mon budget</div><div class="mi-sub">Analyses et statistiques</div></div><div class="mi-right"><div class="mi-arr"><svg><use href="#ar"/></svg></div></div></div>
-        <div class="mi" onclick="G.ok('Limite augmentée','5 000 000 FCFA/mois')"><div class="mi-ic" style="background:rgba(22,163,74,.1)"><svg style="stroke:var(--green)"><use href="#trend"/></svg></div><div><div class="mi-title">Limite de transaction</div><div class="mi-sub">2 000 000 FCFA/mois</div></div><div class="mi-right"><span class="mi-tag gold">Augmenter</span></div></div>
-        <div class="mi" onclick="G.ok('Identité vérifiée','Niveau Gold · KYC complet')"><div class="mi-ic" style="background:rgba(212,160,23,.1)"><svg style="stroke:var(--gold)"><use href="#shield"/></svg></div><div><div class="mi-title">Vérification identité</div><div class="mi-sub">Niveau Gold · KYC complet</div></div><div class="mi-right"><div class="mi-arr"><svg><use href="#ar"/></svg></div></div></div>
+        <div class="mi" onclick="G.showModal('m-limit')"><div class="mi-ic" style="background:rgba(22,163,74,.1)"><svg style="stroke:var(--green)"><use href="#trend"/></svg></div><div><div class="mi-title">Limite de transaction</div><div class="mi-sub" id="limit-sub">2 000 000 FCFA/mois</div></div><div class="mi-right"><span class="mi-tag gold">Modifier</span></div></div>
+        <div class="mi" onclick="G.showModal('m-kyc')"><div class="mi-ic" style="background:rgba(212,160,23,.1)"><svg style="stroke:var(--gold)"><use href="#shield"/></svg></div><div><div class="mi-title">Vérification identité</div><div class="mi-sub" id="kyc-sub">Niveau Silver · Compléter KYC</div></div><div class="mi-right"><div class="mi-arr"><svg><use href="#ar"/></svg></div></div></div>
       </div>
       <div class="menu-grp">
-        <div class="mi" onclick="G.ok('Code partagé','GP-ROSTAND · +1 000 FCFA/invitation')"><div class="mi-ic" style="background:rgba(251,146,60,.1)"><svg style="stroke:#fb923c"><use href="#gift"/></svg></div><div><div class="mi-title">Parrainer un ami</div><div class="mi-sub">+1 000 FCFA par invitation</div></div><div class="mi-right"><span class="mi-tag red">8 invités</span><div class="mi-arr"><svg><use href="#ar"/></svg></div></div></div>
+        <div class="mi" onclick="G._openReferral()"><div class="mi-ic" style="background:rgba(251,146,60,.1)"><svg style="stroke:#fb923c"><use href="#gift"/></svg></div><div><div class="mi-title">Parrainer un ami</div><div class="mi-sub">+1 000 FCFA par invitation</div></div><div class="mi-right"><span class="mi-tag red" id="ref-badge">0 invités</span><div class="mi-arr"><svg><use href="#ar"/></svg></div></div></div>
         <div class="mi" onclick="G.go('notifs')"><div class="mi-ic" style="background:rgba(22,163,74,.1)"><svg style="stroke:var(--green)"><use href="#bell"/></svg></div><div><div class="mi-title">Notifications</div><div class="mi-sub" id="notif-sub">2 non lues</div></div><div class="mi-right"><div class="mi-arr"><svg><use href="#ar"/></svg></div></div></div>
       </div>
       <div class="menu-grp">
@@ -1461,6 +1488,79 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
     <input id="ep-loc" class="inp" placeholder="Ville"/>
     <button class="btn btn-gold" onclick="G.saveProfile()"><svg><use href="#chk"/></svg>Sauvegarder</button>
     <button class="btn btn-ghost" onclick="G.closeModal('mp')">Annuler</button>
+  </div>
+</div>
+
+<!-- MODAL LIMITE TRANSACTIONS -->
+<div class="modal" id="m-limit" onclick="if(event.target===this)G.closeModal('m-limit')">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Limite de transaction</div>
+    <div style="background:linear-gradient(135deg,var(--forest),var(--forest2));border-radius:16px;padding:16px;color:#fff;text-align:center">
+      <div style="font-size:.6rem;opacity:.6;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Limite mensuelle actuelle</div>
+      <div style="font-size:1.6rem;font-weight:900;font-family:var(--fd)">2 000 000 <span style="font-size:.8rem;opacity:.7">FCFA</span></div>
+    </div>
+    <div style="font-size:.8rem;color:var(--txt2);line-height:1.7">Pour augmenter ta limite, complète la vérification d'identité KYC. Les limites varient selon le niveau :<br><br>
+      <b>Silver</b> — 2 000 000 FCFA/mois<br>
+      <b>Gold</b> — 5 000 000 FCFA/mois<br>
+      <b>Platinum</b> — Illimité
+    </div>
+    <button class="btn btn-gold" onclick="G.closeModal('m-limit');G.showModal('m-kyc')"><svg><use href="#shield"/></svg>Vérifier mon identité</button>
+    <button class="btn btn-ghost" onclick="G.closeModal('m-limit')">Fermer</button>
+  </div>
+</div>
+
+<!-- MODAL KYC VÉRIFICATION IDENTITÉ -->
+<div class="modal" id="m-kyc" onclick="if(event.target===this)G.closeModal('m-kyc')">
+  <div class="modal-box" style="max-height:88vh;overflow-y:auto">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Vérification d'identité</div>
+    <div style="display:flex;justify-content:center;gap:8px;margin-bottom:8px">
+      <div id="kyc-lv-s" style="flex:1;padding:8px;border-radius:10px;background:rgba(22,163,74,.1);border:1.5px solid var(--green);text-align:center;font-size:.68rem;font-weight:800;color:var(--green)">Silver ✓</div>
+      <div style="flex:1;padding:8px;border-radius:10px;background:rgba(212,160,23,.08);border:1.5px dashed rgba(212,160,23,.4);text-align:center;font-size:.68rem;font-weight:700;color:var(--gold2)">Gold</div>
+      <div style="flex:1;padding:8px;border-radius:10px;background:var(--bg2);border:1.5px dashed var(--border);text-align:center;font-size:.68rem;font-weight:700;color:var(--txt3)">Platinum</div>
+    </div>
+    <div style="font-size:.78rem;color:var(--txt2);margin-bottom:4px">Pour accéder au niveau Gold, fournis les documents suivants :</div>
+    <div class="lbl" style="margin-bottom:6px">Pièce d'identité (CNI / Passeport)</div>
+    <input id="kyc-name" class="inp" placeholder="Nom complet (tel que sur la pièce)"/>
+    <input id="kyc-id" class="inp" placeholder="Numéro de la pièce d'identité"/>
+    <div class="lbl" style="margin-bottom:6px">Selfie avec la pièce</div>
+    <div onclick="G._kycPickPhoto()" style="border:2px dashed var(--border);border-radius:14px;padding:20px;text-align:center;cursor:pointer;color:var(--txt3);font-size:.78rem">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:6px;display:block;margin:0 auto 8px"><use href="#user"/></svg>Appuyer pour prendre ou importer une photo
+    </div>
+    <input type="file" id="kyc-photo-input" accept="image/*" style="display:none"/>
+    <button class="btn btn-gold" onclick="G._submitKyc()"><svg><use href="#shield"/></svg>Soumettre la demande</button>
+    <button class="btn btn-ghost" onclick="G.closeModal('m-kyc')">Annuler</button>
+  </div>
+</div>
+
+<!-- MODAL PARRAINAGE -->
+<div class="modal" id="m-ref" onclick="if(event.target===this)G.closeModal('m-ref')">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Parrainer un ami</div>
+    <div style="background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:16px;padding:18px;text-align:center">
+      <div style="font-size:.6rem;color:rgba(0,0,0,.5);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Ton code de parrainage</div>
+      <div id="ref-code" style="font-family:var(--fm);font-size:1.5rem;font-weight:900;color:var(--forest);letter-spacing:.12em">GP-••••••</div>
+      <div style="font-size:.62rem;color:rgba(0,0,0,.45);margin-top:4px">+1 000 FCFA pour toi + ton filleul</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;text-align:center;padding:4px 0">
+      <div><div id="ref-count" style="font-size:1.3rem;font-weight:900;color:var(--txt)">0</div><div style="font-size:.58rem;color:var(--txt3);text-transform:uppercase;font-family:var(--fm)">Filleuls</div></div>
+      <div><div id="ref-earned" style="font-size:1.3rem;font-weight:900;color:var(--green)">0 F</div><div style="font-size:.58rem;color:var(--txt3);text-transform:uppercase;font-family:var(--fm)">Gagné</div></div>
+    </div>
+    <button class="btn btn-gold" onclick="G._shareReferral()"><svg><use href="#share"/></svg>Partager mon code</button>
+    <button class="btn btn-ghost" onclick="G.closeModal('m-ref')">Fermer</button>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMATION GÉNÉRIQUE -->
+<div class="modal" id="m-confirm" onclick="if(event.target===this){G.closeModal('m-confirm');G._confirmCb=null}">
+  <div class="modal-box" style="gap:12px">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="mc-title">Confirmer</div>
+    <div id="mc-body" style="text-align:center;font-size:.82rem;color:var(--txt2);line-height:1.6"></div>
+    <button class="btn btn-danger" id="mc-ok" onclick="G._runConfirm()">Confirmer</button>
+    <button class="btn btn-ghost" onclick="G.closeModal('m-confirm');G._confirmCb=null">Annuler</button>
   </div>
 </div>
 
@@ -1732,7 +1832,12 @@ const G = {
   r_home() {
     const bal = S.get('bal', 0), cbal = S.get('coffre', 0), u = S.get('user', {});
     $('home-name').textContent = (u.name || 'Utilisateur').split(' ')[0] + ' ' + ((u.name || '').split(' ')[1]?.[0] || '') + '.';
-    $('home-av').textContent = u.avatar || '?';
+    const photo = localStorage.getItem('gp_photo');
+    const hav = $('home-av');
+    if (hav) {
+      if (photo) { hav.textContent = ''; hav.style.backgroundImage = `url(${photo})`; hav.style.backgroundSize = 'cover'; hav.style.backgroundPosition = 'center'; }
+      else { hav.style.backgroundImage = ''; hav.textContent = u.avatar || '?'; }
+    }
     $('bal-amt').innerHTML = `<span class="cur">FCFA </span>${balVis ? f(bal) : '• • • •'}`;
     $('bal-sub').textContent = `+ Coffre : ${f(cbal)} FCFA`;
     $('cstrip-val').textContent = f(cbal);
@@ -2276,12 +2381,48 @@ const G = {
     G.deleteTontine(t.id, t.name);
   },
 
+  _confirmCb: null,
+  _askConfirm(title, body, okLabel, okStyle, cb) {
+    if ($('mc-title')) $('mc-title').textContent = title;
+    if ($('mc-body')) $('mc-body').textContent = body;
+    const btn = $('mc-ok');
+    if (btn) { btn.textContent = okLabel; btn.className = 'btn ' + (okStyle || 'btn-danger'); }
+    G._confirmCb = cb;
+    G.showModal('m-confirm');
+  },
+  _runConfirm() {
+    G.closeModal('m-confirm');
+    if (G._confirmCb) { const cb = G._confirmCb; G._confirmCb = null; cb(); }
+  },
+
   async deleteTontine(tontineId, name) {
     const t = G._curTontine;
     const isCreator = currentUser && t?.creator_id === currentUser.id;
 
     if (isCreator) {
-      if (!confirm(`Supprimer la tontine "${name}" ?\nLes membres ayant cotisé seront remboursés automatiquement.`)) return;
+      G._askConfirm(
+        `Supprimer "${name}" ?`,
+        `Les membres ayant déjà cotisé ce cycle seront remboursés automatiquement.`,
+        'Supprimer', 'btn-danger',
+        () => G._doDeleteTontine(tontineId, name)
+      );
+      return;
+    } else {
+      G._askConfirm(
+        `Quitter "${name}" ?`,
+        `Tu ne pourras plus voir ni cotiser à cette tontine.`,
+        'Quitter', 'btn-danger',
+        () => G._doDeleteTontine(tontineId, name)
+      );
+      return;
+    }
+  },
+
+  async _doDeleteTontine(tontineId, name) {
+    const t = G._curTontine;
+    const isCreator = currentUser && t?.creator_id === currentUser.id;
+
+    if (isCreator) {
 
       // Récupérer tous les membres qui ont cotisé
       const { data: paidRows } = await db.from('tontine_members')
@@ -2325,7 +2466,6 @@ const G = {
 
     } else {
       // Membre non-créateur : quitter seulement
-      if (!confirm(`Quitter la tontine "${name}" ?`)) return;
       if (currentUser) {
         await db.from('tontine_members').delete()
           .eq('tontine_id', tontineId).eq('user_id', currentUser.id).catch(() => {});
@@ -2335,6 +2475,7 @@ const G = {
 
     const tontines = S.get('tontines', []).filter(x => String(x.id) !== String(tontineId));
     S.set('tontines', tontines);
+    G._tontinesList = G._tontinesList.filter(x => String(x.id) !== String(tontineId));
     G._curTontine = null;
     G.go('tontine');
   },
@@ -3323,32 +3464,131 @@ const G = {
 
   _renderNotifsList(notifs) {
     if (!$('notif-list')) return;
-    $('notif-list').innerHTML = notifs.map(n => `
-      <div class="notif-item ${n.read ? '' : 'unread'}">
-        <div class="notif-ic" style="background:${n.bg}">${si(n.icon, n.color, 17)}</div>
-        <div><div class="notif-title">${n.title}</div><div class="notif-desc">${n.desc}</div><div class="notif-time">${n.time}</div></div>
-      </div>`).join('') || '<div style="padding:24px;text-align:center;color:var(--txt3);font-size:.82rem">Aucune notification</div>';
+    const iconFor = t => ({tontine_invite:'users',tontine_reminder:'users',tontine_payment:'z',tontine_refund:'recv',transfer:'recv'}[t] || 'bell');
+    const bgFor = t => ({tontine_invite:'rgba(10,74,46,.12)',tontine_payment:'rgba(22,163,74,.12)',tontine_refund:'rgba(59,130,246,.12)',tontine_reminder:'rgba(212,160,23,.1)'}[t] || 'rgba(10,74,46,.1)');
+    const colFor = t => ({tontine_invite:'var(--forest)',tontine_payment:'var(--green)',tontine_refund:'#3b82f6',tontine_reminder:'var(--gold2)'}[t] || 'var(--forest)');
+    $('notif-list').innerHTML = notifs.map(n => {
+      const ico = n.icon || iconFor(n.type);
+      const bg = n.bg || bgFor(n.type);
+      const col = n.color || colFor(n.type);
+      return `<div class="notif-item ${n.read ? '' : 'unread'}" style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer" onclick="G._markNotifRead('${n.id}',this)">
+        <div class="notif-ic" style="background:${bg};flex-shrink:0;margin-top:2px">${si(ico, col, 17)}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.82rem;font-weight:${n.read ? '600' : '800'};color:var(--txt);margin-bottom:2px">${n.title}</div>
+          <div style="font-size:.7rem;color:var(--txt3);line-height:1.5">${n.desc || ''}</div>
+          <div style="font-size:.6rem;color:var(--txt3);margin-top:4px;font-family:var(--fm)">${n.time || ''}</div>
+        </div>
+        ${!n.read ? '<div style="width:8px;height:8px;border-radius:50%;background:var(--gold2);flex-shrink:0;margin-top:6px"></div>' : ''}
+      </div>`;
+    }).join('') || '<div style="padding:32px;text-align:center;color:var(--txt3);font-size:.82rem">Aucune notification</div>';
+    // Update count in profil
+    const unread = notifs.filter(n => !n.read).length;
+    if ($('notif-sub')) $('notif-sub').textContent = unread ? `${unread} non lue${unread>1?'s':''}` : 'Tout lu';
+    if ($('notif-dot')) $('notif-dot').style.display = unread ? 'block' : 'none';
+  },
+
+  _markNotifRead(id, el) {
+    const ns = S.get('notifs', []);
+    const n = ns.find(x => String(x.id) === String(id));
+    if (n && !n.read) {
+      n.read = true;
+      S.set('notifs', ns);
+      if (el) el.querySelector('div[style*="background:var(--gold2)"]')?.remove();
+      el?.classList.remove('unread');
+      if (currentUser && id) db.from('notifications').update({ read: true }).eq('id', id).catch(() => {});
+      const unread = ns.filter(n => !n.read).length;
+      if ($('notif-dot')) $('notif-dot').style.display = unread ? 'block' : 'none';
+      if ($('notif-sub')) $('notif-sub').textContent = unread ? `${unread} non lue${unread>1?'s':''}` : 'Tout lu';
+    }
   },
 
   readAll() {
     const ns = S.get('notifs', []);
     ns.forEach(n => n.read = true);
     S.set('notifs', ns);
-    G.render('notifs');
+    G._renderNotifsList(ns);
+    if ($('notif-dot')) $('notif-dot').style.display = 'none';
+    if ($('notif-sub')) $('notif-sub').textContent = 'Tout lu';
+    // Mark read in DB
+    if (currentUser) {
+      db.from('notifications').update({ read: true }).eq('user_id', currentUser.id).eq('read', false).catch(() => {});
+    }
     G.toast('Toutes lues', 'inf');
-    $('notif-dot').style.display = 'none';
   },
 
   // ── PROFIL ──
   r_profil() {
     const u = S.get('user', {});
-    $('prof-av').textContent = u.avatar || '?';
+    const photo = localStorage.getItem('gp_photo');
+    const av = $('prof-av');
+    if (av) {
+      if (photo) {
+        av.style.backgroundImage = `url(${photo})`;
+        av.style.backgroundSize = 'cover';
+        av.style.backgroundPosition = 'center';
+        av.textContent = '';
+        // keep overlay
+        const ov = document.createElement('div');
+        ov.id = 'prof-av-overlay';
+        ov.style.cssText = 'position:absolute;inset:0;background:rgba(0,0,0,.35);border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0;transition:.2s';
+        ov.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><use href="#edit"/></svg>';
+        av.appendChild(ov);
+      } else {
+        av.style.backgroundImage = '';
+        av.textContent = u.avatar || '?';
+        if (!$('prof-av-overlay')) {
+          const ov = document.createElement('div');
+          ov.id = 'prof-av-overlay';
+          ov.style.cssText = 'position:absolute;inset:0;background:rgba(0,0,0,.35);border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0;transition:.2s';
+          ov.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><use href="#edit"/></svg>';
+          av.appendChild(ov);
+        }
+      }
+    }
     $('prof-name').textContent = u.name || '';
     $('prof-phone').textContent = u.phone || '';
     $('prof-loc').textContent = u.loc || 'Libreville, Gabon';
     $('prof-level').textContent = u.level || 'Silver';
     $('prof-txc').textContent = S.get('txs', []).length;
     $('prof-cash').textContent = f(S.get('cash', 0));
+    // Notif count
+    const unread = S.get('notifs', []).filter(n => !n.read).length;
+    if ($('notif-sub')) $('notif-sub').textContent = unread ? `${unread} non lue${unread > 1 ? 's' : ''}` : 'Tout lu';
+    if ($('notif-dot')) $('notif-dot').style.display = unread ? 'block' : 'none';
+    // Dark mode toggle state
+    const isDark = document.documentElement.classList.contains('dark');
+    G._updateDarkUI(isDark);
+    // KYC / Limit status
+    const lvl = u.level || 'Silver';
+    if ($('kyc-sub')) $('kyc-sub').textContent = lvl === 'Gold' ? 'Niveau Gold · Vérifié ✓' : lvl === 'Platinum' ? 'Niveau Platinum · Vérifié ✓' : 'Niveau Silver · Compléter KYC';
+    if ($('limit-sub')) $('limit-sub').textContent = lvl === 'Platinum' ? 'Illimité' : lvl === 'Gold' ? '5 000 000 FCFA/mois' : '2 000 000 FCFA/mois';
+    // Referral badge
+    const refs = parseInt(localStorage.getItem('gp_refs') || '0');
+    if ($('ref-badge')) $('ref-badge').textContent = refs + ' invité' + (refs !== 1 ? 's' : '');
+  },
+
+  _pickProfilePhoto() {
+    $('prof-photo-input')?.click();
+  },
+  _onProfilePhotoChosen(input) {
+    const file = input.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { G.toast('Image trop lourde (max 2 Mo)', 'err'); return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      const src = e.target.result;
+      localStorage.setItem('gp_photo', src);
+      // Update all avatar spots
+      G._applyProfilePhoto(src);
+      G.toast('Photo de profil mise à jour', 'ok');
+    };
+    reader.readAsDataURL(file);
+  },
+  _applyProfilePhoto(src) {
+    const av = $('prof-av');
+    if (av) { av.style.backgroundImage = `url(${src})`; av.style.backgroundSize = 'cover'; av.style.backgroundPosition = 'center'; av.textContent = ''; }
+    const hav = $('home-av');
+    if (hav && src) { hav.style.backgroundImage = `url(${src})`; hav.style.backgroundSize = 'cover'; hav.style.backgroundPosition = 'center'; hav.textContent = ''; }
   },
 
   async saveProfile() {
@@ -3561,6 +3801,43 @@ const G = {
   },
   showModal(id) { $(id).classList.add('on'); },
   closeModal(id) { $(id).classList.remove('on'); },
+
+  // ── PARRAINAGE ──
+  _openReferral() {
+    const u = S.get('user', {});
+    const code = 'GP-' + (u.name || 'USER').toUpperCase().replace(/\s+/g,'').slice(0,6).padEnd(6,'0');
+    if ($('ref-code')) $('ref-code').textContent = code;
+    const refs = parseInt(localStorage.getItem('gp_refs') || '0');
+    if ($('ref-count')) $('ref-count').textContent = refs;
+    if ($('ref-earned')) $('ref-earned').textContent = f(refs * 1000) + ' F';
+    G.showModal('m-ref');
+  },
+  _shareReferral() {
+    const u = S.get('user', {});
+    const code = 'GP-' + (u.name || 'USER').toUpperCase().replace(/\s+/g,'').slice(0,6).padEnd(6,'0');
+    const text = `Rejoins GhettoPay avec mon code de parrainage et reçois 1 000 FCFA offerts ! 🎁\nCode : ${code}\nTélécharge l'app : ${location.origin}${location.pathname}`;
+    if (navigator.share) {
+      navigator.share({ title: 'GhettoPay — Parrainage', text }).catch(() => {});
+    } else {
+      navigator.clipboard?.writeText(text).then(() => G.toast('Code copié !', 'ok')).catch(() => G.toast(code, 'inf'));
+    }
+  },
+
+  // ── KYC ──
+  _kycPickPhoto() { $('kyc-photo-input')?.click(); },
+  _submitKyc() {
+    const name = $('kyc-name')?.value.trim();
+    const id = $('kyc-id')?.value.trim();
+    if (!name || !id) { G.toast('Remplis tous les champs', 'err'); return; }
+    G.closeModal('m-kyc');
+    // Simulate pending KYC
+    const u = S.get('user', {}); u.level = 'Gold'; u.kycPending = true; S.set('user', u);
+    if ($('kyc-sub')) $('kyc-sub').textContent = 'Vérification en cours…';
+    if ($('prof-level')) $('prof-level').textContent = 'Gold';
+    if ($('limit-sub')) $('limit-sub').textContent = '5 000 000 FCFA/mois';
+    if (currentUser) db.from('users').update({ level: 'Gold' }).eq('id', currentUser.id).catch(() => {});
+    G.ok('Demande envoyée !', 'Ton dossier KYC est en cours de traitement. Sous 48h tu recevras une notification.', null);
+  },
 
   // ── DARK MODE ──
   toggleDark() {
