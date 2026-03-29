@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>GhettoPay — Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --forest:#0A4A2E;--forest2:#0F5C38;--green:#16A34A;--green2:#22C55E;
+  --gold:#D4A017;--gold2:#F0C040;--gold3:#FDE68A;
+  --red:#DC2626;--red2:#FCA5A5;
+  --bg:#0B0F0C;--bg2:#111714;--bg3:#182019;--card:#141A15;
+  --card2:#1A2218;--border:rgba(255,255,255,.07);
+  --txt:#E8F0E9;--txt2:#8FA88F;--txt3:#4A6050;
+  --f:'Segoe UI',system-ui,sans-serif;--fm:'SF Mono',Monaco,Consolas,monospace;
+}
+html,body{height:100%;font-family:var(--f);background:var(--bg);color:var(--txt);overflow:hidden}
+
+/* ── LOGIN ── */
+#login-screen{
+  position:fixed;inset:0;background:radial-gradient(ellipse at 30% 40%,rgba(10,74,46,.35),transparent 60%),var(--bg);
+  display:flex;align-items:center;justify-content:center;z-index:1000;
+}
+.login-box{
+  width:400px;background:var(--card);border:1px solid var(--border);border-radius:24px;
+  padding:40px 36px;display:flex;flex-direction:column;gap:20px;
+  box-shadow:0 40px 100px rgba(0,0,0,.6);
+}
+.login-logo{display:flex;align-items:center;gap:14px;margin-bottom:8px}
+.login-logo-ic{width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center}
+.login-logo-ic svg{width:26px;height:26px;stroke:var(--forest);stroke-width:2.5;fill:none}
+.login-title{font-size:1.5rem;font-weight:900;letter-spacing:-.02em}
+.login-sub{font-size:.78rem;color:var(--txt3)}
+.login-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.2);border-radius:100px;font-size:.65rem;font-weight:700;color:#f87171;letter-spacing:.04em}
+.inp{width:100%;padding:13px 16px;background:var(--bg2);border:1.5px solid var(--border);border-radius:12px;font-family:var(--f);font-size:.88rem;color:var(--txt);outline:none;transition:.2s}
+.inp:focus{border-color:rgba(10,74,46,.5);background:var(--bg3)}
+.inp::placeholder{color:var(--txt3)}
+.btn-login{width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));font-family:var(--f);font-size:.92rem;font-weight:800;color:var(--forest);cursor:pointer;transition:.15s}
+.btn-login:hover{box-shadow:0 8px 24px rgba(212,160,23,.4)}
+.btn-login:active{transform:scale(.98)}
+.err-msg{background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.2);border-radius:10px;padding:10px 14px;font-size:.78rem;color:#f87171;display:none}
+
+/* ── LAYOUT ── */
+#app{display:none;height:100vh;flex-direction:row}
+.sidebar{
+  width:240px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;padding:24px 0;overflow:hidden;
+}
+.sidebar-brand{padding:0 20px 24px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.sidebar-brand-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.sb-logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-logo svg{width:18px;height:18px;stroke:var(--forest);stroke-width:2.5;fill:none}
+.sb-name{font-size:1rem;font-weight:900;letter-spacing:-.01em}
+.sb-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:rgba(220,38,38,.15);border:1px solid rgba(220,38,38,.25);border-radius:6px;font-size:.55rem;font-weight:800;color:#f87171;text-transform:uppercase;letter-spacing:.08em}
+.nav-item{display:flex;align-items:center;gap:11px;padding:11px 20px;cursor:pointer;transition:.15s;border-left:3px solid transparent;margin:1px 0}
+.nav-item:hover{background:rgba(255,255,255,.04)}
+.nav-item.on{background:rgba(10,74,46,.2);border-left-color:var(--gold2)}
+.nav-item svg{width:17px;height:17px;stroke-width:1.9;fill:none;flex-shrink:0}
+.nav-item.on svg{stroke:var(--gold2)}
+.nav-item:not(.on) svg{stroke:var(--txt3)}
+.nav-lbl{font-size:.8rem;font-weight:700}
+.nav-item.on .nav-lbl{color:var(--gold2)}
+.nav-item:not(.on) .nav-lbl{color:var(--txt2)}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:.55rem;font-weight:800;padding:2px 7px;border-radius:100px}
+
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{
+  padding:16px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;
+  background:var(--bg2);flex-shrink:0;
+}
+.topbar-title{font-size:1.1rem;font-weight:800;flex:1}
+.topbar-dot{width:9px;height:9px;border-radius:50%;background:var(--green2);box-shadow:0 0 8px rgba(34,197,94,.5);flex-shrink:0}
+.topbar-live{font-size:.65rem;color:var(--txt3);font-family:var(--fm)}
+.topbar-time{font-size:.72rem;color:var(--txt3);font-family:var(--fm)}
+.logout-btn{padding:7px 14px;border:1px solid var(--border);border-radius:9px;background:none;color:var(--txt3);font-size:.72rem;font-weight:700;cursor:pointer;font-family:var(--f);transition:.15s}
+.logout-btn:hover{border-color:rgba(220,38,38,.4);color:#f87171}
+
+.content{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:20px}
+.content::-webkit-scrollbar{width:5px}
+.content::-webkit-scrollbar-track{background:transparent}
+.content::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:100px}
+
+/* ── SECTIONS ── */
+.section{display:none}
+.section.on{display:flex;flex-direction:column;gap:20px}
+
+/* ── STATS CARDS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 20px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;width:80px;height:80px;border-radius:50%;right:-20px;top:-20px;opacity:.08}
+.stat-card.green::before{background:var(--green2)}
+.stat-card.gold::before{background:var(--gold2)}
+.stat-card.blue::before{background:#60a5fa}
+.stat-card.purple::before{background:#a78bfa}
+.stat-icon{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.stat-icon svg{width:17px;height:17px;stroke-width:2;fill:none}
+.stat-val{font-size:1.65rem;font-weight:900;letter-spacing:-.03em;margin-bottom:3px}
+.stat-lbl{font-size:.65rem;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em;font-family:var(--fm)}
+.stat-delta{display:inline-flex;align-items:center;gap:4px;margin-top:8px;font-size:.62rem;font-weight:700;padding:3px 8px;border-radius:6px}
+.stat-delta.up{background:rgba(34,197,94,.12);color:var(--green2)}
+.stat-delta.dn{background:rgba(220,38,38,.12);color:#f87171}
+
+/* ── CHARTS ROW ── */
+.charts-row{display:grid;grid-template-columns:1.6fr 1fr;gap:14px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px}
+.card-title{font-size:.78rem;font-weight:800;color:var(--txt2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.card-title span{font-family:var(--fm);font-size:.62rem;font-weight:400;color:var(--txt3);text-transform:none;letter-spacing:0}
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:100px}
+.bar-col{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1}
+.bar-fill{border-radius:5px 5px 0 0;width:100%;min-height:4px;transition:.3s}
+.bar-lbl{font-size:.55rem;color:var(--txt3);font-family:var(--fm)}
+.bar-val{font-size:.58rem;color:var(--txt2);font-family:var(--fm)}
+.donut-wrap{display:flex;align-items:center;gap:20px}
+.donut-legend{display:flex;flex-direction:column;gap:10px;flex:1}
+.legend-item{display:flex;align-items:center;gap:8px}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.legend-lbl{font-size:.72rem;color:var(--txt2)}
+.legend-val{margin-left:auto;font-size:.72rem;font-weight:700;font-family:var(--fm)}
+
+/* ── TABLE ── */
+.table-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.table-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.table-header .card-title{margin:0}
+.search-box{display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:8px 12px;margin-left:auto}
+.search-box svg{width:14px;height:14px;stroke:var(--txt3);stroke-width:2;fill:none;flex-shrink:0}
+.search-box input{border:none;outline:none;background:none;font-family:var(--f);font-size:.78rem;color:var(--txt);width:180px}
+.search-box input::placeholder{color:var(--txt3)}
+table{width:100%;border-collapse:collapse}
+thead th{padding:10px 20px;text-align:left;font-size:.58rem;font-weight:800;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid var(--border);background:var(--bg2)}
+tbody tr{border-bottom:1px solid var(--border);transition:.1s;cursor:pointer}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(255,255,255,.025)}
+tbody td{padding:12px 20px;font-size:.78rem;color:var(--txt)}
+.cell-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.72rem;color:#fff}
+.cell-name{font-weight:700}
+.cell-sub{font-size:.62rem;color:var(--txt3);font-family:var(--fm);margin-top:1px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:100px;font-size:.6rem;font-weight:700}
+.badge.green{background:rgba(34,197,94,.12);color:var(--green2)}
+.badge.red{background:rgba(220,38,38,.12);color:#f87171}
+.badge.gold{background:rgba(240,192,64,.12);color:var(--gold2)}
+.badge.blue{background:rgba(96,165,250,.12);color:#93c5fd}
+.badge.gray{background:rgba(255,255,255,.06);color:var(--txt3)}
+.action-btn{padding:5px 12px;border:1px solid var(--border);border-radius:8px;background:none;font-family:var(--f);font-size:.65rem;font-weight:700;cursor:pointer;transition:.15s;margin-right:4px}
+.action-btn.danger{border-color:rgba(220,38,38,.3);color:#f87171}
+.action-btn.danger:hover{background:rgba(220,38,38,.1)}
+.action-btn.success{border-color:rgba(34,197,94,.3);color:var(--green2)}
+.action-btn.success:hover{background:rgba(34,197,94,.1)}
+.action-btn.warn{border-color:rgba(240,192,64,.3);color:var(--gold2)}
+.action-btn.warn:hover{background:rgba(240,192,64,.1)}
+.action-btn.neutral{border-color:var(--border);color:var(--txt2)}
+.action-btn.neutral:hover{background:rgba(255,255,255,.05)}
+.pagination{display:flex;align-items:center;gap:8px;padding:12px 20px;border-top:1px solid var(--border)}
+.page-btn{padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:none;font-family:var(--fm);font-size:.72rem;color:var(--txt2);cursor:pointer;transition:.15s}
+.page-btn:hover{background:rgba(255,255,255,.05)}
+.page-btn.on{background:var(--forest);border-color:var(--forest);color:#fff}
+.page-info{font-size:.65rem;color:var(--txt3);font-family:var(--fm);margin-left:auto}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:500;display:none;align-items:center;justify-content:center}
+.modal-overlay.on{display:flex}
+.modal-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:500px;max-width:90vw;max-height:85vh;overflow-y:auto;display:flex;flex-direction:column;gap:16px}
+.modal-title{font-size:1rem;font-weight:800}
+.modal-row{display:flex;flex-direction:column;gap:6px}
+.modal-lbl{font-size:.62rem;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em}
+.modal-val{font-size:.88rem;color:var(--txt);background:var(--bg2);border-radius:10px;padding:10px 14px;font-family:var(--fm)}
+.modal-btns{display:flex;gap:10px;margin-top:4px}
+.mbn{flex:1;padding:12px;border-radius:12px;font-family:var(--f);font-size:.82rem;font-weight:800;cursor:pointer;border:none;transition:.15s}
+.mbn.cancel{background:rgba(255,255,255,.06);color:var(--txt2)}
+.mbn.danger{background:rgba(220,38,38,.15);color:#f87171}
+.mbn.success{background:rgba(34,197,94,.15);color:var(--green2)}
+.mbn.warn{background:rgba(240,192,64,.12);color:var(--gold2)}
+
+/* ── TOAST ── */
+.adm-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1px solid var(--border);color:var(--txt);padding:12px 22px;border-radius:12px;font-size:.78rem;font-weight:700;box-shadow:0 10px 40px rgba(0,0,0,.5);opacity:0;transition:.25s;pointer-events:none;z-index:1000;font-family:var(--fm)}
+.adm-toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.adm-toast.ok{border-color:rgba(34,197,94,.3);color:var(--green2)}
+.adm-toast.err{border-color:rgba(220,38,38,.3);color:#f87171}
+
+/* ── TONTINE SECTION ── */
+.tontine-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.tontine-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px}
+.tnt-hd{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.tnt-ic{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.82rem;color:#fff;flex-shrink:0}
+.tnt-nm{font-size:.85rem;font-weight:800}
+.tnt-meta{font-size:.6rem;color:var(--txt3);margin-top:2px;font-family:var(--fm)}
+.tnt-badge{margin-left:auto;flex-shrink:0}
+.tnt-bar-bg{background:rgba(255,255,255,.08);border-radius:100px;height:5px;overflow:hidden;margin-bottom:6px}
+.tnt-bar{height:100%;border-radius:100px;background:var(--gold2)}
+.tnt-footer{display:flex;justify-content:space-between;font-size:.58rem;color:var(--txt3);font-family:var(--fm);margin-bottom:12px}
+.tnt-members{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.tnt-member-row{display:flex;align-items:center;gap:8px;font-size:.72rem}
+.tnt-m-av{width:22px;height:22px;border-radius:50%;background:var(--forest);display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:800;color:#fff;flex-shrink:0}
+.tnt-actions{display:flex;gap:6px}
+.skel{background:rgba(255,255,255,.05);border-radius:8px;animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.empty-state{text-align:center;padding:48px 20px;color:var(--txt3);font-size:.82rem}
+.empty-state svg{width:40px;height:40px;stroke:var(--txt3);stroke-width:1.2;fill:none;margin:0 auto 12px;display:block}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .charts-row{grid-template-columns:1fr}
+  .tontine-grid{grid-template-columns:1fr}
+  .sidebar{width:200px}
+}
+@media(max-width:640px){
+  .sidebar{display:none}
+  .stats-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-ic">
+        <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <div>
+        <div class="login-title">GhettoPay</div>
+        <div class="login-sub">Interface d'administration</div>
+      </div>
+    </div>
+    <div class="login-badge">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      ACCÈS RESTREINT · ADMINS UNIQUEMENT
+    </div>
+    <div id="adm-err" class="err-msg"></div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <input id="adm-email" class="inp" type="email" placeholder="Email administrateur" autocomplete="email"/>
+      <input id="adm-pass" class="inp" type="password" placeholder="Mot de passe" autocomplete="current-password" onkeydown="if(event.key==='Enter')A.login()"/>
+    </div>
+    <button class="btn-login" onclick="A.login()">Connexion sécurisée →</button>
+    <p style="text-align:center;font-size:.62rem;color:var(--txt3);font-family:var(--fm)">GhettoPay Admin v1.0 · Libreville, Gabon</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-row">
+        <div class="sb-logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--forest)" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+        <div class="sb-name">GhettoPay</div>
+      </div>
+      <div class="sb-badge">
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Admin Panel
+      </div>
+    </div>
+
+    <div class="nav-item on" onclick="A.section('dashboard')" data-s="dashboard">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span class="nav-lbl">Dashboard</span>
+    </div>
+    <div class="nav-item" onclick="A.section('users')" data-s="users">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span class="nav-lbl">Utilisateurs</span>
+      <span class="nav-badge" id="nb-users">—</span>
+    </div>
+    <div class="nav-item" onclick="A.section('transactions')" data-s="transactions">
+      <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      <span class="nav-lbl">Transactions</span>
+    </div>
+    <div class="nav-item" onclick="A.section('tontines')" data-s="tontines">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span class="nav-lbl">Tontines</span>
+    </div>
+    <div class="nav-item" onclick="A.section('coffres')" data-s="coffres">
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <span class="nav-lbl">Coffres</span>
+    </div>
+    <div class="nav-item" onclick="A.section('notifs')" data-s="notifs">
+      <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="nav-lbl">Notifications</span>
+    </div>
+
+    <div style="margin-top:auto;padding:16px 20px;border-top:1px solid var(--border)">
+      <div style="font-size:.65rem;color:var(--txt3);margin-bottom:4px;font-family:var(--fm)">Connecté en tant que</div>
+      <div style="font-size:.78rem;font-weight:700;color:var(--txt)" id="adm-name-sidebar">—</div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-dot"></div>
+      <div class="topbar-live">LIVE</div>
+      <div class="topbar-title" id="section-title">Dashboard</div>
+      <div class="topbar-time" id="adm-clock">—</div>
+      <button class="logout-btn" onclick="A.logout()">Déconnexion</button>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="section on" id="s-dashboard">
+        <div class="stats-grid" id="stats-grid">
+          <div class="stat-card green"><div class="stat-icon" style="background:rgba(34,197,94,.12)"><svg style="stroke:var(--green2)" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="stat-val" id="st-users">—</div><div class="stat-lbl">Utilisateurs</div><div class="stat-delta up" id="st-users-d">…</div></div>
+          <div class="stat-card gold"><div class="stat-icon" style="background:rgba(240,192,64,.1)"><svg style="stroke:var(--gold2)" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div><div class="stat-val" id="st-txs">—</div><div class="stat-lbl">Transactions</div><div class="stat-delta up" id="st-txs-d">…</div></div>
+          <div class="stat-card blue"><div class="stat-icon" style="background:rgba(96,165,250,.1)"><svg style="stroke:#93c5fd" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div><div class="stat-val" id="st-vol">—</div><div class="stat-lbl">Volume (FCFA)</div><div class="stat-delta up" id="st-vol-d">…</div></div>
+          <div class="stat-card purple"><div class="stat-icon" style="background:rgba(167,139,250,.1)"><svg style="stroke:#c4b5fd" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div class="stat-val" id="st-tontines">—</div><div class="stat-lbl">Tontines actives</div><div class="stat-delta up" id="st-ton-d">…</div></div>
+        </div>
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="card-title">Volume des transactions <span>6 derniers mois</span></div>
+            <div class="bar-chart" id="vol-chart"></div>
+          </div>
+          <div class="chart-card">
+            <div class="card-title">Répartition types <span>Total</span></div>
+            <div class="donut-wrap">
+              <svg width="110" height="110" viewBox="0 0 110 110" id="donut-svg"><circle cx="55" cy="55" r="40" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="18"/></svg>
+              <div class="donut-legend" id="donut-legend"></div>
+            </div>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="table-header" style="padding:14px 20px;border-bottom:1px solid var(--border)">
+            <div class="card-title" style="margin:0">Dernières transactions</div>
+          </div>
+          <table>
+            <thead><tr><th>Expéditeur</th><th>Destinataire</th><th>Montant</th><th>Type</th><th>Date</th><th>Statut</th></tr></thead>
+            <tbody id="dash-tx-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- USERS -->
+      <div class="section" id="s-users">
+        <div class="table-card">
+          <div class="table-header">
+            <div class="card-title" style="margin:0">Utilisateurs <span id="users-count" style="font-size:.72rem;color:var(--txt3);font-weight:400;margin-left:8px"></span></div>
+            <div class="search-box">
+              <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" placeholder="Chercher un utilisateur..." oninput="A.filterUsers(this.value)"/>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>Utilisateur</th><th>Téléphone</th><th>Solde</th><th>Niveau</th><th>Inscrit le</th><th>Statut</th><th>Actions</th></tr></thead>
+            <tbody id="users-tbody"></tbody>
+          </table>
+          <div class="pagination" id="users-pagination"></div>
+        </div>
+      </div>
+
+      <!-- TRANSACTIONS -->
+      <div class="section" id="s-transactions">
+        <div class="table-card">
+          <div class="table-header">
+            <div class="card-title" style="margin:0">Toutes les transactions</div>
+            <div style="display:flex;gap:8px;margin-left:auto">
+              <select id="tx-filter-type" onchange="A.filterTx()" style="background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:7px 12px;color:var(--txt);font-family:var(--f);font-size:.75rem;cursor:pointer">
+                <option value="">Tous les types</option>
+                <option value="transfer">Transfert</option>
+                <option value="qr">QR Pay</option>
+                <option value="recharge">Recharge</option>
+                <option value="coffre_deposit">Coffre</option>
+                <option value="tontine">Tontine</option>
+              </select>
+              <div class="search-box" style="margin-left:0">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" placeholder="Chercher..." oninput="A.filterTx(this.value)"/>
+              </div>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>ID</th><th>De</th><th>À / Marchand</th><th>Montant</th><th>Type</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead>
+            <tbody id="tx-tbody"></tbody>
+          </table>
+          <div class="pagination" id="tx-pagination"></div>
+        </div>
+      </div>
+
+      <!-- TONTINES -->
+      <div class="section" id="s-tontines">
+        <div class="tontine-grid" id="tontines-grid"></div>
+      </div>
+
+      <!-- COFFRES -->
+      <div class="section" id="s-coffres">
+        <div class="table-card">
+          <div class="table-header">
+            <div class="card-title" style="margin:0">Coffres d'épargne</div>
+          </div>
+          <table>
+            <thead><tr><th>Nom</th><th>Propriétaire</th><th>Épargné</th><th>Objectif</th><th>% atteint</th><th>Déblocage</th><th>Actions</th></tr></thead>
+            <tbody id="coffres-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- NOTIFICATIONS -->
+      <div class="section" id="s-notifs">
+        <div style="display:flex;gap:12px;align-items:flex-end">
+          <div style="flex:1">
+            <div style="font-size:.65rem;color:var(--txt3);font-family:var(--fm);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Titre</div>
+            <input id="notif-title" class="inp" placeholder="Ex: Mise à jour de sécurité"/>
+          </div>
+          <div style="flex:2">
+            <div style="font-size:.65rem;color:var(--txt3);font-family:var(--fm);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Message</div>
+            <input id="notif-body" class="inp" placeholder="Contenu de la notification..."/>
+          </div>
+          <div>
+            <div style="font-size:.65rem;color:var(--txt3);font-family:var(--fm);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Cible</div>
+            <select id="notif-target" style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:13px 14px;color:var(--txt);font-family:var(--f);font-size:.82rem">
+              <option value="all">Tous les utilisateurs</option>
+              <option value="gold">Niveau Gold</option>
+              <option value="silver">Niveau Silver</option>
+            </select>
+          </div>
+          <button onclick="A.sendBulkNotif()" style="padding:13px 20px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--forest);font-family:var(--f);font-size:.82rem;font-weight:800;cursor:pointer;white-space:nowrap">Envoyer</button>
+        </div>
+        <div class="table-card">
+          <div class="table-header"><div class="card-title" style="margin:0">Notifications envoyées</div></div>
+          <table>
+            <thead><tr><th>Destinataire</th><th>Titre</th><th>Message</th><th>Type</th><th>Date</th><th>Lu</th></tr></thead>
+            <tbody id="notifs-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-box" id="modal-box"></div>
+</div>
+
+<!-- TOAST -->
+<div class="adm-toast" id="adm-toast"></div>
+
+<script>
+// ══════════════════════════════════════════════
+// GHETTOPAY ADMIN PANEL
+// ══════════════════════════════════════════════
+
+const SUPA_URL = 'https://qzazkxlamuylurhjquzu.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6YXpreGxhbXV5bHVyaGpxdXp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyNjM0NzYsImV4cCI6MjA4OTgzOTQ3Nn0.ow7l6dQZqsl5j8UFMrMY0JgIWR65gBFuMLn6MdI7SzQ';
+
+// ADMIN CREDENTIALS (à sécuriser côté Supabase avec rôle admin en production)
+const ADMIN_EMAIL = 'admin@ghettopay.ga';
+const ADMIN_PASS  = 'GhettoAdmin2024!';
+
+const db = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+const f  = n => new Intl.NumberFormat('fr-FR').format(Math.round(n || 0));
+const $  = id => document.getElementById(id);
+
+let _users = [], _txs = [], _tontines = [], _coffres = [], _notifs = [];
+let _usersPage = 1, _txsPage = 1;
+const PER = 15;
+
+// ── HORLOGE ──
+setInterval(() => {
+  const n = new Date();
+  $('adm-clock').textContent = n.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'}) + ' · ' + n.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+}, 1000);
+
+const A = {
+  // ── AUTH ──
+  async login() {
+    const email = $('adm-email')?.value.trim();
+    const pass  = $('adm-pass')?.value;
+    if (!email || !pass) { A.err('Remplis tous les champs'); return; }
+
+    // Vérification admin : email exact + password exact (double sécurité)
+    if (email !== ADMIN_EMAIL) { A.err('Accès refusé — identifiants invalides'); return; }
+
+    const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
+    if (error) { A.err('Identifiants incorrects'); return; }
+
+    // Vérifier que c'est bien l'admin (email correspond)
+    if (data.user?.email !== ADMIN_EMAIL) {
+      await db.auth.signOut();
+      A.err('Accès refusé — compte non autorisé');
+      return;
+    }
+
+    $('login-screen').style.display = 'none';
+    $('app').style.display = 'flex';
+    $('adm-name-sidebar').textContent = data.user.email;
+    await A.load();
+  },
+
+  err(msg) {
+    const el = $('adm-err');
+    el.textContent = msg; el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 4000);
+  },
+
+  async logout() {
+    await db.auth.signOut();
+    location.reload();
+  },
+
+  // ── NAVIGATION ──
+  section(name) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('on'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('on'));
+    $('s-' + name)?.classList.add('on');
+    document.querySelector(`[data-s="${name}"]`)?.classList.add('on');
+    const titles = { dashboard:'Dashboard', users:'Utilisateurs', transactions:'Transactions', tontines:'Tontines', coffres:'Coffres', notifs:'Notifications' };
+    $('section-title').textContent = titles[name] || name;
+    A['render_' + name]?.();
+  },
+
+  // ── LOAD ALL DATA ──
+  async load() {
+    await Promise.all([A.loadUsers(), A.loadTx(), A.loadTontines(), A.loadCoffres(), A.loadNotifs()]);
+    A.render_dashboard();
+  },
+
+  async loadUsers() {
+    const { data } = await db.from('users').select('*, wallets(balance,coffre_balance,cashback)').order('created_at', { ascending: false });
+    _users = data || [];
+    $('nb-users').textContent = _users.length;
+  },
+
+  async loadTx() {
+    const { data } = await db.from('transactions')
+      .select('*, from_user:from_user_id(name,phone), to_user:to_user_id(name,phone)')
+      .order('created_at', { ascending: false }).limit(500);
+    _txs = data || [];
+  },
+
+  async loadTontines() {
+    const { data } = await db.from('tontines').select('*, tontine_members(count)').order('created_at', { ascending: false });
+    _tontines = data || [];
+  },
+
+  async loadCoffres() {
+    const { data } = await db.from('coffres')
+      .select('*, user:user_id(name,phone)').order('created_at', { ascending: false });
+    _coffres = data || [];
+  },
+
+  async loadNotifs() {
+    const { data } = await db.from('notifications')
+      .select('*, user:user_id(name)').order('created_at', { ascending: false }).limit(200);
+    _notifs = data || [];
+  },
+
+  // ── DASHBOARD ──
+  render_dashboard() {
+    // Stats
+    $('st-users').textContent = _users.length;
+    $('st-txs').textContent = _txs.length;
+    const vol = _txs.reduce((s, t) => s + (t.amount || 0), 0);
+    $('st-vol').textContent = vol >= 1000000 ? (vol/1000000).toFixed(1) + 'M' : vol >= 1000 ? (vol/1000).toFixed(0) + 'k' : vol;
+    $('st-tontines').textContent = _tontines.length;
+    $('st-users-d').textContent = `↑ ${_users.filter(u => new Date(u.created_at) > new Date(Date.now()-7*86400000)).length} cette semaine`;
+    $('st-txs-d').textContent = `↑ ${_txs.filter(t => new Date(t.created_at) > new Date(Date.now()-86400000)).length} aujourd'hui`;
+    $('st-vol-d').textContent = '↑ Volume total';
+    $('st-ton-d').textContent = `${_tontines.filter(t=>t.members_paid > 0).length} en cours`;
+
+    // Bar chart volume / 6 mois
+    const now = new Date();
+    const months = Array.from({length:6}, (_,i) => {
+      const d = new Date(now.getFullYear(), now.getMonth() - (5-i), 1);
+      return { y: d.getFullYear(), m: d.getMonth(), label: d.toLocaleDateString('fr-FR',{month:'short'}), val: 0 };
+    });
+    _txs.forEach(t => {
+      const d = new Date(t.created_at);
+      const mo = months.find(m => m.y === d.getFullYear() && m.m === d.getMonth());
+      if (mo) mo.val += (t.amount || 0);
+    });
+    const maxV = Math.max(...months.map(m => m.val), 1);
+    $('vol-chart').innerHTML = months.map((m, i) => {
+      const h = Math.max(4, Math.round((m.val/maxV)*90));
+      const isLast = i === 5;
+      return `<div class="bar-col">
+        <div class="bar-val">${m.val >= 1000 ? (m.val/1000).toFixed(0)+'k' : m.val || ''}</div>
+        <div class="bar-fill" style="height:${h}px;background:${isLast ? 'var(--gold2)' : 'rgba(10,74,46,.6)'}"></div>
+        <div class="bar-lbl">${m.label}</div>
+      </div>`;
+    }).join('');
+
+    // Donut types
+    const types = { transfer: 0, qr: 0, recharge: 0, coffre_deposit: 0, tontine: 0 };
+    _txs.forEach(t => { if (types[t.type] !== undefined) types[t.type] += (t.amount||0); });
+    const typeTotal = Object.values(types).reduce((a,b)=>a+b,1);
+    const colors = { transfer:'#22c55e', qr:'#f0c040', recharge:'#f87171', coffre_deposit:'#60a5fa', tontine:'#a78bfa' };
+    const labels = { transfer:'Transferts', qr:'QR Pay', recharge:'Recharges', coffre_deposit:'Coffres', tontine:'Tontines' };
+    let angle = -90;
+    let paths = '';
+    const r = 40, cx = 55, cy = 55;
+    Object.entries(types).forEach(([k,v]) => {
+      if (!v) return;
+      const pct = v / typeTotal;
+      const a1 = angle * Math.PI/180;
+      const a2 = (angle + pct*360) * Math.PI/180;
+      const x1 = cx + r*Math.cos(a1), y1 = cy + r*Math.sin(a1);
+      const x2 = cx + r*Math.cos(a2), y2 = cy + r*Math.sin(a2);
+      const large = pct > .5 ? 1 : 0;
+      paths += `<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} Z" fill="${colors[k]}" opacity=".85"/>`;
+      angle += pct*360;
+    });
+    $('donut-svg').innerHTML = `<circle cx="55" cy="55" r="40" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="1"/>${paths}<circle cx="55" cy="55" r="25" fill="var(--card)"/>`;
+    $('donut-legend').innerHTML = Object.entries(types).filter(([,v])=>v>0).map(([k,v]) =>
+      `<div class="legend-item"><div class="legend-dot" style="background:${colors[k]}"></div><div class="legend-lbl">${labels[k]}</div><div class="legend-val">${f(v)}</div></div>`
+    ).join('');
+
+    // Recent transactions
+    $('dash-tx-tbody').innerHTML = _txs.slice(0,10).map(t => A._txRow(t)).join('');
+  },
+
+  // ── USERS ──
+  render_users() { A._renderUserTable(_users); },
+
+  filterUsers(q) {
+    if (!q) { A._renderUserTable(_users); return; }
+    const filtered = _users.filter(u =>
+      (u.name||'').toLowerCase().includes(q.toLowerCase()) ||
+      (u.phone||'').includes(q) ||
+      (u.email||'').toLowerCase().includes(q.toLowerCase())
+    );
+    A._renderUserTable(filtered);
+  },
+
+  _renderUserTable(list) {
+    $('users-count').textContent = `(${list.length} utilisateur${list.length>1?'s':''})`;
+    const page = _usersPage, start = (page-1)*PER, slice = list.slice(start, start+PER);
+    const grads = ['#0A4A2E','#7c3aed','#0284c7','#d97706','#dc2626'];
+    $('users-tbody').innerHTML = slice.map((u,i) => {
+      const w = u.wallets?.[0] || {};
+      const bal = w.balance || 0;
+      const blocked = u.blocked || false;
+      const initials = (u.name||'?')[0].toUpperCase();
+      const color = grads[i % grads.length];
+      const lvl = u.level || 'Silver';
+      const lvlClass = lvl === 'Gold' ? 'gold' : lvl === 'Platinum' ? 'blue' : 'gray';
+      const date = u.created_at ? new Date(u.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}) : '—';
+      return `<tr onclick="A.showUser('${u.id}')">
+        <td><div style="display:flex;align-items:center;gap:10px"><div class="cell-av" style="background:${color}">${initials}</div><div><div class="cell-name">${u.name||'—'}</div><div class="cell-sub">${u.email||''}</div></div></div></td>
+        <td><div class="cell-sub">${u.phone||'—'}</div></td>
+        <td><div class="cell-name">${f(bal)} <span style="font-size:.6rem;color:var(--txt3)">FCFA</span></div></td>
+        <td><span class="badge ${lvlClass}">${lvl}</span></td>
+        <td><div class="cell-sub">${date}</div></td>
+        <td><span class="badge ${blocked?'red':'green'}">${blocked?'Bloqué':'Actif'}</span></td>
+        <td>
+          <button class="action-btn ${blocked?'success':'danger'}" onclick="event.stopPropagation();A.toggleBlock('${u.id}','${u.name}',${blocked})">${blocked?'Débloquer':'Bloquer'}</button>
+          <button class="action-btn warn" onclick="event.stopPropagation();A.adjustBalance('${u.id}','${u.name}',${bal})">Solde</button>
+        </td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--txt3)">Aucun utilisateur</td></tr>';
+
+    // Pagination
+    const pages = Math.ceil(list.length / PER);
+    $('users-pagination').innerHTML = `
+      <button class="page-btn" onclick="_usersPage=Math.max(1,_usersPage-1);A._renderUserTable(A._lastUserList||_users)">←</button>
+      ${Array.from({length:Math.min(pages,7)},(_,i)=>`<button class="page-btn ${i+1===page?'on':''}" onclick="_usersPage=${i+1};A._renderUserTable(A._lastUserList||_users)">${i+1}</button>`).join('')}
+      <button class="page-btn" onclick="_usersPage=Math.min(${pages},_usersPage+1);A._renderUserTable(A._lastUserList||_users)">→</button>
+      <div class="page-info">${start+1}–${Math.min(start+PER,list.length)} sur ${list.length}</div>`;
+    A._lastUserList = list;
+  },
+
+  showUser(id) {
+    const u = _users.find(x => x.id === id); if (!u) return;
+    const w = u.wallets?.[0] || {};
+    const userTxs = _txs.filter(t => t.from_user_id === id || t.to_user_id === id);
+    const totalSent = userTxs.filter(t => t.from_user_id === id).reduce((s,t) => s+(t.amount||0), 0);
+    const totalRec  = userTxs.filter(t => t.to_user_id === id).reduce((s,t) => s+(t.amount||0), 0);
+    $('modal-box').innerHTML = `
+      <div class="modal-title">Profil utilisateur</div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="width:52px;height:52px;border-radius:50%;background:var(--forest);display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:900;color:#fff">${(u.name||'?')[0]}</div>
+        <div><div style="font-size:.95rem;font-weight:800">${u.name||'—'}</div><div style="font-size:.7rem;color:var(--txt3);margin-top:2px">${u.email||''}</div></div>
+        <span class="badge ${u.blocked?'red':'green'}" style="margin-left:auto">${u.blocked?'Bloqué':'Actif'}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="modal-row"><div class="modal-lbl">Téléphone</div><div class="modal-val">${u.phone||'—'}</div></div>
+        <div class="modal-row"><div class="modal-lbl">Niveau KYC</div><div class="modal-val">${u.level||'Silver'}</div></div>
+        <div class="modal-row"><div class="modal-lbl">Solde wallet</div><div class="modal-val">${f(w.balance||0)} FCFA</div></div>
+        <div class="modal-row"><div class="modal-lbl">Coffre</div><div class="modal-val">${f(w.coffre_balance||0)} FCFA</div></div>
+        <div class="modal-row"><div class="modal-lbl">Total envoyé</div><div class="modal-val">${f(totalSent)} FCFA</div></div>
+        <div class="modal-row"><div class="modal-lbl">Total reçu</div><div class="modal-val">${f(totalRec)} FCFA</div></div>
+        <div class="modal-row"><div class="modal-lbl">Transactions</div><div class="modal-val">${userTxs.length}</div></div>
+        <div class="modal-row"><div class="modal-lbl">Inscrit le</div><div class="modal-val">${u.created_at ? new Date(u.created_at).toLocaleDateString('fr-FR') : '—'}</div></div>
+      </div>
+      <div class="modal-btns">
+        <button class="mbn ${u.blocked?'success':'danger'}" onclick="A.toggleBlock('${u.id}','${u.name}',${!!u.blocked});A.closeModal()">${u.blocked?'Débloquer':'Bloquer'}</button>
+        <button class="mbn warn" onclick="A.adjustBalance('${u.id}','${u.name}',${w.balance||0})">Ajuster solde</button>
+        <button class="mbn cancel" onclick="A.closeModal()">Fermer</button>
+      </div>`;
+    $('modal').classList.add('on');
+  },
+
+  async toggleBlock(id, name, wasBlocked) {
+    const { error } = await db.from('users').update({ blocked: !wasBlocked }).eq('id', id);
+    if (error) { A.toast('Erreur: ' + error.message, 'err'); return; }
+    const u = _users.find(x => x.id === id);
+    if (u) u.blocked = !wasBlocked;
+    A.render_users();
+    A.toast(`${name} ${wasBlocked ? 'débloqué' : 'bloqué'}`, wasBlocked ? 'ok' : 'err');
+  },
+
+  adjustBalance(userId, name, currentBal) {
+    $('modal-box').innerHTML = `
+      <div class="modal-title">Ajuster le solde — ${name}</div>
+      <div class="modal-row"><div class="modal-lbl">Solde actuel</div><div class="modal-val">${f(currentBal)} FCFA</div></div>
+      <div class="modal-row"><div class="modal-lbl">Nouveau solde (FCFA)</div><input id="new-bal" class="inp" type="number" placeholder="${currentBal}" value="${currentBal}" style="margin-top:4px"/></div>
+      <div class="modal-row"><div class="modal-lbl">Raison (optionnel)</div><input id="bal-reason" class="inp" placeholder="Ex: Correction erreur, bonus..." style="margin-top:4px"/></div>
+      <div class="modal-btns">
+        <button class="mbn success" onclick="A._doAdjustBalance('${userId}','${name}')">Appliquer</button>
+        <button class="mbn cancel" onclick="A.closeModal()">Annuler</button>
+      </div>`;
+    $('modal').classList.add('on');
+  },
+
+  async _doAdjustBalance(userId, name) {
+    const newBal = parseInt($('new-bal')?.value) || 0;
+    const { error } = await db.from('wallets').update({ balance: newBal }).eq('user_id', userId);
+    if (error) { A.toast('Erreur: ' + error.message, 'err'); return; }
+    const u = _users.find(x => x.id === userId);
+    if (u?.wallets?.[0]) u.wallets[0].balance = newBal;
+    A.closeModal(); A.render_users();
+    A.toast(`Solde de ${name} mis à jour → ${f(newBal)} FCFA`, 'ok');
+  },
+
+  // ── TRANSACTIONS ──
+  render_transactions() { A._renderTxTable(_txs); },
+
+  filterTx(q) {
+    const typeFilter = $('tx-filter-type')?.value || '';
+    let filtered = _txs;
+    if (typeFilter) filtered = filtered.filter(t => t.type === typeFilter);
+    if (q) filtered = filtered.filter(t =>
+      (t.from_user?.name||'').toLowerCase().includes(q.toLowerCase()) ||
+      (t.to_user?.name||'').toLowerCase().includes(q.toLowerCase()) ||
+      (t.merchant_name||'').toLowerCase().includes(q.toLowerCase()) ||
+      String(t.amount).includes(q)
+    );
+    A._renderTxTable(filtered);
+  },
+
+  _renderTxTable(list) {
+    const page = _txsPage, start = (page-1)*PER, slice = list.slice(start, start+PER);
+    $('tx-tbody').innerHTML = slice.map(t => A._txRow(t, true)).join('') ||
+      '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--txt3)">Aucune transaction</td></tr>';
+    const pages = Math.ceil(list.length / PER);
+    $('tx-pagination').innerHTML = `
+      <button class="page-btn" onclick="_txsPage=Math.max(1,_txsPage-1);A._renderTxTable(A._lastTxList||_txs)">←</button>
+      ${Array.from({length:Math.min(pages,7)},(_,i)=>`<button class="page-btn ${i+1===page?'on':''}" onclick="_txsPage=${i+1};A._renderTxTable(A._lastTxList||_txs)">${i+1}</button>`).join('')}
+      <button class="page-btn" onclick="_txsPage=Math.min(${pages},_txsPage+1);A._renderTxTable(A._lastTxList||_txs)">→</button>
+      <div class="page-info">${start+1}–${Math.min(start+PER,list.length)} sur ${list.length}</div>`;
+    A._lastTxList = list;
+  },
+
+  _txRow(t, full=false) {
+    const from = t.from_user?.name || '—';
+    const to   = t.to_user?.name || t.merchant_name || '—';
+    const types = { transfer:'Transfert', qr:'QR Pay', recharge:'Recharge', coffre_deposit:'Coffre', tontine:'Tontine', bill:'Facture' };
+    const typeColors = { transfer:'green', qr:'gold', recharge:'blue', coffre_deposit:'blue', tontine:'gray' };
+    const typ = t.type || 'transfer';
+    const date = t.created_at ? new Date(t.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '—';
+    const status = t.status || 'completed';
+    const statusClass = status === 'completed' ? 'green' : status === 'cancelled' ? 'red' : 'gold';
+    if (full) {
+      const shortId = (t.id || '').slice(0,8) + '…';
+      return `<tr>
+        <td><span style="font-family:var(--fm);font-size:.65rem;color:var(--txt3)">${shortId}</span></td>
+        <td><div class="cell-name">${from}</div></td>
+        <td><div class="cell-name">${to}</div></td>
+        <td><div class="cell-name" style="color:${typ==='transfer'&&t.to_user_id?'var(--green2)':'var(--txt)'}">${f(t.amount)} <span style="font-size:.6rem;color:var(--txt3)">FCFA</span></div></td>
+        <td><span class="badge ${typeColors[typ]||'gray'}">${types[typ]||typ}</span></td>
+        <td><div class="cell-sub">${date}</div></td>
+        <td><span class="badge ${statusClass}">${status}</span></td>
+        <td>${status !== 'cancelled' ? `<button class="action-btn danger" onclick="A.cancelTx('${t.id}')">Annuler</button>` : ''}</td>
+      </tr>`;
+    }
+    return `<tr>
+      <td><div class="cell-name">${from}</div></td>
+      <td><div class="cell-name">${to}</div></td>
+      <td><div class="cell-name">${f(t.amount)} <span style="font-size:.6rem;color:var(--txt3)">FCFA</span></div></td>
+      <td><span class="badge ${typeColors[typ]||'gray'}">${types[typ]||typ}</span></td>
+      <td><div class="cell-sub">${date}</div></td>
+      <td><span class="badge ${statusClass}">${status}</span></td>
+    </tr>`;
+  },
+
+  async cancelTx(id) {
+    if (!confirm('Annuler cette transaction ? Cette action est irréversible.')) return;
+    const { error } = await db.from('transactions').update({ status: 'cancelled' }).eq('id', id);
+    if (error) { A.toast('Erreur: ' + error.message, 'err'); return; }
+    const t = _txs.find(x => x.id === id);
+    if (t) t.status = 'cancelled';
+    A.render_transactions();
+    A.toast('Transaction annulée', 'err');
+  },
+
+  // ── TONTINES ──
+  render_tontines() {
+    const colors = ['linear-gradient(135deg,#7c3aed,#a78bfa)','linear-gradient(135deg,#0A4A2E,#16A34A)','linear-gradient(135deg,#0284c7,#38bdf8)','linear-gradient(135deg,#d97706,#fcd34d)'];
+    $('tontines-grid').innerHTML = _tontines.map((t, i) => {
+      const memberCount = t.tontine_members?.[0]?.count || 0;
+      const paid = t.members_paid || 0;
+      const pct = memberCount > 0 ? Math.round(paid/memberCount*100) : 0;
+      const date = t.created_at ? new Date(t.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}) : '—';
+      return `<div class="tontine-card">
+        <div class="tnt-hd">
+          <div class="tnt-ic" style="background:${colors[i%colors.length].includes('gradient')?'var(--forest)':colors[i%colors.length]}">${t.name[0]}</div>
+          <div><div class="tnt-nm">${t.name}</div><div class="tnt-meta">${t.frequency==='weekly'?'Hebdo':'Mensuelle'} · ${date}</div></div>
+          <div class="tnt-badge"><span class="badge ${pct===100?'green':'gold'}">${pct===100?'Complet':paid+'/'+memberCount}</span></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:.78rem">
+          <span style="color:var(--txt2)">${memberCount} membre${memberCount>1?'s':''}</span>
+          <span style="font-weight:800;color:var(--txt)">${f(t.amount_per_cycle)} FCFA/cycle</span>
+        </div>
+        <div class="tnt-bar-bg"><div class="tnt-bar" style="width:${pct}%"></div></div>
+        <div class="tnt-footer"><span>${paid} cotisé${paid>1?'s':''}</span><span>${pct}%</span></div>
+        <div class="tnt-actions">
+          <button class="action-btn warn" onclick="A.resetTontineCycle('${t.id}','${t.name}')">Reset cycle</button>
+          <button class="action-btn danger" onclick="A.deleteTontine('${t.id}','${t.name}')">Supprimer</button>
+        </div>
+      </div>`;
+    }).join('') || `<div class="empty-state" style="grid-column:1/-1"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Aucune tontine</div>`;
+  },
+
+  async resetTontineCycle(id, name) {
+    if (!confirm(`Réinitialiser le cycle de "${name}" ?`)) return;
+    await db.from('tontine_members').update({ has_paid: false }).eq('tontine_id', id);
+    await db.from('tontines').update({ members_paid: 0 }).eq('id', id);
+    const t = _tontines.find(x => x.id === id);
+    if (t) t.members_paid = 0;
+    A.render_tontines();
+    A.toast(`Cycle de "${name}" réinitialisé`, 'ok');
+  },
+
+  async deleteTontine(id, name) {
+    if (!confirm(`Supprimer définitivement la tontine "${name}" ?`)) return;
+    await db.from('tontine_members').delete().eq('tontine_id', id);
+    await db.from('tontines').delete().eq('id', id);
+    _tontines = _tontines.filter(t => t.id !== id);
+    A.render_tontines();
+    A.toast(`Tontine "${name}" supprimée`, 'err');
+  },
+
+  // ── COFFRES ──
+  render_coffres() {
+    $('coffres-tbody').innerHTML = _coffres.map(c => {
+      const pct = c.target > 0 ? Math.round((c.saved/c.target)*100) : 0;
+      const unlock = c.unlock_date ? new Date(c.unlock_date).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}) : '—';
+      return `<tr>
+        <td><div class="cell-name">${c.name}</div></td>
+        <td><div class="cell-sub">${c.user?.name||'—'} · ${c.user?.phone||''}</div></td>
+        <td><div class="cell-name">${f(c.saved)} <span style="font-size:.6rem;color:var(--txt3)">FCFA</span></div></td>
+        <td><div class="cell-sub">${f(c.target)} FCFA</div></td>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="flex:1;background:rgba(255,255,255,.08);border-radius:100px;height:5px;overflow:hidden"><div style="width:${pct}%;height:100%;background:var(--green2);border-radius:100px"></div></div>
+            <span style="font-size:.65rem;color:var(--txt3);font-family:var(--fm)">${pct}%</span>
+          </div>
+        </td>
+        <td><div class="cell-sub">${unlock}</div></td>
+        <td><button class="action-btn danger" onclick="A.deleteCoffre('${c.id}','${c.name}')">Supprimer</button></td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--txt3)">Aucun coffre</td></tr>';
+  },
+
+  async deleteCoffre(id, name) {
+    if (!confirm(`Supprimer le coffre "${name}" ?`)) return;
+    await db.from('coffres').delete().eq('id', id);
+    _coffres = _coffres.filter(c => c.id !== id);
+    A.render_coffres();
+    A.toast(`Coffre "${name}" supprimé`, 'err');
+  },
+
+  // ── NOTIFICATIONS BULK ──
+  render_notifs() {
+    $('notifs-tbody').innerHTML = _notifs.map(n => {
+      const date = n.created_at ? new Date(n.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '—';
+      return `<tr>
+        <td><div class="cell-name">${n.user?.name||'—'}</div></td>
+        <td><div class="cell-name">${n.title||'—'}</div></td>
+        <td><div class="cell-sub">${(n.body||'').slice(0,60)}${(n.body||'').length>60?'…':''}</div></td>
+        <td><span class="badge gray">${n.type||'system'}</span></td>
+        <td><div class="cell-sub">${date}</div></td>
+        <td><span class="badge ${n.read?'gray':'green'}">${n.read?'Lu':'Non lu'}</span></td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--txt3)">Aucune notification</td></tr>';
+  },
+
+  async sendBulkNotif() {
+    const title  = $('notif-title')?.value.trim();
+    const body   = $('notif-body')?.value.trim();
+    const target = $('notif-target')?.value;
+    if (!title || !body) { A.toast('Titre et message requis', 'err'); return; }
+
+    let users = _users;
+    if (target === 'gold') users = users.filter(u => u.level === 'Gold');
+    if (target === 'silver') users = users.filter(u => u.level === 'Silver');
+
+    const inserts = users.map(u => ({ user_id: u.id, type: 'admin', title, body, read: false }));
+    const { error } = await db.from('notifications').insert(inserts);
+    if (error) { A.toast('Erreur: ' + error.message, 'err'); return; }
+
+    await A.loadNotifs();
+    A.render_notifs();
+    $('notif-title').value = '';
+    $('notif-body').value = '';
+    A.toast(`Notification envoyée à ${inserts.length} utilisateur${inserts.length>1?'s':''}`, 'ok');
+  },
+
+  // ── UTILS ──
+  closeModal() { $('modal').classList.remove('on'); },
+  toast(msg, type) {
+    const t = $('adm-toast');
+    t.textContent = msg; t.className = 'adm-toast ' + (type||'') + ' on';
+    clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('on'), 3500);
+  },
+};
+
+// Fermer modal en cliquant dehors
+$('modal').addEventListener('click', e => { if (e.target === $('modal')) A.closeModal(); });
+
+// Init clock
+$('adm-clock').textContent = new Date().toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'}) + ' · ' + new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+
+// Vérifier si déjà connecté comme admin
+(async () => {
+  const { data: { session } } = await db.auth.getSession();
+  if (session?.user?.email === ADMIN_EMAIL) {
+    $('login-screen').style.display = 'none';
+    $('app').style.display = 'flex';
+    $('adm-name-sidebar').textContent = session.user.email;
+    await A.load();
+  }
+})();
+</script>
+</body>
+</html>
