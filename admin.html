@@ -365,7 +365,7 @@ tbody td{padding:12px 20px;font-size:.78rem;color:var(--txt)}
               </select>
               <div class="search-box" style="margin-left:0">
                 <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input type="text" placeholder="Chercher..." oninput="A.filterTx(this.value)"/>
+                <input id="tx-search" type="text" placeholder="Chercher..." oninput="A.filterTx()"/>
               </div>
             </div>
           </div>
@@ -615,11 +615,13 @@ const A = {
   render_users() { A._renderUserTable(_users); },
 
   filterUsers(q) {
+    _usersPage = 1;
     if (!q) { A._renderUserTable(_users); return; }
+    const ql = q.toLowerCase();
     const filtered = _users.filter(u =>
-      (u.name||'').toLowerCase().includes(q.toLowerCase()) ||
+      (u.name||'').toLowerCase().includes(ql) ||
       (u.phone||'').includes(q) ||
-      (u.email||'').toLowerCase().includes(q.toLowerCase())
+      (u.email||'').toLowerCase().includes(ql)
     );
     A._renderUserTable(filtered);
   },
@@ -727,16 +729,18 @@ const A = {
   // ── TRANSACTIONS ──
   render_transactions() { A._renderTxTable(_txs); },
 
-  filterTx(q) {
+  filterTx() {
     const typeFilter = $('tx-filter-type')?.value || '';
+    const q = $('tx-search')?.value.trim().toLowerCase() || '';
     let filtered = _txs;
     if (typeFilter) filtered = filtered.filter(t => t.type === typeFilter);
     if (q) filtered = filtered.filter(t =>
-      (t.from_user?.name||'').toLowerCase().includes(q.toLowerCase()) ||
-      (t.to_user?.name||'').toLowerCase().includes(q.toLowerCase()) ||
-      (t.merchant_name||'').toLowerCase().includes(q.toLowerCase()) ||
+      (t.from_user?.name||'').toLowerCase().includes(q) ||
+      (t.to_user?.name||'').toLowerCase().includes(q) ||
+      (t.merchant_name||'').toLowerCase().includes(q) ||
       String(t.amount).includes(q)
     );
+    _txsPage = 1;
     A._renderTxTable(filtered);
   },
 

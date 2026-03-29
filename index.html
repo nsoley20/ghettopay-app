@@ -91,27 +91,28 @@ body{
   position:absolute;top:10px;left:50%;transform:translateX(-50%);
   width:112px;height:30px;background:var(--ink);border-radius:100px;z-index:100;
 }
+.desktop-side{display:none}
+
 /* ── Mobile ≤599px : plein écran ─────────────────── */
 @media(max-width:599px){
   body{align-items:stretch;justify-content:stretch;background:var(--bg)}
   .shell{width:100%;height:100%;border-radius:0;padding:0;box-shadow:none}
   .shell-inner{border-radius:0}
   .island{display:none}
-  .desktop-side{display:none!important}
 }
 
 /* ── Tablette 600-1279px : shell centré, plus large ── */
 @media(min-width:600px) and (max-width:1279px){
+  body{padding:16px}
   .shell{
     width:min(480px,calc(100vw - 40px));
-    height:min(900px,calc(100vh - 32px));
+    height:calc(100vh - 32px);
     border-radius:38px;
     padding:7px;
     box-shadow:0 0 0 1px rgba(255,255,255,.14),0 28px 70px rgba(0,0,0,.55);
   }
   .shell-inner{border-radius:31px}
   .island{display:none}
-  .desktop-side{display:none!important}
 }
 
 /* ── PC ≥1280px : sidebar + shell ──────────────────── */
@@ -128,7 +129,7 @@ body{
   .shell-inner{border-radius:34px}
   .island{display:none}
   .desktop-side{
-    display:flex!important;
+    display:flex;
     flex-direction:column;
     gap:24px;
     width:280px;
@@ -795,8 +796,8 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 </head>
 <body>
 
-<!-- Sidebar PC — masquée sur mobile/tablette via CSS -->
-<div class="desktop-side" style="display:none">
+<!-- Sidebar PC — masquée sur mobile/tablette via CSS, visible ≥1280px -->
+<div class="desktop-side">
   <div>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
       <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;flex-shrink:0">
@@ -1802,6 +1803,7 @@ appStart();
 let cur = 'loading', hist = [], pD = {}, selC = null, aStr = '', pinBuf = '', balVis = true;
 let currentUser = null; // utilisateur connecté
 let isNewUser = false;  // mode inscription
+let walletChannel = null; // canal realtime solde
 
 // ── HELPERS ──
 const f = n => new Intl.NumberFormat('fr-FR').format(Math.round(n));
@@ -1852,6 +1854,29 @@ async function loadUserData(authId) {
   S.set('bal', wallet?.balance || 0);
   S.set('coffre', wallet?.coffre_balance || 0);
   S.set('cash', wallet?.cashback || 0);
+
+  // Charger la photo de profil depuis Supabase si disponible et pas encore en cache local
+  if (user.avatar_url && !localStorage.getItem('gp_photo')) {
+    localStorage.setItem('gp_photo', user.avatar_url);
+  }
+
+  // ── REALTIME : écouter les changements de solde du wallet ──
+  if (walletChannel) { db.removeChannel(walletChannel); walletChannel = null; }
+  walletChannel = db.channel('wallet_' + user.id)
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'wallets', filter: `user_id=eq.${user.id}` }, payload => {
+      const d = payload.new;
+      const nb = d.balance || 0, nc = d.coffre_balance || 0;
+      S.set('bal', nb); S.set('coffre', nc); S.set('cash', d.cashback || 0);
+      if (currentUser?.wallet) { currentUser.wallet.balance = nb; currentUser.wallet.coffre_balance = nc; }
+      if (cur === 'home') {
+        if (balVis) {
+          $('bal-amt').innerHTML = `<span class="cur">FCFA </span>${f(nb)}`;
+          $('bal-sub').textContent = `+ Coffre : ${f(nc)} FCFA`;
+        }
+        $('cstrip-val').textContent = f(nc);
+      }
+    })
+    .subscribe();
 }
 
 // ── CACHE LOCAL (fallback rapide) ──
@@ -3770,12 +3795,26 @@ const G = {
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) { G.toast('Image trop lourde (max 2 Mo)', 'err'); return; }
     const reader = new FileReader();
-    reader.onload = e => {
+    reader.onload = async e => {
       const src = e.target.result;
       localStorage.setItem('gp_photo', src);
-      // Update all avatar spots
       G._applyProfilePhoto(src);
       G.toast('Photo de profil mise à jour', 'ok');
+      // Persister sur Supabase Storage si connecté
+      if (currentUser) {
+        try {
+          const ext = file.name.split('.').pop() || 'jpg';
+          const path = `avatars/${currentUser.id}.${ext}`;
+          const { error: upErr } = await db.storage.from('avatars').upload(path, file, { upsert: true, contentType: file.type });
+          if (!upErr) {
+            const { data: urlData } = db.storage.from('avatars').getPublicUrl(path);
+            if (urlData?.publicUrl) {
+              await db.from('users').update({ avatar_url: urlData.publicUrl }).eq('id', currentUser.id);
+              currentUser.avatar_url = urlData.publicUrl;
+            }
+          }
+        } catch (_) {}
+      }
     };
     reader.readAsDataURL(file);
   },

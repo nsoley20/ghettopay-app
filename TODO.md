@@ -1,10 +1,16 @@
-# Task: Réduire taille boutons spécifiques (envoyer, recevoir, scanner, payer, tontine) de 35%
+# GhettoPay Task Fixes - Approved Plan Implementation
 
-## Progress Steps (Approved Plan)
-- [x] Step 1: Update TODO.md avec plan boutons réduit
-- [x] Step 2: Editer CSS .qa-row / .qa / .qa-promo / .qa-ic (35% smaller)
-- [ ] Step 3: Test responsive et interactions (padding/icons/fonts verified)
-- [ ] Step 4: Complete task & preview
+**Current Status**: Patch v2.2 ✅ — Steps 1-3 done.
 
-**Next:** Step 3 - Test layout on refresh/mobile view.
+**Completed**:
+- [x] Login flow priority
+- [x] Photo KYC preview
+- [x] Coffre real-time UI update
+- [x] Admin interface (users/tx/tontines/coffres/notifs)
+- [x] Step 1: Photo persistence (localStorage base64 + Supabase Storage avatar_url upload)
+- [x] Step 2: Live Supabase realtime (wallet channel on home balance/coffre)
+- [x] Step 3: Responsive fixes (sidebar base CSS, tablet height gap)
 
+**Remaining**:
+- [ ] Step 4: Full testing (all breakpoints + login → home → send → coffre → profil flow)
+- [ ] Step 5: Final verification + completion
