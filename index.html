@@ -2177,17 +2177,21 @@ const si = (ic, col, sz=18) => `<svg width="${sz}" height="${sz}" viewBox="0 0 2
 
 // ── DÉMARRAGE ──
 async function appStart() {
-  // Desktop : render le dashboard immédiatement avec les données cachées
-  if (window.innerWidth >= 1280) G.renderDesktopHome();
-
-  const { data: { session } } = await db.auth.getSession();
-  if (session) {
-    await loadUserData(session.user.id);
-    G.go('pin');
-  } else {
+  try {
+    if (window.innerWidth >= 1280) G.renderDesktopHome();
+    const { data: { session } } = await db.auth.getSession();
+    if (session) {
+      await loadUserData(session.user.id);
+      G.go('pin');
+    } else {
+      G.go('onboard');
+    }
+  } catch(e) {
+    console.error('appStart error:', e);
     G.go('onboard');
+  } finally {
+    $('sc-loading').classList.remove('on');
   }
-  $('sc-loading').classList.remove('on');
 }
 
 // ── CHARGER LES DONNÉES UTILISATEUR ──
@@ -2220,14 +2224,18 @@ async function loadUserData(authId) {
   S.set('user', { name: user.name, phone: user.phone, pin: String(user.pin_code || ''), avatar: user.avatar, loc: user.location, level: user.level });
   S.set('bal', wallet?.balance || 0);
   S.set('cash', wallet?.cashback || 0);
-  // Recalculer le total coffre depuis les coffres réels (source de vérité)
-  const { data: userCoffres } = await db.from('coffres').select('saved').eq('user_id', user.id);
-  const realCoffre = userCoffres?.reduce((s, c) => s + (c.saved || 0), 0) ?? (wallet?.coffre_balance || 0);
-  S.set('coffre', realCoffre);
-  // Synchroniser coffre_balance dans wallets si différent
-  if (wallet && realCoffre !== (wallet.coffre_balance || 0)) {
-    db.from('wallets').update({ coffre_balance: realCoffre }).eq('user_id', user.id).catch(() => {});
-  }
+  // Recalculer le total coffre depuis les coffres réels (non-bloquant)
+  S.set('coffre', wallet?.coffre_balance || 0);
+  db.from('coffres').select('saved').eq('user_id', user.id)
+    .then(({ data: userCoffres }) => {
+      if (!userCoffres) return;
+      const realCoffre = userCoffres.reduce((s, c) => s + (c.saved || 0), 0);
+      S.set('coffre', realCoffre);
+      if (wallet && realCoffre !== (wallet.coffre_balance || 0)) {
+        db.from('wallets').update({ coffre_balance: realCoffre }).eq('user_id', user.id).catch(() => {});
+      }
+      if (window.innerWidth >= 1280) G.renderDesktopHome();
+    }).catch(() => {});
 
   // Charger la photo de profil depuis Supabase si disponible et pas encore en cache local
   if (user.avatar_url && !localStorage.getItem('gp_photo')) {
