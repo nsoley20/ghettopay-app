@@ -1615,10 +1615,12 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
     <input id="kyc-name" class="inp" placeholder="Nom complet (tel que sur la pièce)"/>
     <input id="kyc-id" class="inp" placeholder="Numéro de la pièce d'identité"/>
     <div class="lbl" style="margin-bottom:6px">Selfie avec la pièce</div>
-    <div onclick="G._kycPickPhoto()" style="border:2px dashed var(--border);border-radius:14px;padding:20px;text-align:center;cursor:pointer;color:var(--txt3);font-size:.78rem">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:6px;display:block;margin:0 auto 8px"><use href="#user"/></svg>Appuyer pour prendre ou importer une photo
+    <div id="kyc-photo-zone" onclick="G._kycPickPhoto()" style="border:2px dashed var(--border);border-radius:14px;padding:20px;text-align:center;cursor:pointer;color:var(--txt3);font-size:.78rem;overflow:hidden;min-height:80px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px">
+      <svg id="kyc-photo-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#user"/></svg>
+      <span id="kyc-photo-label">Appuyer pour prendre ou importer une photo</span>
+      <img id="kyc-photo-preview" style="display:none;max-height:120px;border-radius:10px;object-fit:cover"/>
     </div>
-    <input type="file" id="kyc-photo-input" accept="image/*" style="display:none"/>
+    <input type="file" id="kyc-photo-input" accept="image/*" capture="environment" style="display:none" onchange="G._onKycPhotoChosen(this)"/>
     <button class="btn btn-gold" onclick="G._submitKyc()"><svg><use href="#shield"/></svg>Soumettre la demande</button>
     <button class="btn btn-ghost" onclick="G.closeModal('m-kyc')">Annuler</button>
   </div>
@@ -1632,7 +1634,7 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
     <div style="background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:16px;padding:18px;text-align:center">
       <div style="font-size:.6rem;color:rgba(0,0,0,.5);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Ton code de parrainage</div>
       <div id="ref-code" style="font-family:var(--fm);font-size:1.5rem;font-weight:900;color:var(--forest);letter-spacing:.12em">GP-••••••</div>
-      <div style="font-size:.62rem;color:rgba(0,0,0,.45);margin-top:4px">+1 000 FCFA pour toi + ton filleul</div>
+      <div style="font-size:.62rem;color:rgba(0,0,0,.45);margin-top:4px">+500 FCFA pour toi + ton filleul</div>
     </div>
     <div style="display:flex;justify-content:space-between;text-align:center;padding:4px 0">
       <div><div id="ref-count" style="font-size:1.3rem;font-weight:900;color:var(--txt)">0</div><div style="font-size:.58rem;color:var(--txt3);text-transform:uppercase;font-family:var(--fm)">Filleuls</div></div>
@@ -2033,8 +2035,15 @@ const G = {
   r_send() {
     aStr = '';
     $('amt-disp').textContent = '0';
-    $('rec-row').style.display = 'none';
-    selC = null;
+    // Si un contact est déjà sélectionné (ex: depuis scan QR), le conserver
+    if (!selC) {
+      $('rec-row').style.display = 'none';
+    } else {
+      if ($('rec-av')) $('rec-av').textContent = selC.av;
+      if ($('rec-name')) $('rec-name').textContent = selC.name;
+      if ($('rec-phone')) $('rec-phone').textContent = selC.phone;
+      if ($('rec-row')) $('rec-row').style.display = 'flex';
+    }
     G.r_contacts();
   },
 
@@ -2228,15 +2237,10 @@ const G = {
       const { data: found } = await db.from('users').select('id,name').eq('phone', phone).maybeSingle();
       if (!found) { G.toast('Cet utilisateur n\'est pas encore sur GhettoPay', 'err'); return; }
       const nm = found.name || name || phone;
+      // Définir selC AVANT go('send') pour que r_send() le détecte
       selC = { id: found.id, name: nm, phone, av: (nm[0] || '?').toUpperCase() };
       G.go('send');
-      G.toast(`Destinataire : ${selC.name}`, 'inf');
-      setTimeout(() => {
-        if ($('rec-av')) $('rec-av').textContent = selC.av;
-        if ($('rec-name')) $('rec-name').textContent = selC.name;
-        if ($('rec-phone')) $('rec-phone').textContent = selC.phone;
-        if ($('rec-row')) $('rec-row').style.display = 'flex';
-      }, 150);
+      G.toast(`Destinataire : ${nm}`, 'inf');
     } catch(e) {
       G.toast('QR non reconnu', 'err');
     }
@@ -2579,16 +2583,19 @@ const G = {
         }).catch(() => {});
       }
 
-      await db.from('tontine_members').delete().eq('tontine_id', tontineId).catch(() => {});
-      await db.from('tontines').delete().eq('id', tontineId).catch(() => {});
+      const { error: delMembErr } = await db.from('tontine_members').delete().eq('tontine_id', tontineId);
+      if (delMembErr) { G.toast('Erreur suppression membres : ' + delMembErr.message, 'err'); return; }
+      const { error: delTonErr } = await db.from('tontines').delete().eq('id', tontineId);
+      if (delTonErr) { G.toast('Erreur suppression tontine : ' + delTonErr.message, 'err'); return; }
       if (selfRefunded) G.toast(`Tontine supprimée · +${f(amt)} FCFA remboursés`, 'ok');
       else G.toast('Tontine supprimée', 'inf');
 
     } else {
       // Membre non-créateur : quitter seulement
       if (currentUser) {
-        await db.from('tontine_members').delete()
-          .eq('tontine_id', tontineId).eq('user_id', currentUser.id).catch(() => {});
+        const { error: leaveErr } = await db.from('tontine_members').delete()
+          .eq('tontine_id', tontineId).eq('user_id', currentUser.id);
+        if (leaveErr) { G.toast('Erreur : ' + leaveErr.message, 'err'); return; }
       }
       G.toast('Tontine quittée', 'inf');
     }
@@ -4030,6 +4037,12 @@ const G = {
       return;
     }
 
+    // Admin → rediriger vers l'interface d'administration
+    if (data.user.email === 'admin@ghettopay.ga') {
+      window.location.href = 'admin.html';
+      return;
+    }
+
     await loadUserData(data.user.id);
     G.go('pin');
   },
@@ -4043,13 +4056,13 @@ const G = {
     if ($('ref-code')) $('ref-code').textContent = code;
     const refs = parseInt(localStorage.getItem('gp_refs') || '0');
     if ($('ref-count')) $('ref-count').textContent = refs;
-    if ($('ref-earned')) $('ref-earned').textContent = f(refs * 1000) + ' F';
+    if ($('ref-earned')) $('ref-earned').textContent = f(refs * 500) + ' F';
     G.showModal('m-ref');
   },
   _shareReferral() {
     const u = S.get('user', {});
     const code = 'GP-' + (u.name || 'USER').toUpperCase().replace(/\s+/g,'').slice(0,6).padEnd(6,'0');
-    const text = `Rejoins GhettoPay avec mon code de parrainage et reçois 1 000 FCFA offerts ! 🎁\nCode : ${code}\nTélécharge l'app : ${location.origin}${location.pathname}`;
+    const text = `Rejoins GhettoPay avec mon code de parrainage et reçois 500 FCFA offerts ! 🎁\nCode : ${code}\nTélécharge l'app : ${location.origin}${location.pathname}`;
     if (navigator.share) {
       navigator.share({ title: 'GhettoPay — Parrainage', text }).catch(() => {});
     } else {
@@ -4059,12 +4072,36 @@ const G = {
 
   // ── KYC ──
   _kycPickPhoto() { $('kyc-photo-input')?.click(); },
+  _onKycPhotoChosen(input) {
+    const file = input.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { G.toast('Image trop lourde (max 5 Mo)', 'err'); input.value = ''; return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      const preview = $('kyc-photo-preview');
+      const icon = $('kyc-photo-icon');
+      const label = $('kyc-photo-label');
+      if (preview) { preview.src = e.target.result; preview.style.display = 'block'; }
+      if (icon) icon.style.display = 'none';
+      if (label) { label.textContent = '✓ Photo sélectionnée · Appuyer pour changer'; label.style.color = 'var(--green)'; }
+      G._kycPhotoData = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  },
   _submitKyc() {
     const name = $('kyc-name')?.value.trim();
     const id = $('kyc-id')?.value.trim();
     if (!name || !id) { G.toast('Remplis tous les champs', 'err'); return; }
+    if (!G._kycPhotoData) { G.toast('Ajoute une photo de ta pièce d\'identité', 'err'); return; }
     G.closeModal('m-kyc');
-    // Simulate pending KYC
+    G._kycPhotoData = null;
+    // Reset preview pour la prochaine ouverture
+    const preview = $('kyc-photo-preview');
+    const icon = $('kyc-photo-icon');
+    const label = $('kyc-photo-label');
+    if (preview) { preview.src = ''; preview.style.display = 'none'; }
+    if (icon) icon.style.display = '';
+    if (label) { label.textContent = 'Appuyer pour prendre ou importer une photo'; label.style.color = ''; }
     const u = S.get('user', {}); u.level = 'Gold'; u.kycPending = true; S.set('user', u);
     if ($('kyc-sub')) $('kyc-sub').textContent = 'Vérification en cours…';
     if ($('prof-level')) $('prof-level').textContent = 'Gold';
