@@ -2219,8 +2219,15 @@ async function loadUserData(authId) {
   // pin_code peut être int ou string selon la DB → toujours stocker en string
   S.set('user', { name: user.name, phone: user.phone, pin: String(user.pin_code || ''), avatar: user.avatar, loc: user.location, level: user.level });
   S.set('bal', wallet?.balance || 0);
-  S.set('coffre', wallet?.coffre_balance || 0);
   S.set('cash', wallet?.cashback || 0);
+  // Recalculer le total coffre depuis les coffres réels (source de vérité)
+  const { data: userCoffres } = await db.from('coffres').select('saved').eq('user_id', user.id);
+  const realCoffre = userCoffres?.reduce((s, c) => s + (c.saved || 0), 0) ?? (wallet?.coffre_balance || 0);
+  S.set('coffre', realCoffre);
+  // Synchroniser coffre_balance dans wallets si différent
+  if (wallet && realCoffre !== (wallet.coffre_balance || 0)) {
+    db.from('wallets').update({ coffre_balance: realCoffre }).eq('user_id', user.id).catch(() => {});
+  }
 
   // Charger la photo de profil depuis Supabase si disponible et pas encore en cache local
   if (user.avatar_url && !localStorage.getItem('gp_photo')) {
@@ -2861,8 +2868,10 @@ const G = {
       await db.from('coffres').delete().eq('id', coffreId);
       if (saved > 0) {
         const bal = S.get('bal', 0);
-        await db.from('wallets').update({ balance: bal + saved }).eq('user_id', currentUser.id);
+        const newCoffre = Math.max(0, S.get('coffre', 0) - saved);
+        await db.from('wallets').update({ balance: bal + saved, coffre_balance: newCoffre }).eq('user_id', currentUser.id);
         S.set('bal', bal + saved);
+        S.set('coffre', newCoffre);
       }
     }
     const newCoffres = coffres.filter(x => String(x.id) !== String(coffreId));
@@ -2870,6 +2879,31 @@ const G = {
     if (saved > 0) S.set('coffre', Math.max(0, S.get('coffre',0) - saved));
     G.r_coffre();
     G.toast('Coffre supprimé', 'inf');
+  },
+
+  async _withdrawCoffre(coffreId) {
+    const coffres = S.get('coffres', []);
+    const c = coffres.find(x => String(x.id) === String(coffreId));
+    if (!c) { G.toast('Coffre introuvable', 'err'); return; }
+    const saved = c.saved || 0;
+    if (saved <= 0) { G.toast('Coffre vide', 'err'); return; }
+    if (!confirm(`Retirer ${f(saved)} FCFA du coffre "${c.name}" ?`)) return;
+    const bal = S.get('bal', 0);
+    const newCoffre = Math.max(0, S.get('coffre', 0) - saved);
+    if (currentUser) {
+      await Promise.all([
+        db.from('coffres').update({ saved: 0 }).eq('id', coffreId),
+        db.from('wallets').update({ balance: bal + saved, coffre_balance: newCoffre }).eq('user_id', currentUser.id),
+        db.from('transactions').insert({ from_user_id: currentUser.id, amount: saved, type: 'coffre_withdraw', merchant_name: c.name, status: 'completed' })
+      ]).catch(e => { G.toast('Erreur retrait : ' + (e.message||''), 'err'); return; });
+    }
+    S.set('bal', bal + saved);
+    S.set('coffre', newCoffre);
+    const updated = coffres.map(x => String(x.id)===String(coffreId) ? {...x, saved:0} : x);
+    S.set('coffres', updated);
+    G.r_coffre();
+    if (window.innerWidth >= 1280) G.gp_renderCoffre();
+    G.toast(`${f(saved)} FCFA retirés dans votre solde`, 'ok');
   },
 
   _deleteCurrentTontine() {
@@ -3000,16 +3034,19 @@ const G = {
 
     G.closeModal('mdep');
 
+    const newCoffre = S.get('coffre', 0) + amount;
     if (currentUser) {
-      await db.from('wallets').update({ balance: bal - amount }).eq('user_id', currentUser.id);
       const { data: cof } = await db.from('coffres').select('saved').eq('id', coffreId).single();
-      await db.from('coffres').update({ saved: (cof?.saved || 0) + amount }).eq('id', coffreId);
-      await db.from('transactions').insert({ from_user_id: currentUser.id, amount, type: 'coffre_deposit', merchant_name: coffreName, status: 'completed' });
+      await Promise.all([
+        db.from('wallets').update({ balance: bal - amount, coffre_balance: newCoffre }).eq('user_id', currentUser.id),
+        db.from('coffres').update({ saved: (cof?.saved || 0) + amount }).eq('id', coffreId),
+        db.from('transactions').insert({ from_user_id: currentUser.id, amount, type: 'coffre_deposit', merchant_name: coffreName, status: 'completed' })
+      ]);
       S.set('bal', bal - amount);
-      S.set('coffre', S.get('coffre', 0) + amount);
+      S.set('coffre', newCoffre);
     } else {
       S.set('bal', bal - amount);
-      S.set('coffre', S.get('coffre', 0) + amount);
+      S.set('coffre', newCoffre);
       const coffres = S.get('coffres', []);
       const c = coffres.find(x => x.id == coffreId);
       if (c) c.saved += amount;

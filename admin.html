@@ -10,214 +10,462 @@
 :root{
   --forest:#0A4A2E;--forest2:#0F5C38;--green:#16A34A;--green2:#22C55E;
   --gold:#D4A017;--gold2:#F0C040;--gold3:#FDE68A;
-  --red:#DC2626;--red2:#FCA5A5;
-  --bg:#0B0F0C;--bg2:#111714;--bg3:#182019;--card:#141A15;
-  --card2:#1A2218;--border:rgba(255,255,255,.07);
+  --red:#DC2626;--blue:#3B82F6;--purple:#8B5CF6;
+  --bg:#0B0F0C;--bg2:#111714;--bg3:#182019;
+  --card:#141A15;--card2:#1A2218;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);
   --txt:#E8F0E9;--txt2:#8FA88F;--txt3:#4A6050;
   --f:'Segoe UI',system-ui,sans-serif;--fm:'SF Mono',Monaco,Consolas,monospace;
+  --sidebar-w:240px;--topbar-h:60px;
 }
 html,body{height:100%;font-family:var(--f);background:var(--bg);color:var(--txt);overflow:hidden}
 
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:10px}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.2)}
+
 /* ── LOGIN ── */
 #login-screen{
-  position:fixed;inset:0;background:radial-gradient(ellipse at 30% 40%,rgba(10,74,46,.35),transparent 60%),var(--bg);
+  position:fixed;inset:0;
+  background:radial-gradient(ellipse at 30% 40%,rgba(10,74,46,.4),transparent 65%),
+             radial-gradient(ellipse at 80% 80%,rgba(212,160,23,.08),transparent 55%),var(--bg);
   display:flex;align-items:center;justify-content:center;z-index:1000;
 }
 .login-box{
-  width:400px;background:var(--card);border:1px solid var(--border);border-radius:24px;
-  padding:40px 36px;display:flex;flex-direction:column;gap:20px;
-  box-shadow:0 40px 100px rgba(0,0,0,.6);
+  width:420px;background:var(--card);border:1px solid var(--border2);border-radius:24px;
+  padding:44px 40px;display:flex;flex-direction:column;gap:22px;
+  box-shadow:0 40px 120px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.03);
 }
-.login-logo{display:flex;align-items:center;gap:14px;margin-bottom:8px}
-.login-logo-ic{width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center}
+.login-logo{display:flex;align-items:center;gap:14px;margin-bottom:4px}
+.login-logo-ic{
+  width:54px;height:54px;border-radius:16px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 24px rgba(212,160,23,.35);flex-shrink:0;
+}
 .login-logo-ic svg{width:26px;height:26px;stroke:var(--forest);stroke-width:2.5;fill:none}
-.login-title{font-size:1.5rem;font-weight:900;letter-spacing:-.02em}
-.login-sub{font-size:.78rem;color:var(--txt3)}
-.login-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.2);border-radius:100px;font-size:.65rem;font-weight:700;color:#f87171;letter-spacing:.04em}
-.inp{width:100%;padding:13px 16px;background:var(--bg2);border:1.5px solid var(--border);border-radius:12px;font-family:var(--f);font-size:.88rem;color:var(--txt);outline:none;transition:.2s}
-.inp:focus{border-color:rgba(10,74,46,.5);background:var(--bg3)}
+.login-title{font-size:1.6rem;font-weight:900;letter-spacing:-.03em}
+.login-sub{font-size:.78rem;color:var(--txt3);margin-top:2px}
+.login-badge{
+  display:inline-flex;align-items:center;gap:6px;padding:6px 14px;
+  background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.2);
+  border-radius:100px;font-size:.62rem;font-weight:800;color:#f87171;letter-spacing:.05em;
+  width:fit-content;
+}
+.inp{
+  width:100%;padding:14px 16px;background:var(--bg2);border:1.5px solid var(--border);
+  border-radius:12px;font-family:var(--f);font-size:.88rem;color:var(--txt);outline:none;transition:.2s;
+}
+.inp:focus{border-color:rgba(10,74,46,.6);background:var(--bg3);box-shadow:0 0 0 3px rgba(10,74,46,.12)}
 .inp::placeholder{color:var(--txt3)}
-.btn-login{width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));font-family:var(--f);font-size:.92rem;font-weight:800;color:var(--forest);cursor:pointer;transition:.15s}
-.btn-login:hover{box-shadow:0 8px 24px rgba(212,160,23,.4)}
+.btn-login{
+  width:100%;padding:15px;border:none;border-radius:12px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  font-family:var(--f);font-size:.92rem;font-weight:800;color:var(--forest);
+  cursor:pointer;transition:.15s;letter-spacing:.01em;
+}
+.btn-login:hover{box-shadow:0 10px 28px rgba(212,160,23,.45);transform:translateY(-1px)}
 .btn-login:active{transform:scale(.98)}
-.err-msg{background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.2);border-radius:10px;padding:10px 14px;font-size:.78rem;color:#f87171;display:none}
+.err-msg{
+  background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.2);
+  border-radius:10px;padding:11px 14px;font-size:.78rem;color:#f87171;display:none;
+}
 
 /* ── LAYOUT ── */
-#app{display:none;height:100vh;flex-direction:row}
+#app{display:none;height:100vh;flex-direction:row;overflow:hidden}
+
+/* ── SIDEBAR ── */
 .sidebar{
-  width:240px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);
-  display:flex;flex-direction:column;padding:24px 0;overflow:hidden;
+  width:var(--sidebar-w);flex-shrink:0;background:var(--bg2);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;height:100vh;overflow:hidden;
+  transition:transform .25s ease,width .25s ease;z-index:100;
 }
-.sidebar-brand{padding:0 20px 24px;border-bottom:1px solid var(--border);margin-bottom:16px}
-.sidebar-brand-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
-.sb-logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sidebar-brand{padding:20px;border-bottom:1px solid var(--border);flex-shrink:0}
+.sidebar-brand-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.sb-logo{
+  width:36px;height:36px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  display:flex;align-items:center;justify-content:center;
+}
 .sb-logo svg{width:18px;height:18px;stroke:var(--forest);stroke-width:2.5;fill:none}
 .sb-name{font-size:1rem;font-weight:900;letter-spacing:-.01em}
-.sb-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:rgba(220,38,38,.15);border:1px solid rgba(220,38,38,.25);border-radius:6px;font-size:.55rem;font-weight:800;color:#f87171;text-transform:uppercase;letter-spacing:.08em}
-.nav-item{display:flex;align-items:center;gap:11px;padding:11px 20px;cursor:pointer;transition:.15s;border-left:3px solid transparent;margin:1px 0}
-.nav-item:hover{background:rgba(255,255,255,.04)}
-.nav-item.on{background:rgba(10,74,46,.2);border-left-color:var(--gold2)}
+.sb-badge{
+  display:inline-flex;align-items:center;gap:4px;padding:3px 8px;
+  background:rgba(220,38,38,.15);border:1px solid rgba(220,38,38,.25);
+  border-radius:6px;font-size:.52rem;font-weight:800;color:#f87171;
+  text-transform:uppercase;letter-spacing:.08em;
+}
+.nav-section-lbl{
+  font-size:.52rem;font-weight:800;color:var(--txt3);
+  text-transform:uppercase;letter-spacing:.12em;
+  padding:16px 20px 6px;
+}
+.nav-item{
+  display:flex;align-items:center;gap:11px;padding:10px 20px;
+  cursor:pointer;transition:.15s;border-left:3px solid transparent;margin:1px 8px;
+  border-radius:0 10px 10px 0;
+}
+.nav-item:hover{background:rgba(255,255,255,.05)}
+.nav-item.on{background:rgba(10,74,46,.25);border-left-color:var(--gold2)}
 .nav-item svg{width:17px;height:17px;stroke-width:1.9;fill:none;flex-shrink:0}
 .nav-item.on svg{stroke:var(--gold2)}
 .nav-item:not(.on) svg{stroke:var(--txt3)}
 .nav-lbl{font-size:.8rem;font-weight:700}
 .nav-item.on .nav-lbl{color:var(--gold2)}
 .nav-item:not(.on) .nav-lbl{color:var(--txt2)}
-.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:.55rem;font-weight:800;padding:2px 7px;border-radius:100px}
-
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.topbar{
-  padding:16px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;
-  background:var(--bg2);flex-shrink:0;
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:.52rem;font-weight:800;padding:2px 7px;border-radius:100px;min-width:20px;text-align:center}
+.sb-footer{
+  margin-top:auto;padding:16px 20px;border-top:1px solid var(--border);flex-shrink:0;
 }
-.topbar-title{font-size:1.1rem;font-weight:800;flex:1}
-.topbar-dot{width:9px;height:9px;border-radius:50%;background:var(--green2);box-shadow:0 0 8px rgba(34,197,94,.5);flex-shrink:0}
-.topbar-live{font-size:.65rem;color:var(--txt3);font-family:var(--fm)}
-.topbar-time{font-size:.72rem;color:var(--txt3);font-family:var(--fm)}
-.logout-btn{padding:7px 14px;border:1px solid var(--border);border-radius:9px;background:none;color:var(--txt3);font-size:.72rem;font-weight:700;cursor:pointer;font-family:var(--f);transition:.15s}
-.logout-btn:hover{border-color:rgba(220,38,38,.4);color:#f87171}
+.sb-user-info{display:flex;align-items:center;gap:10px}
+.sb-user-av{width:32px;height:32px;border-radius:50%;background:var(--forest);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:900;color:#fff;flex-shrink:0}
+.sb-user-name{font-size:.75rem;font-weight:700;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sb-user-role{font-size:.58rem;color:var(--txt3);font-family:var(--fm)}
 
-.content{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:20px}
-.content::-webkit-scrollbar{width:5px}
-.content::-webkit-scrollbar-track{background:transparent}
-.content::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:100px}
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* ── TOPBAR ── */
+.topbar{
+  height:var(--topbar-h);padding:0 24px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:14px;background:var(--bg2);flex-shrink:0;
+}
+.topbar-menu-btn{
+  display:none;width:36px;height:36px;border:1px solid var(--border);border-radius:9px;
+  background:none;cursor:pointer;align-items:center;justify-content:center;flex-shrink:0;
+}
+.topbar-menu-btn svg{width:18px;height:18px;stroke:var(--txt2);stroke-width:2;fill:none}
+.topbar-live-wrap{display:flex;align-items:center;gap:6px}
+.topbar-dot{width:8px;height:8px;border-radius:50%;background:var(--green2);box-shadow:0 0 8px rgba(34,197,94,.6);animation:pulse-dot 2s ease infinite;flex-shrink:0}
+@keyframes pulse-dot{0%,100%{opacity:1;box-shadow:0 0 8px rgba(34,197,94,.6)}50%{opacity:.7;box-shadow:0 0 14px rgba(34,197,94,.8)}}
+.topbar-live-lbl{font-size:.6rem;color:var(--txt3);font-family:var(--fm);font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.topbar-title{font-size:1.05rem;font-weight:800;flex:1;letter-spacing:-.01em}
+.topbar-time{font-size:.7rem;color:var(--txt3);font-family:var(--fm)}
+.topbar-actions{display:flex;align-items:center;gap:8px}
+.topbar-refresh-btn{
+  padding:7px 12px;border:1px solid var(--border);border-radius:9px;
+  background:none;color:var(--txt2);font-size:.7rem;font-weight:700;cursor:pointer;
+  font-family:var(--f);transition:.15s;display:flex;align-items:center;gap:5px;
+}
+.topbar-refresh-btn svg{width:13px;height:13px;stroke:currentColor;stroke-width:2.5;fill:none}
+.topbar-refresh-btn:hover{background:rgba(255,255,255,.06);color:var(--txt)}
+.logout-btn{
+  padding:7px 14px;border:1px solid rgba(220,38,38,.25);border-radius:9px;
+  background:rgba(220,38,38,.08);color:#f87171;font-size:.7rem;font-weight:700;
+  cursor:pointer;font-family:var(--f);transition:.15s;
+}
+.logout-btn:hover{background:rgba(220,38,38,.15)}
+
+/* ── CONTENT ── */
+.content{flex:1;overflow-y:auto;padding:22px 24px;display:flex;flex-direction:column;gap:18px}
 
 /* ── SECTIONS ── */
 .section{display:none}
-.section.on{display:flex;flex-direction:column;gap:20px}
+.section.on{display:flex;flex-direction:column;gap:18px}
 
-/* ── STATS CARDS ── */
+/* ── STATS GRID ── */
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-.stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 20px;position:relative;overflow:hidden}
-.stat-card::before{content:'';position:absolute;width:80px;height:80px;border-radius:50%;right:-20px;top:-20px;opacity:.08}
-.stat-card.green::before{background:var(--green2)}
-.stat-card.gold::before{background:var(--gold2)}
-.stat-card.blue::before{background:#60a5fa}
-.stat-card.purple::before{background:#a78bfa}
-.stat-icon{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
-.stat-icon svg{width:17px;height:17px;stroke-width:2;fill:none}
-.stat-val{font-size:1.65rem;font-weight:900;letter-spacing:-.03em;margin-bottom:3px}
-.stat-lbl{font-size:.65rem;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em;font-family:var(--fm)}
-.stat-delta{display:inline-flex;align-items:center;gap:4px;margin-top:8px;font-size:.62rem;font-weight:700;padding:3px 8px;border-radius:6px}
-.stat-delta.up{background:rgba(34,197,94,.12);color:var(--green2)}
-.stat-delta.dn{background:rgba(220,38,38,.12);color:#f87171}
+.stat-card{
+  background:var(--card);border:1px solid var(--border);border-radius:18px;
+  padding:20px;position:relative;overflow:hidden;cursor:default;
+  transition:.2s;
+}
+.stat-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.stat-card::after{
+  content:'';position:absolute;width:100px;height:100px;border-radius:50%;
+  right:-25px;bottom:-25px;opacity:.06;
+}
+.stat-card.green::after{background:var(--green2)}
+.stat-card.gold::after{background:var(--gold2)}
+.stat-card.blue::after{background:#60a5fa}
+.stat-card.purple::after{background:#a78bfa}
+.stat-icon{
+  width:42px;height:42px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;margin-bottom:16px;
+}
+.stat-icon svg{width:18px;height:18px;stroke-width:2;fill:none}
+.stat-val{font-size:1.9rem;font-weight:900;letter-spacing:-.04em;margin-bottom:4px;line-height:1}
+.stat-lbl{font-size:.62rem;color:var(--txt3);text-transform:uppercase;letter-spacing:.12em;font-family:var(--fm)}
+.stat-delta{
+  display:inline-flex;align-items:center;gap:4px;margin-top:10px;
+  font-size:.6rem;font-weight:700;padding:3px 9px;border-radius:6px;
+}
+.stat-delta.up{background:rgba(34,197,94,.1);color:var(--green2)}
+.stat-delta.dn{background:rgba(220,38,38,.1);color:#f87171}
+.stat-delta.neu{background:rgba(255,255,255,.06);color:var(--txt3)}
 
-/* ── CHARTS ROW ── */
-.charts-row{display:grid;grid-template-columns:1.6fr 1fr;gap:14px}
-.chart-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px}
-.card-title{font-size:.78rem;font-weight:800;color:var(--txt2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
-.card-title span{font-family:var(--fm);font-size:.62rem;font-weight:400;color:var(--txt3);text-transform:none;letter-spacing:0}
-.bar-chart{display:flex;align-items:flex-end;gap:8px;height:100px}
-.bar-col{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1}
-.bar-fill{border-radius:5px 5px 0 0;width:100%;min-height:4px;transition:.3s}
-.bar-lbl{font-size:.55rem;color:var(--txt3);font-family:var(--fm)}
-.bar-val{font-size:.58rem;color:var(--txt2);font-family:var(--fm)}
-.donut-wrap{display:flex;align-items:center;gap:20px}
-.donut-legend{display:flex;flex-direction:column;gap:10px;flex:1}
-.legend-item{display:flex;align-items:center;gap:8px}
-.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.legend-lbl{font-size:.72rem;color:var(--txt2)}
-.legend-val{margin-left:auto;font-size:.72rem;font-weight:700;font-family:var(--fm)}
+/* ── SECTION HEADER ROW ── */
+.sec-hdr{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sec-hdr-title{font-size:1rem;font-weight:800;flex:1;min-width:120px}
+.sec-hdr-count{font-size:.72rem;color:var(--txt3);font-weight:500}
+.sec-hdr-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 
-/* ── TABLE ── */
-.table-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
-.table-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
-.table-header .card-title{margin:0}
-.search-box{display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:8px 12px;margin-left:auto}
+/* ── EXPORT BUTTON ── */
+.export-btn{
+  display:flex;align-items:center;gap:6px;padding:8px 14px;
+  border:1px solid rgba(240,192,64,.25);border-radius:9px;
+  background:rgba(240,192,64,.07);color:var(--gold2);
+  font-size:.72rem;font-weight:700;cursor:pointer;font-family:var(--f);
+  transition:.15s;white-space:nowrap;
+}
+.export-btn svg{width:13px;height:13px;stroke:currentColor;stroke-width:2;fill:none}
+.export-btn:hover{background:rgba(240,192,64,.14);border-color:rgba(240,192,64,.4)}
+
+/* ── FILTER CONTROLS ── */
+.filter-wrap{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.filter-select{
+  background:var(--bg2);border:1px solid var(--border);border-radius:9px;
+  padding:8px 12px;color:var(--txt);font-family:var(--f);font-size:.75rem;cursor:pointer;
+  outline:none;transition:.15s;
+}
+.filter-select:focus{border-color:var(--border2)}
+.search-box{
+  display:flex;align-items:center;gap:8px;background:var(--bg2);
+  border:1px solid var(--border);border-radius:9px;padding:8px 12px;transition:.15s;
+}
+.search-box:focus-within{border-color:var(--border2)}
 .search-box svg{width:14px;height:14px;stroke:var(--txt3);stroke-width:2;fill:none;flex-shrink:0}
-.search-box input{border:none;outline:none;background:none;font-family:var(--f);font-size:.78rem;color:var(--txt);width:180px}
+.search-box input{
+  border:none;outline:none;background:none;font-family:var(--f);
+  font-size:.78rem;color:var(--txt);width:180px;
+}
 .search-box input::placeholder{color:var(--txt3)}
-table{width:100%;border-collapse:collapse}
-thead th{padding:10px 20px;text-align:left;font-size:.58rem;font-weight:800;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid var(--border);background:var(--bg2)}
-tbody tr{border-bottom:1px solid var(--border);transition:.1s;cursor:pointer}
+
+/* ── TABLE CARD ── */
+.table-card{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden}
+.table-header{
+  padding:16px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;min-width:500px}
+thead th{
+  padding:10px 18px;text-align:left;font-size:.58rem;font-weight:800;
+  color:var(--txt3);text-transform:uppercase;letter-spacing:.12em;
+  border-bottom:1px solid var(--border);background:var(--bg2);
+  white-space:nowrap;position:sticky;top:0;z-index:1;
+}
+tbody tr{border-bottom:1px solid var(--border);transition:.12s;cursor:pointer}
 tbody tr:last-child{border-bottom:none}
-tbody tr:hover{background:rgba(255,255,255,.025)}
-tbody td{padding:12px 20px;font-size:.78rem;color:var(--txt)}
-.cell-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.72rem;color:#fff}
-.cell-name{font-weight:700}
-.cell-sub{font-size:.62rem;color:var(--txt3);font-family:var(--fm);margin-top:1px}
-.badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:100px;font-size:.6rem;font-weight:700}
-.badge.green{background:rgba(34,197,94,.12);color:var(--green2)}
-.badge.red{background:rgba(220,38,38,.12);color:#f87171}
-.badge.gold{background:rgba(240,192,64,.12);color:var(--gold2)}
-.badge.blue{background:rgba(96,165,250,.12);color:#93c5fd}
-.badge.gray{background:rgba(255,255,255,.06);color:var(--txt3)}
-.action-btn{padding:5px 12px;border:1px solid var(--border);border-radius:8px;background:none;font-family:var(--f);font-size:.65rem;font-weight:700;cursor:pointer;transition:.15s;margin-right:4px}
+tbody tr:hover{background:rgba(255,255,255,.03)}
+tbody td{padding:12px 18px;font-size:.78rem;color:var(--txt);vertical-align:middle}
+.cell-av{
+  width:34px;height:34px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.72rem;color:#fff;
+}
+.cell-name{font-weight:700;color:var(--txt)}
+.cell-sub{font-size:.62rem;color:var(--txt3);font-family:var(--fm);margin-top:2px}
+.cell-mono{font-size:.7rem;font-family:var(--fm);color:var(--txt3)}
+
+/* ── BADGES ── */
+.badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:4px 10px;border-radius:100px;font-size:.58rem;font-weight:800;
+  white-space:nowrap;
+}
+.badge.green{background:rgba(34,197,94,.12);color:var(--green2);border:1px solid rgba(34,197,94,.2)}
+.badge.red{background:rgba(220,38,38,.12);color:#f87171;border:1px solid rgba(220,38,38,.2)}
+.badge.gold{background:rgba(240,192,64,.12);color:var(--gold2);border:1px solid rgba(240,192,64,.2)}
+.badge.blue{background:rgba(96,165,250,.12);color:#93c5fd;border:1px solid rgba(96,165,250,.2)}
+.badge.purple{background:rgba(167,139,250,.12);color:#c4b5fd;border:1px solid rgba(167,139,250,.2)}
+.badge.gray{background:rgba(255,255,255,.06);color:var(--txt3);border:1px solid var(--border)}
+
+/* ── ACTION BUTTONS ── */
+.action-btn{
+  padding:5px 12px;border:1px solid var(--border);border-radius:8px;
+  background:none;font-family:var(--f);font-size:.65rem;font-weight:700;
+  cursor:pointer;transition:.15s;margin-right:4px;white-space:nowrap;
+}
 .action-btn.danger{border-color:rgba(220,38,38,.3);color:#f87171}
-.action-btn.danger:hover{background:rgba(220,38,38,.1)}
+.action-btn.danger:hover{background:rgba(220,38,38,.12)}
 .action-btn.success{border-color:rgba(34,197,94,.3);color:var(--green2)}
-.action-btn.success:hover{background:rgba(34,197,94,.1)}
+.action-btn.success:hover{background:rgba(34,197,94,.12)}
 .action-btn.warn{border-color:rgba(240,192,64,.3);color:var(--gold2)}
 .action-btn.warn:hover{background:rgba(240,192,64,.1)}
 .action-btn.neutral{border-color:var(--border);color:var(--txt2)}
 .action-btn.neutral:hover{background:rgba(255,255,255,.05)}
-.pagination{display:flex;align-items:center;gap:8px;padding:12px 20px;border-top:1px solid var(--border)}
-.page-btn{padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:none;font-family:var(--fm);font-size:.72rem;color:var(--txt2);cursor:pointer;transition:.15s}
-.page-btn:hover{background:rgba(255,255,255,.05)}
-.page-btn.on{background:var(--forest);border-color:var(--forest);color:#fff}
+
+/* ── PAGINATION ── */
+.pagination{
+  display:flex;align-items:center;gap:6px;padding:12px 20px;
+  border-top:1px solid var(--border);flex-wrap:wrap;
+}
+.page-btn{
+  padding:6px 12px;border:1px solid var(--border);border-radius:8px;
+  background:none;font-family:var(--fm);font-size:.7rem;color:var(--txt2);
+  cursor:pointer;transition:.15s;min-width:34px;text-align:center;
+}
+.page-btn:hover{background:rgba(255,255,255,.05);color:var(--txt)}
+.page-btn.on{background:var(--forest2);border-color:var(--forest2);color:#fff}
+.page-btn:disabled{opacity:.35;cursor:not-allowed}
 .page-info{font-size:.65rem;color:var(--txt3);font-family:var(--fm);margin-left:auto}
 
-/* ── MODAL ── */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:500;display:none;align-items:center;justify-content:center}
-.modal-overlay.on{display:flex}
-.modal-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:500px;max-width:90vw;max-height:85vh;overflow-y:auto;display:flex;flex-direction:column;gap:16px}
-.modal-title{font-size:1rem;font-weight:800}
-.modal-row{display:flex;flex-direction:column;gap:6px}
-.modal-lbl{font-size:.62rem;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em}
-.modal-val{font-size:.88rem;color:var(--txt);background:var(--bg2);border-radius:10px;padding:10px 14px;font-family:var(--fm)}
-.modal-btns{display:flex;gap:10px;margin-top:4px}
-.mbn{flex:1;padding:12px;border-radius:12px;font-family:var(--f);font-size:.82rem;font-weight:800;cursor:pointer;border:none;transition:.15s}
-.mbn.cancel{background:rgba(255,255,255,.06);color:var(--txt2)}
-.mbn.danger{background:rgba(220,38,38,.15);color:#f87171}
-.mbn.success{background:rgba(34,197,94,.15);color:var(--green2)}
-.mbn.warn{background:rgba(240,192,64,.12);color:var(--gold2)}
-
-/* ── TOAST ── */
-.adm-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1px solid var(--border);color:var(--txt);padding:12px 22px;border-radius:12px;font-size:.78rem;font-weight:700;box-shadow:0 10px 40px rgba(0,0,0,.5);opacity:0;transition:.25s;pointer-events:none;z-index:1000;font-family:var(--fm)}
-.adm-toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
-.adm-toast.ok{border-color:rgba(34,197,94,.3);color:var(--green2)}
-.adm-toast.err{border-color:rgba(220,38,38,.3);color:#f87171}
+/* ── CHARTS ── */
+.charts-row{display:grid;grid-template-columns:1.6fr 1fr;gap:14px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px}
+.card-title{
+  font-size:.72rem;font-weight:800;color:var(--txt2);text-transform:uppercase;
+  letter-spacing:.12em;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;
+}
+.card-title span{font-family:var(--fm);font-size:.6rem;font-weight:400;color:var(--txt3);text-transform:none;letter-spacing:0}
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:110px}
+.bar-col{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;min-width:0}
+.bar-fill{border-radius:6px 6px 0 0;width:100%;min-height:4px;transition:.4s ease}
+.bar-fill:hover{filter:brightness(1.2)}
+.bar-lbl{font-size:.52rem;color:var(--txt3);font-family:var(--fm);white-space:nowrap}
+.bar-val{font-size:.56rem;color:var(--txt2);font-family:var(--fm)}
+.donut-wrap{display:flex;align-items:center;gap:20px}
+.donut-legend{display:flex;flex-direction:column;gap:9px;flex:1}
+.legend-item{display:flex;align-items:center;gap:8px}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.legend-lbl{font-size:.7rem;color:var(--txt2)}
+.legend-val{margin-left:auto;font-size:.7rem;font-weight:700;font-family:var(--fm);color:var(--txt)}
 
 /* ── TONTINE SECTION ── */
-.tontine-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.tontine-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px}
+.tontine-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.tontine-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px;transition:.15s}
+.tontine-card:hover{border-color:var(--border2)}
 .tnt-hd{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.tnt-ic{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.82rem;color:#fff;flex-shrink:0}
-.tnt-nm{font-size:.85rem;font-weight:800}
+.tnt-ic{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.85rem;color:#fff;flex-shrink:0}
+.tnt-nm{font-size:.88rem;font-weight:800}
 .tnt-meta{font-size:.6rem;color:var(--txt3);margin-top:2px;font-family:var(--fm)}
 .tnt-badge{margin-left:auto;flex-shrink:0}
-.tnt-bar-bg{background:rgba(255,255,255,.08);border-radius:100px;height:5px;overflow:hidden;margin-bottom:6px}
-.tnt-bar{height:100%;border-radius:100px;background:var(--gold2)}
+.tnt-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.tnt-stat{background:var(--bg2);border-radius:10px;padding:10px 12px}
+.tnt-stat-lbl{font-size:.55rem;color:var(--txt3);font-family:var(--fm);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.tnt-stat-val{font-size:.88rem;font-weight:800;color:var(--txt)}
+.tnt-bar-bg{background:rgba(255,255,255,.07);border-radius:100px;height:5px;overflow:hidden;margin-bottom:6px}
+.tnt-bar{height:100%;border-radius:100px;background:var(--gold2);transition:width .4s}
 .tnt-footer{display:flex;justify-content:space-between;font-size:.58rem;color:var(--txt3);font-family:var(--fm);margin-bottom:12px}
-.tnt-members{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
-.tnt-member-row{display:flex;align-items:center;gap:8px;font-size:.72rem}
-.tnt-m-av{width:22px;height:22px;border-radius:50%;background:var(--forest);display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:800;color:#fff;flex-shrink:0}
 .tnt-actions{display:flex;gap:6px}
-.skel{background:rgba(255,255,255,.05);border-radius:8px;animation:pulse 1.5s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.empty-state{text-align:center;padding:48px 20px;color:var(--txt3);font-size:.82rem}
-.empty-state svg{width:40px;height:40px;stroke:var(--txt3);stroke-width:1.2;fill:none;margin:0 auto 12px;display:block}
 
-/* ── RESPONSIVE ── */
-@media(max-width:900px){
-  .stats-grid{grid-template-columns:1fr 1fr}
+/* ── NOTIF FORM ── */
+.notif-form{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:14px}
+.notif-form-row{display:grid;grid-template-columns:1fr 2fr auto auto;gap:10px;align-items:flex-end}
+.form-lbl{font-size:.6rem;font-weight:800;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.send-notif-btn{
+  padding:13px 22px;border:none;border-radius:12px;white-space:nowrap;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:var(--forest);font-family:var(--f);font-size:.82rem;font-weight:800;cursor:pointer;
+  transition:.15s;
+}
+.send-notif-btn:hover{box-shadow:0 6px 20px rgba(212,160,23,.35)}
+
+/* ── MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.75);
+  backdrop-filter:blur(8px);z-index:500;display:none;
+  align-items:center;justify-content:center;padding:20px;
+}
+.modal-overlay.on{display:flex}
+.modal-box{
+  background:var(--card);border:1px solid var(--border2);border-radius:22px;
+  padding:30px;width:520px;max-width:100%;max-height:90vh;
+  overflow-y:auto;display:flex;flex-direction:column;gap:18px;
+  box-shadow:0 40px 100px rgba(0,0,0,.7);
+}
+.modal-title{font-size:1.05rem;font-weight:900;letter-spacing:-.01em}
+.modal-row{display:flex;flex-direction:column;gap:6px}
+.modal-lbl{font-size:.6rem;font-weight:800;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em}
+.modal-val{font-size:.85rem;color:var(--txt);background:var(--bg2);border-radius:10px;padding:10px 14px;font-family:var(--fm)}
+.modal-btns{display:flex;gap:10px;margin-top:4px}
+.mbn{flex:1;padding:13px;border-radius:12px;font-family:var(--f);font-size:.82rem;font-weight:800;cursor:pointer;border:none;transition:.15s}
+.mbn.cancel{background:rgba(255,255,255,.07);color:var(--txt2)}
+.mbn.cancel:hover{background:rgba(255,255,255,.1)}
+.mbn.danger{background:rgba(220,38,38,.15);color:#f87171}
+.mbn.danger:hover{background:rgba(220,38,38,.22)}
+.mbn.success{background:rgba(34,197,94,.15);color:var(--green2)}
+.mbn.success:hover{background:rgba(34,197,94,.22)}
+.mbn.warn{background:rgba(240,192,64,.12);color:var(--gold2)}
+.mbn.warn:hover{background:rgba(240,192,64,.18)}
+
+/* ── TOAST ── */
+.adm-toast{
+  position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(16px);
+  background:var(--card2);border:1px solid var(--border2);color:var(--txt);
+  padding:13px 24px;border-radius:14px;font-size:.78rem;font-weight:700;
+  box-shadow:0 12px 40px rgba(0,0,0,.6);opacity:0;transition:.25s cubic-bezier(.34,1.56,.64,1);
+  pointer-events:none;z-index:2000;font-family:var(--fm);max-width:320px;text-align:center;
+}
+.adm-toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.adm-toast.ok{border-color:rgba(34,197,94,.35);color:var(--green2)}
+.adm-toast.err{border-color:rgba(220,38,38,.35);color:#f87171}
+.adm-toast.warn{border-color:rgba(240,192,64,.35);color:var(--gold2)}
+
+/* ── EMPTY STATE ── */
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:60px 20px;color:var(--txt3);gap:12px;
+}
+.empty-state svg{width:44px;height:44px;stroke:var(--txt3);stroke-width:1.2;fill:none;opacity:.6}
+.empty-state p{font-size:.82rem;text-align:center}
+
+/* ── PROGRESS BAR ── */
+.prog-wrap{display:flex;align-items:center;gap:8px}
+.prog-bg{flex:1;background:rgba(255,255,255,.07);border-radius:100px;height:5px;overflow:hidden}
+.prog-fill{height:100%;border-radius:100px;background:var(--green2);transition:width .4s}
+
+/* ── SKELETON ── */
+.skel{background:rgba(255,255,255,.05);border-radius:8px;animation:skel-pulse 1.6s ease-in-out infinite}
+@keyframes skel-pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── OVERLAY (sidebar mobile) ── */
+.sidebar-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);
+  z-index:99;backdrop-filter:blur(2px);
+}
+.sidebar-overlay.on{display:block}
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════ */
+@media(max-width:1100px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
   .charts-row{grid-template-columns:1fr}
-  .tontine-grid{grid-template-columns:1fr}
-  .sidebar{width:200px}
+  .notif-form-row{grid-template-columns:1fr 1fr;grid-template-rows:auto auto}
+}
+@media(max-width:900px){
+  :root{--sidebar-w:220px}
+  .search-box input{width:140px}
 }
 @media(max-width:640px){
-  .sidebar{display:none}
-  .stats-grid{grid-template-columns:1fr}
-  .content{padding:16px 14px 90px;gap:14px}
-  .topbar{padding:12px 16px}
-  .topbar-title{font-size:.9rem}
+  :root{--topbar-h:54px}
+  /* Sidebar hidden by default on mobile, slides in */
+  .sidebar{
+    position:fixed;left:0;top:0;bottom:0;
+    transform:translateX(-100%);z-index:100;
+  }
+  .sidebar.mobile-open{transform:translateX(0)}
+  /* Show hamburger */
+  .topbar-menu-btn{display:flex}
   .topbar-time{display:none}
-  .table-header{flex-wrap:wrap;gap:8px}
-  .search-box{width:100%;margin-left:0}
+  /* Content */
+  .content{padding:14px 12px 90px;gap:14px}
+  /* Stats */
+  .stats-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .stat-val{font-size:1.4rem}
+  .stat-card{padding:16px}
+  /* Tables */
+  thead th:nth-child(n+5){display:none}
+  tbody td:nth-child(n+5){display:none}
+  .table-header{flex-direction:column;align-items:stretch;gap:10px;padding:14px 14px}
+  .sec-hdr-actions{width:100%}
+  .filter-wrap{width:100%}
+  .filter-select,.export-btn{flex:1;justify-content:center}
+  .search-box{flex:1}
   .search-box input{width:100%}
-  thead th{padding:8px 12px;font-size:.52rem}
-  tbody td{padding:10px 12px;font-size:.72rem}
-  .stat-val{font-size:1.3rem}
+  /* Charts */
+  .charts-row{grid-template-columns:1fr}
+  .donut-wrap{flex-direction:column;align-items:flex-start}
+  /* Tontines */
+  .tontine-grid{grid-template-columns:1fr}
+  /* Notif form */
+  .notif-form-row{grid-template-columns:1fr;grid-template-rows:unset}
+  /* Modal */
+  .modal-box{padding:22px 18px}
 }
 
 /* ── MOBILE BOTTOM NAVBAR ── */
@@ -226,22 +474,23 @@ tbody td{padding:12px 20px;font-size:.78rem;color:var(--txt)}
   background:var(--bg2);border-top:1px solid var(--border);
   padding:0 0 env(safe-area-inset-bottom);z-index:200;
 }
-@media(max-width:640px){
-  .adm-mobile-nav{display:flex}
-}
+@media(max-width:640px){.adm-mobile-nav{display:flex}}
 .adm-mobile-nav-item{
   flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:4px;padding:10px 4px;cursor:pointer;transition:.15s;
+  gap:4px;padding:10px 2px;cursor:pointer;transition:.15s;
   border-top:2.5px solid transparent;
 }
-.adm-mobile-nav-item svg{width:20px;height:20px;stroke-width:1.9;fill:none;stroke:var(--txt3)}
-.adm-mobile-nav-item span{font-size:.52rem;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.04em}
-.adm-mobile-nav-item.on{border-top-color:var(--gold2);background:rgba(10,74,46,.15)}
+.adm-mobile-nav-item svg{width:19px;height:19px;stroke-width:1.9;fill:none;stroke:var(--txt3)}
+.adm-mobile-nav-item span{font-size:.48rem;font-weight:800;color:var(--txt3);text-transform:uppercase;letter-spacing:.04em}
+.adm-mobile-nav-item.on{border-top-color:var(--gold2);background:rgba(10,74,46,.2)}
 .adm-mobile-nav-item.on svg{stroke:var(--gold2)}
 .adm-mobile-nav-item.on span{color:var(--gold2)}
 </style>
 </head>
 <body>
+
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div class="sidebar-overlay" id="sb-overlay" onclick="A.closeSidebar()"></div>
 
 <!-- LOGIN -->
 <div id="login-screen">
@@ -265,7 +514,7 @@ tbody td{padding:12px 20px;font-size:.78rem;color:var(--txt)}
       <input id="adm-pass" class="inp" type="password" placeholder="Mot de passe" autocomplete="current-password" onkeydown="if(event.key==='Enter')A.login()"/>
     </div>
     <button class="btn-login" onclick="A.login()">Connexion sécurisée →</button>
-    <p style="text-align:center;font-size:.62rem;color:var(--txt3);font-family:var(--fm)">GhettoPay Admin v1.0 · Libreville, Gabon</p>
+    <p style="text-align:center;font-size:.6rem;color:var(--txt3);font-family:var(--fm)">GhettoPay Admin v2.0 · Libreville, Gabon</p>
   </div>
 </div>
 
@@ -273,10 +522,10 @@ tbody td{padding:12px 20px;font-size:.78rem;color:var(--txt)}
 <div id="app">
 
   <!-- SIDEBAR -->
-  <div class="sidebar">
+  <div class="sidebar" id="sidebar">
     <div class="sidebar-brand">
       <div class="sidebar-brand-row">
-        <div class="sb-logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--forest)" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+        <div class="sb-logo"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
         <div class="sb-name">GhettoPay</div>
       </div>
       <div class="sb-badge">
@@ -285,8 +534,9 @@ tbody td{padding:12px 20px;font-size:.78rem;color:var(--txt)}
       </div>
     </div>
 
+    <div class="nav-section-lbl">Principal</div>
     <div class="nav-item on" onclick="A.section('dashboard')" data-s="dashboard">
-      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
       <span class="nav-lbl">Dashboard</span>
     </div>
     <div class="nav-item" onclick="A.section('users')" data-s="users">
@@ -298,6 +548,8 @@ tbody td{padding:12px 20px;font-size:.78rem;color:var(--txt)}
       <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       <span class="nav-lbl">Transactions</span>
     </div>
+
+    <div class="nav-section-lbl">Épargne & Groupe</div>
     <div class="nav-item" onclick="A.section('tontines')" data-s="tontines">
       <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       <span class="nav-lbl">Tontines</span>
@@ -306,86 +558,134 @@ tbody td{padding:12px 20px;font-size:.78rem;color:var(--txt)}
       <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
       <span class="nav-lbl">Coffres</span>
     </div>
+
+    <div class="nav-section-lbl">Communication</div>
     <div class="nav-item" onclick="A.section('notifs')" data-s="notifs">
       <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <span class="nav-lbl">Notifications</span>
     </div>
 
-    <div style="margin-top:auto;padding:16px 20px;border-top:1px solid var(--border)">
-      <div style="font-size:.65rem;color:var(--txt3);margin-bottom:4px;font-family:var(--fm)">Connecté en tant que</div>
-      <div style="font-size:.78rem;font-weight:700;color:var(--txt)" id="adm-name-sidebar">—</div>
+    <div class="sb-footer">
+      <div class="sb-user-info">
+        <div class="sb-user-av">A</div>
+        <div>
+          <div class="sb-user-name" id="adm-name-sidebar">admin@ghettopay.ga</div>
+          <div class="sb-user-role">Super Admin</div>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- MAIN -->
   <div class="main">
     <div class="topbar">
-      <div class="topbar-dot"></div>
-      <div class="topbar-live">LIVE</div>
+      <button class="topbar-menu-btn" onclick="A.toggleSidebar()">
+        <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="topbar-live-wrap">
+        <div class="topbar-dot"></div>
+        <div class="topbar-live-lbl">Live</div>
+      </div>
       <div class="topbar-title" id="section-title">Dashboard</div>
       <div class="topbar-time" id="adm-clock">—</div>
-      <button class="logout-btn" onclick="A.logout()">Déconnexion</button>
+      <div class="topbar-actions">
+        <button class="topbar-refresh-btn" onclick="A.reload()">
+          <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Actualiser
+        </button>
+        <button class="logout-btn" onclick="A.logout()">Déconnexion</button>
+      </div>
     </div>
 
     <div class="content">
 
-      <!-- DASHBOARD -->
+      <!-- ══ DASHBOARD ══ -->
       <div class="section on" id="s-dashboard">
         <div class="stats-grid" id="stats-grid">
-          <div class="stat-card green"><div class="stat-icon" style="background:rgba(34,197,94,.12)"><svg style="stroke:var(--green2)" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="stat-val" id="st-users">—</div><div class="stat-lbl">Utilisateurs</div><div class="stat-delta up" id="st-users-d">…</div></div>
-          <div class="stat-card gold"><div class="stat-icon" style="background:rgba(240,192,64,.1)"><svg style="stroke:var(--gold2)" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div><div class="stat-val" id="st-txs">—</div><div class="stat-lbl">Transactions</div><div class="stat-delta up" id="st-txs-d">…</div></div>
-          <div class="stat-card blue"><div class="stat-icon" style="background:rgba(96,165,250,.1)"><svg style="stroke:#93c5fd" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div><div class="stat-val" id="st-vol">—</div><div class="stat-lbl">Volume (FCFA)</div><div class="stat-delta up" id="st-vol-d">…</div></div>
-          <div class="stat-card purple"><div class="stat-icon" style="background:rgba(167,139,250,.1)"><svg style="stroke:#c4b5fd" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div class="stat-val" id="st-tontines">—</div><div class="stat-lbl">Tontines actives</div><div class="stat-delta up" id="st-ton-d">…</div></div>
+          <div class="stat-card green">
+            <div class="stat-icon" style="background:rgba(34,197,94,.1)"><svg style="stroke:var(--green2)" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <div class="stat-val" id="st-users">—</div>
+            <div class="stat-lbl">Utilisateurs</div>
+            <div class="stat-delta up" id="st-users-d">…</div>
+          </div>
+          <div class="stat-card gold">
+            <div class="stat-icon" style="background:rgba(240,192,64,.09)"><svg style="stroke:var(--gold2)" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
+            <div class="stat-val" id="st-txs">—</div>
+            <div class="stat-lbl">Transactions</div>
+            <div class="stat-delta up" id="st-txs-d">…</div>
+          </div>
+          <div class="stat-card blue">
+            <div class="stat-icon" style="background:rgba(96,165,250,.09)"><svg style="stroke:#93c5fd" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+            <div class="stat-val" id="st-vol">—</div>
+            <div class="stat-lbl">Volume FCFA</div>
+            <div class="stat-delta up" id="st-vol-d">…</div>
+          </div>
+          <div class="stat-card purple">
+            <div class="stat-icon" style="background:rgba(167,139,250,.09)"><svg style="stroke:#c4b5fd" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+            <div class="stat-val" id="st-tontines">—</div>
+            <div class="stat-lbl">Tontines actives</div>
+            <div class="stat-delta neu" id="st-ton-d">…</div>
+          </div>
         </div>
         <div class="charts-row">
           <div class="chart-card">
-            <div class="card-title">Volume des transactions <span>6 derniers mois</span></div>
+            <div class="card-title">Volume transactions <span>6 derniers mois</span></div>
             <div class="bar-chart" id="vol-chart"></div>
           </div>
           <div class="chart-card">
-            <div class="card-title">Répartition types <span>Total</span></div>
+            <div class="card-title">Répartition types <span>total</span></div>
             <div class="donut-wrap">
-              <svg width="110" height="110" viewBox="0 0 110 110" id="donut-svg"><circle cx="55" cy="55" r="40" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="18"/></svg>
+              <svg width="110" height="110" viewBox="0 0 110 110" id="donut-svg"><circle cx="55" cy="55" r="40" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="1"/></svg>
               <div class="donut-legend" id="donut-legend"></div>
             </div>
           </div>
         </div>
         <div class="table-card">
-          <div class="table-header" style="padding:14px 20px;border-bottom:1px solid var(--border)">
-            <div class="card-title" style="margin:0">Dernières transactions</div>
+          <div class="table-header">
+            <div style="font-size:.8rem;font-weight:800">Dernières transactions</div>
           </div>
-          <table>
-            <thead><tr><th>Expéditeur</th><th>Destinataire</th><th>Montant</th><th>Type</th><th>Date</th><th>Statut</th></tr></thead>
-            <tbody id="dash-tx-tbody"></tbody>
-          </table>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Expéditeur</th><th>Destinataire</th><th>Montant</th><th>Type</th><th>Date</th><th>Statut</th></tr></thead>
+              <tbody id="dash-tx-tbody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <!-- USERS -->
+      <!-- ══ USERS ══ -->
       <div class="section" id="s-users">
-        <div class="table-card">
-          <div class="table-header">
-            <div class="card-title" style="margin:0">Utilisateurs <span id="users-count" style="font-size:.72rem;color:var(--txt3);font-weight:400;margin-left:8px"></span></div>
+        <div class="sec-hdr">
+          <div class="sec-hdr-title">Utilisateurs <span class="sec-hdr-count" id="users-count"></span></div>
+          <div class="sec-hdr-actions">
             <div class="search-box">
               <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input type="text" placeholder="Chercher un utilisateur..." oninput="A.filterUsers(this.value)"/>
+              <input type="text" placeholder="Nom, téléphone, email…" oninput="A.filterUsers(this.value)"/>
             </div>
+            <button class="export-btn" onclick="A.exportCSV('users')">
+              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Exporter CSV
+            </button>
           </div>
-          <table>
-            <thead><tr><th>Utilisateur</th><th>Téléphone</th><th>Solde</th><th>Niveau</th><th>Inscrit le</th><th>Statut</th><th>Actions</th></tr></thead>
-            <tbody id="users-tbody"></tbody>
-          </table>
+        </div>
+        <div class="table-card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Utilisateur</th><th>Téléphone</th><th>Solde</th><th>Niveau</th><th>Inscrit le</th><th>Statut</th><th>Actions</th></tr></thead>
+              <tbody id="users-tbody"></tbody>
+            </table>
+          </div>
           <div class="pagination" id="users-pagination"></div>
         </div>
       </div>
 
-      <!-- TRANSACTIONS -->
+      <!-- ══ TRANSACTIONS ══ -->
       <div class="section" id="s-transactions">
-        <div class="table-card">
-          <div class="table-header">
-            <div class="card-title" style="margin:0">Toutes les transactions</div>
-            <div style="display:flex;gap:8px;margin-left:auto">
-              <select id="tx-filter-type" onchange="A.filterTx()" style="background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:7px 12px;color:var(--txt);font-family:var(--f);font-size:.75rem;cursor:pointer">
+        <div class="sec-hdr">
+          <div class="sec-hdr-title">Transactions</div>
+          <div class="sec-hdr-actions">
+            <div class="filter-wrap">
+              <select id="tx-filter-type" class="filter-select" onchange="A.filterTx()">
                 <option value="">Tous les types</option>
                 <option value="transfer">Transfert</option>
                 <option value="qr">QR Pay</option>
@@ -393,65 +693,105 @@ tbody td{padding:12px 20px;font-size:.78rem;color:var(--txt)}
                 <option value="coffre_deposit">Coffre</option>
                 <option value="tontine">Tontine</option>
               </select>
-              <div class="search-box" style="margin-left:0">
+              <div class="search-box">
                 <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input id="tx-search" type="text" placeholder="Chercher..." oninput="A.filterTx()"/>
+                <input id="tx-search" type="text" placeholder="Nom, montant…" oninput="A.filterTx()"/>
               </div>
             </div>
+            <button class="export-btn" onclick="A.exportCSV('transactions')">
+              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Exporter CSV
+            </button>
           </div>
-          <table>
-            <thead><tr><th>ID</th><th>De</th><th>À / Marchand</th><th>Montant</th><th>Type</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead>
-            <tbody id="tx-tbody"></tbody>
-          </table>
+        </div>
+        <div class="table-card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>ID</th><th>De</th><th>À / Marchand</th><th>Montant</th><th>Type</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead>
+              <tbody id="tx-tbody"></tbody>
+            </table>
+          </div>
           <div class="pagination" id="tx-pagination"></div>
         </div>
       </div>
 
-      <!-- TONTINES -->
+      <!-- ══ TONTINES ══ -->
       <div class="section" id="s-tontines">
+        <div class="sec-hdr">
+          <div class="sec-hdr-title">Tontines</div>
+          <div class="sec-hdr-actions">
+            <button class="export-btn" onclick="A.exportCSV('tontines')">
+              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Exporter CSV
+            </button>
+          </div>
+        </div>
         <div class="tontine-grid" id="tontines-grid"></div>
       </div>
 
-      <!-- COFFRES -->
+      <!-- ══ COFFRES ══ -->
       <div class="section" id="s-coffres">
-        <div class="table-card">
-          <div class="table-header">
-            <div class="card-title" style="margin:0">Coffres d'épargne</div>
+        <div class="sec-hdr">
+          <div class="sec-hdr-title">Coffres d'épargne</div>
+          <div class="sec-hdr-actions">
+            <button class="export-btn" onclick="A.exportCSV('coffres')">
+              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Exporter CSV
+            </button>
           </div>
-          <table>
-            <thead><tr><th>Nom</th><th>Propriétaire</th><th>Épargné</th><th>Objectif</th><th>% atteint</th><th>Déblocage</th><th>Actions</th></tr></thead>
-            <tbody id="coffres-tbody"></tbody>
-          </table>
+        </div>
+        <div class="table-card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Nom</th><th>Propriétaire</th><th>Épargné</th><th>Objectif</th><th>Progression</th><th>Déblocage</th><th>Actions</th></tr></thead>
+              <tbody id="coffres-tbody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <!-- NOTIFICATIONS -->
+      <!-- ══ NOTIFICATIONS ══ -->
       <div class="section" id="s-notifs">
-        <div style="display:flex;gap:12px;align-items:flex-end">
-          <div style="flex:1">
-            <div style="font-size:.65rem;color:var(--txt3);font-family:var(--fm);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Titre</div>
-            <input id="notif-title" class="inp" placeholder="Ex: Mise à jour de sécurité"/>
+        <div class="notif-form">
+          <div style="font-size:.88rem;font-weight:800;margin-bottom:2px">Envoyer une notification</div>
+          <div class="notif-form-row">
+            <div>
+              <div class="form-lbl">Titre</div>
+              <input id="notif-title" class="inp" placeholder="Ex: Mise à jour importante"/>
+            </div>
+            <div>
+              <div class="form-lbl">Message</div>
+              <input id="notif-body" class="inp" placeholder="Contenu de la notification…"/>
+            </div>
+            <div>
+              <div class="form-lbl">Cible</div>
+              <select id="notif-target" class="filter-select" style="width:100%;height:49px">
+                <option value="all">Tous les utilisateurs</option>
+                <option value="gold">Niveau Gold</option>
+                <option value="silver">Niveau Silver</option>
+              </select>
+            </div>
+            <div style="display:flex;align-items:flex-end">
+              <button class="send-notif-btn" onclick="A.sendBulkNotif()">Envoyer →</button>
+            </div>
           </div>
-          <div style="flex:2">
-            <div style="font-size:.65rem;color:var(--txt3);font-family:var(--fm);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Message</div>
-            <input id="notif-body" class="inp" placeholder="Contenu de la notification..."/>
+        </div>
+        <div class="sec-hdr">
+          <div class="sec-hdr-title">Notifications envoyées</div>
+          <div class="sec-hdr-actions">
+            <button class="export-btn" onclick="A.exportCSV('notifs')">
+              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Exporter CSV
+            </button>
           </div>
-          <div>
-            <div style="font-size:.65rem;color:var(--txt3);font-family:var(--fm);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Cible</div>
-            <select id="notif-target" style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:13px 14px;color:var(--txt);font-family:var(--f);font-size:.82rem">
-              <option value="all">Tous les utilisateurs</option>
-              <option value="gold">Niveau Gold</option>
-              <option value="silver">Niveau Silver</option>
-            </select>
-          </div>
-          <button onclick="A.sendBulkNotif()" style="padding:13px 20px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--forest);font-family:var(--f);font-size:.82rem;font-weight:800;cursor:pointer;white-space:nowrap">Envoyer</button>
         </div>
         <div class="table-card">
-          <div class="table-header"><div class="card-title" style="margin:0">Notifications envoyées</div></div>
-          <table>
-            <thead><tr><th>Destinataire</th><th>Titre</th><th>Message</th><th>Type</th><th>Date</th><th>Lu</th></tr></thead>
-            <tbody id="notifs-tbody"></tbody>
-          </table>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Destinataire</th><th>Titre</th><th>Message</th><th>Type</th><th>Date</th><th>Lu</th></tr></thead>
+              <tbody id="notifs-tbody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -467,15 +807,41 @@ tbody td{padding:12px 20px;font-size:.78rem;color:var(--txt)}
 <!-- TOAST -->
 <div class="adm-toast" id="adm-toast"></div>
 
+<!-- MOBILE BOTTOM NAV -->
+<nav class="adm-mobile-nav" id="adm-mobile-nav">
+  <div class="adm-mobile-nav-item on" data-ms="dashboard" onclick="A.section('dashboard')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    <span>Tableau</span>
+  </div>
+  <div class="adm-mobile-nav-item" data-ms="users" onclick="A.section('users')">
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+    <span>Users</span>
+  </div>
+  <div class="adm-mobile-nav-item" data-ms="transactions" onclick="A.section('transactions')">
+    <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    <span>Txs</span>
+  </div>
+  <div class="adm-mobile-nav-item" data-ms="tontines" onclick="A.section('tontines')">
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <span>Tontines</span>
+  </div>
+  <div class="adm-mobile-nav-item" data-ms="coffres" onclick="A.section('coffres')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    <span>Coffres</span>
+  </div>
+  <div class="adm-mobile-nav-item" data-ms="notifs" onclick="A.section('notifs')">
+    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    <span>Notifs</span>
+  </div>
+</nav>
+
 <script>
 // ══════════════════════════════════════════════
-// GHETTOPAY ADMIN PANEL
+// GHETTOPAY ADMIN PANEL v2
 // ══════════════════════════════════════════════
 
 const SUPA_URL = 'https://qzazkxlamuylurhjquzu.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF6YXpreGxhbXV5bHVyaGpxdXp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyNjM0NzYsImV4cCI6MjA4OTgzOTQ3Nn0.ow7l6dQZqsl5j8UFMrMY0JgIWR65gBFuMLn6MdI7SzQ';
-
-// ADMIN CREDENTIALS (à sécuriser côté Supabase avec rôle admin en production)
 const ADMIN_EMAIL = 'admin@ghettopay.ga';
 const ADMIN_PASS  = 'GhettoAdmin2024!';
 
@@ -487,32 +853,29 @@ let _users = [], _txs = [], _tontines = [], _coffres = [], _notifs = [];
 let _usersPage = 1, _txsPage = 1;
 const PER = 15;
 
-// ── HORLOGE ──
+// Clock
 setInterval(() => {
   const n = new Date();
-  $('adm-clock').textContent = n.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'}) + ' · ' + n.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  const el = $('adm-clock');
+  if (el) el.textContent = n.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'}) + ' · ' + n.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
 }, 1000);
 
 const A = {
+
   // ── AUTH ──
   async login() {
     const email = $('adm-email')?.value.trim();
     const pass  = $('adm-pass')?.value;
     if (!email || !pass) { A.err('Remplis tous les champs'); return; }
-
-    // Vérification admin : email exact + password exact (double sécurité)
     if (email !== ADMIN_EMAIL) { A.err('Accès refusé — identifiants invalides'); return; }
-
+    const btn = document.querySelector('.btn-login');
+    if (btn) { btn.textContent = 'Connexion…'; btn.disabled = true; }
     const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
-    if (error) { A.err('Identifiants incorrects'); return; }
-
-    // Vérifier que c'est bien l'admin (email correspond)
-    if (data.user?.email !== ADMIN_EMAIL) {
-      await db.auth.signOut();
-      A.err('Accès refusé — compte non autorisé');
-      return;
+    if (btn) { btn.textContent = 'Connexion sécurisée →'; btn.disabled = false; }
+    if (error || data.user?.email !== ADMIN_EMAIL) {
+      if (data?.user) await db.auth.signOut();
+      A.err('Identifiants incorrects'); return;
     }
-
     $('login-screen').style.display = 'none';
     $('app').style.display = 'flex';
     $('adm-name-sidebar').textContent = data.user.email;
@@ -525,31 +888,45 @@ const A = {
     setTimeout(() => el.style.display = 'none', 4000);
   },
 
-  async logout() {
-    await db.auth.signOut();
-    location.reload();
+  async logout() { await db.auth.signOut(); location.reload(); },
+
+  // ── SIDEBAR TOGGLE (mobile) ──
+  toggleSidebar() {
+    const sb = $('sidebar'), ov = $('sb-overlay');
+    const open = sb.classList.toggle('mobile-open');
+    ov.classList.toggle('on', open);
+  },
+  closeSidebar() {
+    $('sidebar').classList.remove('mobile-open');
+    $('sb-overlay').classList.remove('on');
   },
 
   // ── NAVIGATION ──
   section(name) {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('on'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('on'));
+    document.querySelectorAll('.adm-mobile-nav-item').forEach(el => el.classList.remove('on'));
     $('s-' + name)?.classList.add('on');
     document.querySelector(`[data-s="${name}"]`)?.classList.add('on');
+    document.querySelector(`.adm-mobile-nav-item[data-ms="${name}"]`)?.classList.add('on');
     const titles = { dashboard:'Dashboard', users:'Utilisateurs', transactions:'Transactions', tontines:'Tontines', coffres:'Coffres', notifs:'Notifications' };
     $('section-title').textContent = titles[name] || name;
-    A._mobileNavActive(name);
+    A.closeSidebar();
     A['render_' + name]?.();
   },
-  _mobileNavActive(name) {
-    document.querySelectorAll('.adm-mobile-nav-item').forEach(el => el.classList.remove('on'));
-    document.querySelector(`.adm-mobile-nav-item[data-ms="${name}"]`)?.classList.add('on');
-  },
 
-  // ── LOAD ALL DATA ──
+  // ── LOAD & RELOAD ──
   async load() {
     await Promise.all([A.loadUsers(), A.loadTx(), A.loadTontines(), A.loadCoffres(), A.loadNotifs()]);
     A.render_dashboard();
+  },
+  async reload() {
+    A.toast('Actualisation…', 'warn');
+    await A.load();
+    // Re-render current section
+    const cur = document.querySelector('.section.on')?.id?.replace('s-','');
+    if (cur) A['render_' + cur]?.();
+    A.toast('Données actualisées', 'ok');
   },
 
   async loadUsers() {
@@ -557,45 +934,40 @@ const A = {
     _users = data || [];
     $('nb-users').textContent = _users.length;
   },
-
   async loadTx() {
     const { data } = await db.from('transactions')
       .select('*, from_user:from_user_id(name,phone), to_user:to_user_id(name,phone)')
       .order('created_at', { ascending: false }).limit(500);
     _txs = data || [];
   },
-
   async loadTontines() {
     const { data } = await db.from('tontines').select('*, tontine_members(count)').order('created_at', { ascending: false });
     _tontines = data || [];
   },
-
   async loadCoffres() {
-    const { data } = await db.from('coffres')
-      .select('*, user:user_id(name,phone)').order('created_at', { ascending: false });
+    const { data } = await db.from('coffres').select('*, user:user_id(name,phone)').order('created_at', { ascending: false });
     _coffres = data || [];
   },
-
   async loadNotifs() {
-    const { data } = await db.from('notifications')
-      .select('*, user:user_id(name)').order('created_at', { ascending: false }).limit(200);
+    const { data } = await db.from('notifications').select('*, user:user_id(name)').order('created_at', { ascending: false }).limit(200);
     _notifs = data || [];
   },
 
   // ── DASHBOARD ──
   render_dashboard() {
-    // Stats
     $('st-users').textContent = _users.length;
     $('st-txs').textContent = _txs.length;
     const vol = _txs.reduce((s, t) => s + (t.amount || 0), 0);
-    $('st-vol').textContent = vol >= 1000000 ? (vol/1000000).toFixed(1) + 'M' : vol >= 1000 ? (vol/1000).toFixed(0) + 'k' : vol;
+    $('st-vol').textContent = vol >= 1e9 ? (vol/1e9).toFixed(1)+'B' : vol >= 1e6 ? (vol/1e6).toFixed(1)+'M' : vol >= 1000 ? (vol/1000).toFixed(0)+'k' : vol;
     $('st-tontines').textContent = _tontines.length;
-    $('st-users-d').textContent = `↑ ${_users.filter(u => new Date(u.created_at) > new Date(Date.now()-7*86400000)).length} cette semaine`;
-    $('st-txs-d').textContent = `↑ ${_txs.filter(t => new Date(t.created_at) > new Date(Date.now()-86400000)).length} aujourd'hui`;
-    $('st-vol-d').textContent = '↑ Volume total';
-    $('st-ton-d').textContent = `${_tontines.filter(t=>t.members_paid > 0).length} en cours`;
+    const weekNew = _users.filter(u => new Date(u.created_at) > new Date(Date.now()-7*86400000)).length;
+    const todayTx = _txs.filter(t => new Date(t.created_at) > new Date(Date.now()-86400000)).length;
+    $('st-users-d').textContent = `↑ ${weekNew} cette semaine`;
+    $('st-txs-d').textContent = `↑ ${todayTx} aujourd'hui`;
+    $('st-vol-d').textContent = `Volume total`;
+    $('st-ton-d').textContent = `${_tontines.length} groupes`;
 
-    // Bar chart volume / 6 mois
+    // Bar chart
     const now = new Date();
     const months = Array.from({length:6}, (_,i) => {
       const d = new Date(now.getFullYear(), now.getMonth() - (5-i), 1);
@@ -608,94 +980,90 @@ const A = {
     });
     const maxV = Math.max(...months.map(m => m.val), 1);
     $('vol-chart').innerHTML = months.map((m, i) => {
-      const h = Math.max(4, Math.round((m.val/maxV)*90));
+      const h = Math.max(4, Math.round((m.val/maxV)*100));
       const isLast = i === 5;
+      const color = isLast ? 'var(--gold2)' : i === 4 ? 'rgba(10,74,46,.7)' : 'rgba(10,74,46,.45)';
       return `<div class="bar-col">
         <div class="bar-val">${m.val >= 1000 ? (m.val/1000).toFixed(0)+'k' : m.val || ''}</div>
-        <div class="bar-fill" style="height:${h}px;background:${isLast ? 'var(--gold2)' : 'rgba(10,74,46,.6)'}"></div>
+        <div class="bar-fill" style="height:${h}px;background:${color}"></div>
         <div class="bar-lbl">${m.label}</div>
       </div>`;
     }).join('');
 
-    // Donut types
+    // Donut
     const types = { transfer: 0, qr: 0, recharge: 0, coffre_deposit: 0, tontine: 0 };
     _txs.forEach(t => { if (types[t.type] !== undefined) types[t.type] += (t.amount||0); });
     const typeTotal = Object.values(types).reduce((a,b)=>a+b,1);
     const colors = { transfer:'#22c55e', qr:'#f0c040', recharge:'#f87171', coffre_deposit:'#60a5fa', tontine:'#a78bfa' };
     const labels = { transfer:'Transferts', qr:'QR Pay', recharge:'Recharges', coffre_deposit:'Coffres', tontine:'Tontines' };
-    let angle = -90;
-    let paths = '';
+    let angle = -90, paths = '';
     const r = 40, cx = 55, cy = 55;
     Object.entries(types).forEach(([k,v]) => {
       if (!v) return;
       const pct = v / typeTotal;
-      const a1 = angle * Math.PI/180;
-      const a2 = (angle + pct*360) * Math.PI/180;
-      const x1 = cx + r*Math.cos(a1), y1 = cy + r*Math.sin(a1);
-      const x2 = cx + r*Math.cos(a2), y2 = cy + r*Math.sin(a2);
-      const large = pct > .5 ? 1 : 0;
-      paths += `<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} Z" fill="${colors[k]}" opacity=".85"/>`;
+      const a1 = angle * Math.PI/180, a2 = (angle + pct*360) * Math.PI/180;
+      const x1 = cx+r*Math.cos(a1), y1 = cy+r*Math.sin(a1);
+      const x2 = cx+r*Math.cos(a2), y2 = cy+r*Math.sin(a2);
+      paths += `<path d="M${cx},${cy} L${x1.toFixed(2)},${y1.toFixed(2)} A${r},${r} 0 ${pct>.5?1:0},1 ${x2.toFixed(2)},${y2.toFixed(2)} Z" fill="${colors[k]}" opacity=".85"/>`;
       angle += pct*360;
     });
-    $('donut-svg').innerHTML = `<circle cx="55" cy="55" r="40" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="1"/>${paths}<circle cx="55" cy="55" r="25" fill="var(--card)"/>`;
+    $('donut-svg').innerHTML = `<circle cx="55" cy="55" r="40" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="1"/>${paths}<circle cx="55" cy="55" r="24" fill="var(--card)"/>`;
     $('donut-legend').innerHTML = Object.entries(types).filter(([,v])=>v>0).map(([k,v]) =>
       `<div class="legend-item"><div class="legend-dot" style="background:${colors[k]}"></div><div class="legend-lbl">${labels[k]}</div><div class="legend-val">${f(v)}</div></div>`
     ).join('');
 
-    // Recent transactions
     $('dash-tx-tbody').innerHTML = _txs.slice(0,10).map(t => A._txRow(t)).join('');
   },
 
   // ── USERS ──
-  render_users() { A._renderUserTable(_users); },
-
+  render_users() { A._lastUserList = _users; A._renderUserTable(_users); },
   filterUsers(q) {
     _usersPage = 1;
-    if (!q) { A._renderUserTable(_users); return; }
+    if (!q?.trim()) { A._lastUserList = _users; A._renderUserTable(_users); return; }
     const ql = q.toLowerCase();
     const filtered = _users.filter(u =>
       (u.name||'').toLowerCase().includes(ql) ||
       (u.phone||'').includes(q) ||
       (u.email||'').toLowerCase().includes(ql)
     );
+    A._lastUserList = filtered;
     A._renderUserTable(filtered);
   },
-
   _renderUserTable(list) {
     $('users-count').textContent = `(${list.length} utilisateur${list.length>1?'s':''})`;
     const page = _usersPage, start = (page-1)*PER, slice = list.slice(start, start+PER);
-    const grads = ['#0A4A2E','#7c3aed','#0284c7','#d97706','#dc2626'];
+    const grads = ['#0A4A2E','#7c3aed','#0284c7','#d97706','#dc2626','#0891b2','#059669'];
     $('users-tbody').innerHTML = slice.map((u,i) => {
       const w = u.wallets?.[0] || {};
       const bal = w.balance || 0;
       const blocked = u.blocked || false;
       const initials = (u.name||'?')[0].toUpperCase();
-      const color = grads[i % grads.length];
       const lvl = u.level || 'Silver';
-      const lvlClass = lvl === 'Gold' ? 'gold' : lvl === 'Platinum' ? 'blue' : 'gray';
+      const lvlClass = lvl === 'Gold' ? 'gold' : lvl === 'Platinum' ? 'blue' : lvl === 'Bronze' ? 'gray' : 'gray';
       const date = u.created_at ? new Date(u.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}) : '—';
       return `<tr onclick="A.showUser('${u.id}')">
-        <td><div style="display:flex;align-items:center;gap:10px"><div class="cell-av" style="background:${color}">${initials}</div><div><div class="cell-name">${u.name||'—'}</div><div class="cell-sub">${u.email||''}</div></div></div></td>
-        <td><div class="cell-sub">${u.phone||'—'}</div></td>
-        <td><div class="cell-name">${f(bal)} <span style="font-size:.6rem;color:var(--txt3)">FCFA</span></div></td>
+        <td><div style="display:flex;align-items:center;gap:10px">
+          <div class="cell-av" style="background:${grads[i%grads.length]}">${initials}</div>
+          <div><div class="cell-name">${u.name||'—'}</div><div class="cell-sub">${u.email||''}</div></div>
+        </div></td>
+        <td><div class="cell-mono">${u.phone||'—'}</div></td>
+        <td><div class="cell-name">${f(bal)} <span style="font-size:.58rem;color:var(--txt3)">F</span></div></td>
         <td><span class="badge ${lvlClass}">${lvl}</span></td>
         <td><div class="cell-sub">${date}</div></td>
         <td><span class="badge ${blocked?'red':'green'}">${blocked?'Bloqué':'Actif'}</span></td>
-        <td>
-          <button class="action-btn ${blocked?'success':'danger'}" onclick="event.stopPropagation();A.toggleBlock('${u.id}','${u.name}',${blocked})">${blocked?'Débloquer':'Bloquer'}</button>
-          <button class="action-btn warn" onclick="event.stopPropagation();A.adjustBalance('${u.id}','${u.name}',${bal})">Solde</button>
+        <td onclick="event.stopPropagation()">
+          <button class="action-btn ${blocked?'success':'danger'}" onclick="A.toggleBlock('${u.id}','${u.name||''}',${blocked})">${blocked?'Débloquer':'Bloquer'}</button>
+          <button class="action-btn warn" onclick="A.adjustBalance('${u.id}','${u.name||''}',${bal})">Solde</button>
         </td>
       </tr>`;
-    }).join('') || '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--txt3)">Aucun utilisateur</td></tr>';
+    }).join('') || '<tr><td colspan="7" class="empty-state" style="padding:40px;text-align:center;color:var(--txt3)">Aucun utilisateur</td></tr>';
 
-    // Pagination
     const pages = Math.ceil(list.length / PER);
-    $('users-pagination').innerHTML = `
-      <button class="page-btn" onclick="_usersPage=Math.max(1,_usersPage-1);A._renderUserTable(A._lastUserList||_users)">←</button>
+    $('users-pagination').innerHTML = pages <= 1 ? '' : `
+      <button class="page-btn" onclick="_usersPage=Math.max(1,_usersPage-1);A._renderUserTable(A._lastUserList||_users)" ${page<=1?'disabled':''}>←</button>
       ${Array.from({length:Math.min(pages,7)},(_,i)=>`<button class="page-btn ${i+1===page?'on':''}" onclick="_usersPage=${i+1};A._renderUserTable(A._lastUserList||_users)">${i+1}</button>`).join('')}
-      <button class="page-btn" onclick="_usersPage=Math.min(${pages},_usersPage+1);A._renderUserTable(A._lastUserList||_users)">→</button>
+      <button class="page-btn" onclick="_usersPage=Math.min(${pages},_usersPage+1);A._renderUserTable(A._lastUserList||_users)" ${page>=pages?'disabled':''}>→</button>
       <div class="page-info">${start+1}–${Math.min(start+PER,list.length)} sur ${list.length}</div>`;
-    A._lastUserList = list;
   },
 
   showUser(id) {
@@ -706,24 +1074,27 @@ const A = {
     const totalRec  = userTxs.filter(t => t.to_user_id === id).reduce((s,t) => s+(t.amount||0), 0);
     $('modal-box').innerHTML = `
       <div class="modal-title">Profil utilisateur</div>
-      <div style="display:flex;align-items:center;gap:14px">
-        <div style="width:52px;height:52px;border-radius:50%;background:var(--forest);display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:900;color:#fff">${(u.name||'?')[0]}</div>
-        <div><div style="font-size:.95rem;font-weight:800">${u.name||'—'}</div><div style="font-size:.7rem;color:var(--txt3);margin-top:2px">${u.email||''}</div></div>
-        <span class="badge ${u.blocked?'red':'green'}" style="margin-left:auto">${u.blocked?'Bloqué':'Actif'}</span>
+      <div style="display:flex;align-items:center;gap:14px;padding:16px;background:var(--bg2);border-radius:14px">
+        <div style="width:54px;height:54px;border-radius:50%;background:var(--forest);display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:900;color:#fff;flex-shrink:0">${(u.name||'?')[0].toUpperCase()}</div>
+        <div style="flex:1">
+          <div style="font-size:1rem;font-weight:800">${u.name||'—'}</div>
+          <div style="font-size:.72rem;color:var(--txt3);margin-top:3px">${u.email||''}</div>
+        </div>
+        <span class="badge ${u.blocked?'red':'green'}">${u.blocked?'Bloqué':'Actif'}</span>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <div class="modal-row"><div class="modal-lbl">Téléphone</div><div class="modal-val">${u.phone||'—'}</div></div>
         <div class="modal-row"><div class="modal-lbl">Niveau KYC</div><div class="modal-val">${u.level||'Silver'}</div></div>
-        <div class="modal-row"><div class="modal-lbl">Solde wallet</div><div class="modal-val">${f(w.balance||0)} FCFA</div></div>
-        <div class="modal-row"><div class="modal-lbl">Coffre</div><div class="modal-val">${f(w.coffre_balance||0)} FCFA</div></div>
+        <div class="modal-row"><div class="modal-lbl">Solde wallet</div><div class="modal-val" style="color:var(--green2)">${f(w.balance||0)} FCFA</div></div>
+        <div class="modal-row"><div class="modal-lbl">Coffre épargne</div><div class="modal-val">${f(w.coffre_balance||0)} FCFA</div></div>
         <div class="modal-row"><div class="modal-lbl">Total envoyé</div><div class="modal-val">${f(totalSent)} FCFA</div></div>
         <div class="modal-row"><div class="modal-lbl">Total reçu</div><div class="modal-val">${f(totalRec)} FCFA</div></div>
         <div class="modal-row"><div class="modal-lbl">Transactions</div><div class="modal-val">${userTxs.length}</div></div>
         <div class="modal-row"><div class="modal-lbl">Inscrit le</div><div class="modal-val">${u.created_at ? new Date(u.created_at).toLocaleDateString('fr-FR') : '—'}</div></div>
       </div>
       <div class="modal-btns">
-        <button class="mbn ${u.blocked?'success':'danger'}" onclick="A.toggleBlock('${u.id}','${u.name}',${!!u.blocked});A.closeModal()">${u.blocked?'Débloquer':'Bloquer'}</button>
-        <button class="mbn warn" onclick="A.adjustBalance('${u.id}','${u.name}',${w.balance||0})">Ajuster solde</button>
+        <button class="mbn ${u.blocked?'success':'danger'}" onclick="A.toggleBlock('${u.id}','${u.name||''}',${!!u.blocked});A.closeModal()">${u.blocked?'Débloquer':'Bloquer'}</button>
+        <button class="mbn warn" onclick="A.adjustBalance('${u.id}','${u.name||''}',${w.balance||0})">Ajuster solde</button>
         <button class="mbn cancel" onclick="A.closeModal()">Fermer</button>
       </div>`;
     $('modal').classList.add('on');
@@ -741,9 +1112,9 @@ const A = {
   adjustBalance(userId, name, currentBal) {
     $('modal-box').innerHTML = `
       <div class="modal-title">Ajuster le solde — ${name}</div>
-      <div class="modal-row"><div class="modal-lbl">Solde actuel</div><div class="modal-val">${f(currentBal)} FCFA</div></div>
-      <div class="modal-row"><div class="modal-lbl">Nouveau solde (FCFA)</div><input id="new-bal" class="inp" type="number" placeholder="${currentBal}" value="${currentBal}" style="margin-top:4px"/></div>
-      <div class="modal-row"><div class="modal-lbl">Raison (optionnel)</div><input id="bal-reason" class="inp" placeholder="Ex: Correction erreur, bonus..." style="margin-top:4px"/></div>
+      <div class="modal-row"><div class="modal-lbl">Solde actuel</div><div class="modal-val" style="color:var(--green2)">${f(currentBal)} FCFA</div></div>
+      <div class="modal-row"><div class="modal-lbl">Nouveau solde (FCFA)</div><input id="new-bal" class="inp" type="number" placeholder="${currentBal}" value="${currentBal}" style="margin-top:6px"/></div>
+      <div class="modal-row"><div class="modal-lbl">Raison (optionnel)</div><input id="bal-reason" class="inp" placeholder="Ex: Correction erreur, bonus promotionnel…" style="margin-top:6px"/></div>
       <div class="modal-btns">
         <button class="mbn success" onclick="A._doAdjustBalance('${userId}','${name}')">Appliquer</button>
         <button class="mbn cancel" onclick="A.closeModal()">Annuler</button>
@@ -758,15 +1129,14 @@ const A = {
     const u = _users.find(x => x.id === userId);
     if (u?.wallets?.[0]) u.wallets[0].balance = newBal;
     A.closeModal(); A.render_users();
-    A.toast(`Solde de ${name} mis à jour → ${f(newBal)} FCFA`, 'ok');
+    A.toast(`Solde de ${name} → ${f(newBal)} FCFA`, 'ok');
   },
 
   // ── TRANSACTIONS ──
-  render_transactions() { A._renderTxTable(_txs); },
-
+  render_transactions() { A._lastTxList = _txs; A._renderTxTable(_txs); },
   filterTx() {
     const typeFilter = $('tx-filter-type')?.value || '';
-    const q = $('tx-search')?.value.trim().toLowerCase() || '';
+    const q = ($('tx-search')?.value || '').trim().toLowerCase();
     let filtered = _txs;
     if (typeFilter) filtered = filtered.filter(t => t.type === typeFilter);
     if (q) filtered = filtered.filter(t =>
@@ -776,54 +1146,50 @@ const A = {
       String(t.amount).includes(q)
     );
     _txsPage = 1;
+    A._lastTxList = filtered;
     A._renderTxTable(filtered);
   },
-
   _renderTxTable(list) {
     const page = _txsPage, start = (page-1)*PER, slice = list.slice(start, start+PER);
     $('tx-tbody').innerHTML = slice.map(t => A._txRow(t, true)).join('') ||
-      '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--txt3)">Aucune transaction</td></tr>';
+      '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--txt3)">Aucune transaction</td></tr>';
     const pages = Math.ceil(list.length / PER);
-    $('tx-pagination').innerHTML = `
-      <button class="page-btn" onclick="_txsPage=Math.max(1,_txsPage-1);A._renderTxTable(A._lastTxList||_txs)">←</button>
+    $('tx-pagination').innerHTML = pages <= 1 ? '' : `
+      <button class="page-btn" onclick="_txsPage=Math.max(1,_txsPage-1);A._renderTxTable(A._lastTxList||_txs)" ${page<=1?'disabled':''}>←</button>
       ${Array.from({length:Math.min(pages,7)},(_,i)=>`<button class="page-btn ${i+1===page?'on':''}" onclick="_txsPage=${i+1};A._renderTxTable(A._lastTxList||_txs)">${i+1}</button>`).join('')}
-      <button class="page-btn" onclick="_txsPage=Math.min(${pages},_txsPage+1);A._renderTxTable(A._lastTxList||_txs)">→</button>
+      <button class="page-btn" onclick="_txsPage=Math.min(${pages},_txsPage+1);A._renderTxTable(A._lastTxList||_txs)" ${page>=pages?'disabled':''}>→</button>
       <div class="page-info">${start+1}–${Math.min(start+PER,list.length)} sur ${list.length}</div>`;
-    A._lastTxList = list;
   },
-
   _txRow(t, full=false) {
     const from = t.from_user?.name || '—';
     const to   = t.to_user?.name || t.merchant_name || '—';
-    const types = { transfer:'Transfert', qr:'QR Pay', recharge:'Recharge', coffre_deposit:'Coffre', tontine:'Tontine', bill:'Facture' };
-    const typeColors = { transfer:'green', qr:'gold', recharge:'blue', coffre_deposit:'blue', tontine:'gray' };
+    const types = { transfer:'Transfert', qr:'QR Pay', recharge:'Recharge', coffre_deposit:'Coffre', tontine:'Tontine', bill:'Facture', coffre_withdraw:'Retrait Coffre' };
+    const typeColors = { transfer:'green', qr:'gold', recharge:'blue', coffre_deposit:'blue', coffre_withdraw:'purple', tontine:'purple' };
     const typ = t.type || 'transfer';
     const date = t.created_at ? new Date(t.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '—';
     const status = t.status || 'completed';
-    const statusClass = status === 'completed' ? 'green' : status === 'cancelled' ? 'red' : 'gold';
+    const sc = status === 'completed' ? 'green' : status === 'cancelled' ? 'red' : 'gold';
     if (full) {
-      const shortId = (t.id || '').slice(0,8) + '…';
       return `<tr>
-        <td><span style="font-family:var(--fm);font-size:.65rem;color:var(--txt3)">${shortId}</span></td>
+        <td><span class="cell-mono">${(t.id||'').slice(0,8)}…</span></td>
         <td><div class="cell-name">${from}</div></td>
         <td><div class="cell-name">${to}</div></td>
-        <td><div class="cell-name" style="color:${typ==='transfer'&&t.to_user_id?'var(--green2)':'var(--txt)'}">${f(t.amount)} <span style="font-size:.6rem;color:var(--txt3)">FCFA</span></div></td>
+        <td><div class="cell-name" style="color:var(--green2)">${f(t.amount)} <span style="font-size:.58rem;opacity:.6">F</span></div></td>
         <td><span class="badge ${typeColors[typ]||'gray'}">${types[typ]||typ}</span></td>
         <td><div class="cell-sub">${date}</div></td>
-        <td><span class="badge ${statusClass}">${status}</span></td>
+        <td><span class="badge ${sc}">${status}</span></td>
         <td>${status !== 'cancelled' ? `<button class="action-btn danger" onclick="A.cancelTx('${t.id}')">Annuler</button>` : ''}</td>
       </tr>`;
     }
     return `<tr>
       <td><div class="cell-name">${from}</div></td>
       <td><div class="cell-name">${to}</div></td>
-      <td><div class="cell-name">${f(t.amount)} <span style="font-size:.6rem;color:var(--txt3)">FCFA</span></div></td>
+      <td><div class="cell-name" style="color:var(--green2)">${f(t.amount)} <span style="font-size:.58rem;opacity:.6">F</span></div></td>
       <td><span class="badge ${typeColors[typ]||'gray'}">${types[typ]||typ}</span></td>
       <td><div class="cell-sub">${date}</div></td>
-      <td><span class="badge ${statusClass}">${status}</span></td>
+      <td><span class="badge ${sc}">${status}</span></td>
     </tr>`;
   },
-
   async cancelTx(id) {
     if (!confirm('Annuler cette transaction ? Cette action est irréversible.')) return;
     const { error } = await db.from('transactions').update({ status: 'cancelled' }).eq('id', id);
@@ -836,7 +1202,17 @@ const A = {
 
   // ── TONTINES ──
   render_tontines() {
-    const colors = ['linear-gradient(135deg,#7c3aed,#a78bfa)','linear-gradient(135deg,#0A4A2E,#16A34A)','linear-gradient(135deg,#0284c7,#38bdf8)','linear-gradient(135deg,#d97706,#fcd34d)'];
+    const colors = [
+      'linear-gradient(135deg,#7c3aed,#a78bfa)',
+      'linear-gradient(135deg,#0A4A2E,#16A34A)',
+      'linear-gradient(135deg,#0284c7,#38bdf8)',
+      'linear-gradient(135deg,#d97706,#fcd34d)',
+      'linear-gradient(135deg,#dc2626,#f87171)',
+    ];
+    if (!_tontines.length) {
+      $('tontines-grid').innerHTML = `<div class="empty-state" style="grid-column:1/-1;background:var(--card);border-radius:18px;border:1px solid var(--border)"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><p>Aucune tontine trouvée</p></div>`;
+      return;
+    }
     $('tontines-grid').innerHTML = _tontines.map((t, i) => {
       const memberCount = t.tontine_members?.[0]?.count || 0;
       const paid = t.members_paid || 0;
@@ -844,24 +1220,26 @@ const A = {
       const date = t.created_at ? new Date(t.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}) : '—';
       return `<div class="tontine-card">
         <div class="tnt-hd">
-          <div class="tnt-ic" style="background:${colors[i%colors.length].includes('gradient')?'var(--forest)':colors[i%colors.length]}">${t.name[0]}</div>
-          <div><div class="tnt-nm">${t.name}</div><div class="tnt-meta">${t.frequency==='weekly'?'Hebdo':'Mensuelle'} · ${date}</div></div>
-          <div class="tnt-badge"><span class="badge ${pct===100?'green':'gold'}">${pct===100?'Complet':paid+'/'+memberCount}</span></div>
+          <div class="tnt-ic" style="background:${i%2===0?'var(--forest)':'#7c3aed'}">${(t.name||'T')[0].toUpperCase()}</div>
+          <div>
+            <div class="tnt-nm">${t.name||'Tontine'}</div>
+            <div class="tnt-meta">${t.frequency==='weekly'?'Hebdo':'Mensuelle'} · ${date}</div>
+          </div>
+          <div class="tnt-badge"><span class="badge ${pct===100?'green':paid>0?'gold':'gray'}">${pct===100?'Complet':paid+'/'+memberCount}</span></div>
         </div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:.78rem">
-          <span style="color:var(--txt2)">${memberCount} membre${memberCount>1?'s':''}</span>
-          <span style="font-weight:800;color:var(--txt)">${f(t.amount_per_cycle)} FCFA/cycle</span>
+        <div class="tnt-stats">
+          <div class="tnt-stat"><div class="tnt-stat-lbl">Membres</div><div class="tnt-stat-val">${memberCount}</div></div>
+          <div class="tnt-stat"><div class="tnt-stat-lbl">Cotisation</div><div class="tnt-stat-val">${f(t.amount_per_cycle||0)} F</div></div>
         </div>
         <div class="tnt-bar-bg"><div class="tnt-bar" style="width:${pct}%"></div></div>
-        <div class="tnt-footer"><span>${paid} cotisé${paid>1?'s':''}</span><span>${pct}%</span></div>
+        <div class="tnt-footer"><span>${paid} cotisé${paid>1?'s':''}</span><span style="font-weight:700;color:${pct===100?'var(--green2)':'var(--gold2)'}">${pct}%</span></div>
         <div class="tnt-actions">
-          <button class="action-btn warn" onclick="A.resetTontineCycle('${t.id}','${t.name}')">Reset cycle</button>
-          <button class="action-btn danger" onclick="A.deleteTontine('${t.id}','${t.name}')">Supprimer</button>
+          <button class="action-btn warn" onclick="A.resetTontineCycle('${t.id}','${t.name||''}')">Reset cycle</button>
+          <button class="action-btn danger" onclick="A.deleteTontine('${t.id}','${t.name||''}')">Supprimer</button>
         </div>
       </div>`;
-    }).join('') || `<div class="empty-state" style="grid-column:1/-1"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Aucune tontine</div>`;
+    }).join('');
   },
-
   async resetTontineCycle(id, name) {
     if (!confirm(`Réinitialiser le cycle de "${name}" ?`)) return;
     await db.from('tontine_members').update({ has_paid: false }).eq('tontine_id', id);
@@ -871,7 +1249,6 @@ const A = {
     A.render_tontines();
     A.toast(`Cycle de "${name}" réinitialisé`, 'ok');
   },
-
   async deleteTontine(id, name) {
     if (!confirm(`Supprimer définitivement la tontine "${name}" ?`)) return;
     await db.from('tontine_members').delete().eq('tontine_id', id);
@@ -883,26 +1260,29 @@ const A = {
 
   // ── COFFRES ──
   render_coffres() {
+    if (!_coffres.length) {
+      $('coffres-tbody').innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--txt3)">Aucun coffre</td></tr>';
+      return;
+    }
     $('coffres-tbody').innerHTML = _coffres.map(c => {
-      const pct = c.target > 0 ? Math.round((c.saved/c.target)*100) : 0;
+      const pct = c.target > 0 ? Math.min(100, Math.round((c.saved||0)/c.target*100)) : 0;
       const unlock = c.unlock_date ? new Date(c.unlock_date).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}) : '—';
       return `<tr>
-        <td><div class="cell-name">${c.name}</div></td>
-        <td><div class="cell-sub">${c.user?.name||'—'} · ${c.user?.phone||''}</div></td>
-        <td><div class="cell-name">${f(c.saved)} <span style="font-size:.6rem;color:var(--txt3)">FCFA</span></div></td>
-        <td><div class="cell-sub">${f(c.target)} FCFA</div></td>
+        <td><div class="cell-name">${c.name||'—'}</div></td>
+        <td><div class="cell-name">${c.user?.name||'—'}</div><div class="cell-sub">${c.user?.phone||''}</div></td>
+        <td><div class="cell-name" style="color:var(--green2)">${f(c.saved||0)} <span style="font-size:.58rem;opacity:.6">F</span></div></td>
+        <td><div class="cell-sub">${f(c.target||0)} F</div></td>
         <td>
-          <div style="display:flex;align-items:center;gap:8px">
-            <div style="flex:1;background:rgba(255,255,255,.08);border-radius:100px;height:5px;overflow:hidden"><div style="width:${pct}%;height:100%;background:var(--green2);border-radius:100px"></div></div>
-            <span style="font-size:.65rem;color:var(--txt3);font-family:var(--fm)">${pct}%</span>
+          <div class="prog-wrap">
+            <div class="prog-bg"><div class="prog-fill" style="width:${pct}%"></div></div>
+            <span style="font-size:.62rem;color:var(--txt3);font-family:var(--fm);flex-shrink:0">${pct}%</span>
           </div>
         </td>
         <td><div class="cell-sub">${unlock}</div></td>
-        <td><button class="action-btn danger" onclick="A.deleteCoffre('${c.id}','${c.name}')">Supprimer</button></td>
+        <td><button class="action-btn danger" onclick="A.deleteCoffre('${c.id}','${c.name||''}')">Supprimer</button></td>
       </tr>`;
-    }).join('') || '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--txt3)">Aucun coffre</td></tr>';
+    }).join('');
   },
-
   async deleteCoffre(id, name) {
     if (!confirm(`Supprimer le coffre "${name}" ?`)) return;
     await db.from('coffres').delete().eq('id', id);
@@ -911,58 +1291,115 @@ const A = {
     A.toast(`Coffre "${name}" supprimé`, 'err');
   },
 
-  // ── NOTIFICATIONS BULK ──
+  // ── NOTIFICATIONS ──
   render_notifs() {
+    if (!_notifs.length) {
+      $('notifs-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--txt3)">Aucune notification envoyée</td></tr>';
+      return;
+    }
     $('notifs-tbody').innerHTML = _notifs.map(n => {
       const date = n.created_at ? new Date(n.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '—';
       return `<tr>
         <td><div class="cell-name">${n.user?.name||'—'}</div></td>
         <td><div class="cell-name">${n.title||'—'}</div></td>
-        <td><div class="cell-sub">${(n.body||'').slice(0,60)}${(n.body||'').length>60?'…':''}</div></td>
+        <td><div class="cell-sub">${(n.body||'').slice(0,55)}${(n.body||'').length>55?'…':''}</div></td>
         <td><span class="badge gray">${n.type||'system'}</span></td>
         <td><div class="cell-sub">${date}</div></td>
         <td><span class="badge ${n.read?'gray':'green'}">${n.read?'Lu':'Non lu'}</span></td>
       </tr>`;
-    }).join('') || '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--txt3)">Aucune notification</td></tr>';
+    }).join('');
   },
-
   async sendBulkNotif() {
     const title  = $('notif-title')?.value.trim();
     const body   = $('notif-body')?.value.trim();
     const target = $('notif-target')?.value;
     if (!title || !body) { A.toast('Titre et message requis', 'err'); return; }
-
     let users = _users;
     if (target === 'gold') users = users.filter(u => u.level === 'Gold');
     if (target === 'silver') users = users.filter(u => u.level === 'Silver');
-
     const inserts = users.map(u => ({ user_id: u.id, type: 'admin', title, body, read: false }));
     const { error } = await db.from('notifications').insert(inserts);
     if (error) { A.toast('Erreur: ' + error.message, 'err'); return; }
-
     await A.loadNotifs();
     A.render_notifs();
-    $('notif-title').value = '';
-    $('notif-body').value = '';
+    $('notif-title').value = ''; $('notif-body').value = '';
     A.toast(`Notification envoyée à ${inserts.length} utilisateur${inserts.length>1?'s':''}`, 'ok');
+  },
+
+  // ── EXPORT CSV ──
+  exportCSV(type) {
+    let rows = [], headers = [], filename = '';
+    if (type === 'users') {
+      headers = ['Nom','Email','Téléphone','Niveau','Solde (FCFA)','Coffre (FCFA)','Statut','Inscrit le'];
+      rows = _users.map(u => {
+        const w = u.wallets?.[0] || {};
+        return [u.name||'', u.email||'', u.phone||'', u.level||'', w.balance||0, w.coffre_balance||0, u.blocked?'Bloqué':'Actif', u.created_at ? new Date(u.created_at).toLocaleDateString('fr-FR') : ''];
+      });
+      filename = `ghettopay_users_${A._dateTag()}.csv`;
+    } else if (type === 'transactions') {
+      headers = ['ID','De','À / Marchand','Montant (FCFA)','Type','Date','Statut'];
+      rows = (A._lastTxList || _txs).map(t => [
+        t.id||'', t.from_user?.name||'', t.to_user?.name||t.merchant_name||'',
+        t.amount||0, t.type||'', t.created_at ? new Date(t.created_at).toLocaleString('fr-FR') : '', t.status||''
+      ]);
+      filename = `ghettopay_transactions_${A._dateTag()}.csv`;
+    } else if (type === 'tontines') {
+      headers = ['Nom','Fréquence','Membres','Cotisation (FCFA)','Payés','Créé le'];
+      rows = _tontines.map(t => [
+        t.name||'', t.frequency||'', t.tontine_members?.[0]?.count||0,
+        t.amount_per_cycle||0, t.members_paid||0,
+        t.created_at ? new Date(t.created_at).toLocaleDateString('fr-FR') : ''
+      ]);
+      filename = `ghettopay_tontines_${A._dateTag()}.csv`;
+    } else if (type === 'coffres') {
+      headers = ['Nom','Propriétaire','Téléphone','Épargné (FCFA)','Objectif (FCFA)','% atteint','Déblocage'];
+      rows = _coffres.map(c => {
+        const pct = c.target > 0 ? Math.round((c.saved||0)/c.target*100) : 0;
+        return [c.name||'', c.user?.name||'', c.user?.phone||'', c.saved||0, c.target||0, pct+'%', c.unlock_date ? new Date(c.unlock_date).toLocaleDateString('fr-FR') : ''];
+      });
+      filename = `ghettopay_coffres_${A._dateTag()}.csv`;
+    } else if (type === 'notifs') {
+      headers = ['Destinataire','Titre','Message','Type','Date','Lu'];
+      rows = _notifs.map(n => [
+        n.user?.name||'', n.title||'', n.body||'', n.type||'',
+        n.created_at ? new Date(n.created_at).toLocaleString('fr-FR') : '', n.read ? 'Oui' : 'Non'
+      ]);
+      filename = `ghettopay_notifications_${A._dateTag()}.csv`;
+    }
+    if (!rows.length) { A.toast('Aucune donnée à exporter', 'warn'); return; }
+    const bom = '\uFEFF'; // UTF-8 BOM for Excel
+    const csv = bom + [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    A.toast(`Export "${filename}" téléchargé`, 'ok');
+  },
+  _dateTag() {
+    const d = new Date();
+    return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
   },
 
   // ── UTILS ──
   closeModal() { $('modal').classList.remove('on'); },
   toast(msg, type) {
     const t = $('adm-toast');
-    t.textContent = msg; t.className = 'adm-toast ' + (type||'') + ' on';
-    clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('on'), 3500);
+    t.textContent = msg;
+    t.className = 'adm-toast ' + (type||'') + ' on';
+    clearTimeout(t._t);
+    t._t = setTimeout(() => t.classList.remove('on'), 3500);
   },
 };
 
-// Fermer modal en cliquant dehors
+// Close modal on overlay click
 $('modal').addEventListener('click', e => { if (e.target === $('modal')) A.closeModal(); });
 
 // Init clock
-$('adm-clock').textContent = new Date().toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'}) + ' · ' + new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+const _now = new Date();
+$('adm-clock').textContent = _now.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'}) + ' · ' + _now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
 
-// Vérifier si déjà connecté comme admin
+// Auto-login if session active
 (async () => {
   const { data: { session } } = await db.auth.getSession();
   if (session?.user?.email === ADMIN_EMAIL) {
@@ -973,33 +1410,5 @@ $('adm-clock').textContent = new Date().toLocaleDateString('fr-FR',{weekday:'sho
   }
 })();
 </script>
-
-<!-- MOBILE BOTTOM NAV -->
-<nav class="adm-mobile-nav" id="adm-mobile-nav">
-  <div class="adm-mobile-nav-item on" data-ms="dashboard" onclick="A.section('dashboard');A._mobileNavActive('dashboard')">
-    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-    <span>Tableau</span>
-  </div>
-  <div class="adm-mobile-nav-item" data-ms="users" onclick="A.section('users');A._mobileNavActive('users')">
-    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-    <span>Utilisateurs</span>
-  </div>
-  <div class="adm-mobile-nav-item" data-ms="transactions" onclick="A.section('transactions');A._mobileNavActive('transactions')">
-    <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-    <span>Transactions</span>
-  </div>
-  <div class="adm-mobile-nav-item" data-ms="tontines" onclick="A.section('tontines');A._mobileNavActive('tontines')">
-    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-    <span>Tontines</span>
-  </div>
-  <div class="adm-mobile-nav-item" data-ms="coffres" onclick="A.section('coffres');A._mobileNavActive('coffres')">
-    <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-    <span>Coffres</span>
-  </div>
-  <div class="adm-mobile-nav-item" data-ms="notifs" onclick="A.section('notifs');A._mobileNavActive('notifs')">
-    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-    <span>Notifs</span>
-  </div>
-</nav>
 </body>
 </html>
