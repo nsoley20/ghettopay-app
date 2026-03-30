@@ -8,6 +8,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="theme-color" content="#0A4A2E"/>
 <title>GhettoPay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;0,9..40,900;1,9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -115,29 +118,7 @@ body{
   .island{display:none}
 }
 
-/* ── PC ≥1280px : sidebar + shell ──────────────────── */
-@media(min-width:1280px){
-  body{flex-direction:row;gap:56px;padding:0 48px;justify-content:center;align-items:center}
-  .shell{
-    flex-shrink:0;
-    width:420px;
-    height:min(880px,calc(100vh - 32px));
-    border-radius:42px;
-    padding:8px;
-    box-shadow:0 0 0 1px rgba(255,255,255,.12),0 36px 90px rgba(0,0,0,.5);
-  }
-  .shell-inner{border-radius:34px}
-  .island{display:none}
-  .desktop-side{
-    display:flex;
-    flex-direction:column;
-    gap:24px;
-    width:280px;
-    flex-shrink:0;
-    max-height:calc(100vh - 32px);
-    overflow:hidden;
-  }
-}
+/* ── PC ≥1280px : handled in gp-layout CSS block above ── */
 
 .sc{
   position:absolute;inset:0;
@@ -767,7 +748,291 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
 .skel{background:var(--bg3);border-radius:8px;animation:pulse 1.4s ease-in-out infinite}
 
-/* ── Petits écrans ≤ 360px (iPhone SE, vieux Android) ─────────────── */
+/* ╔═════════════════════════════════════════════════╗
+   ║  DESKTOP LAYOUT — gp-layout (≥1280px)           ║
+   ╚═════════════════════════════════════════════════╝ */
+.gp-layout{display:none}
+
+@media(min-width:1280px){
+  /* Override body for desktop */
+  body{overflow:hidden;background:#F5F2EA;display:block;padding:0}
+  .shell{
+    position:fixed!important;
+    right:24px;top:50%;
+    transform:translateY(-50%);
+    width:330px;
+    height:min(680px,calc(100vh - 40px));
+    border-radius:36px;
+    padding:6px;
+    z-index:110;
+    flex-shrink:0;
+    box-shadow:0 0 0 1px rgba(255,255,255,.13),0 28px 70px rgba(0,0,0,.45);
+  }
+  .shell-inner{border-radius:30px}
+  .island{display:none}
+  /* Desktop layout */
+  .gp-layout{
+    display:flex;
+    position:fixed;inset:0;z-index:100;
+    background:#F5F2EA;
+    font-family:'DM Sans',system-ui,sans-serif;
+  }
+}
+
+/* ── SIDEBAR ── */
+.gp-sidebar{
+  width:64px;background:#1C1C1C;
+  display:flex;flex-direction:column;align-items:center;
+  padding:20px 0 24px;gap:4px;flex-shrink:0;
+  position:relative;z-index:10;
+}
+.gp-sidebar-logo{
+  width:40px;height:40px;border-radius:12px;
+  background:linear-gradient(145deg,#D4A820,#E8C040);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:20px;cursor:pointer;transition:transform .2s;
+  box-shadow:0 4px 16px rgba(212,168,32,.4);
+  border:none;flex-shrink:0;
+}
+.gp-sidebar-logo:hover{transform:scale(1.06)}
+.gp-sidebar-logo svg{width:22px;height:22px;stroke:#0A4A2E;stroke-width:2.4;fill:none}
+.gp-nav{display:flex;flex-direction:column;align-items:center;gap:4px;width:100%}
+.gp-nav-item{
+  width:44px;height:44px;border-radius:13px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;position:relative;
+  transition:background .18s,transform .15s;
+  border:none;background:none;
+}
+.gp-nav-item svg{width:20px;height:20px;stroke:rgba(255,255,255,.35);stroke-width:1.8;fill:none;transition:stroke .18s}
+.gp-nav-item:hover{background:rgba(255,255,255,.08)}
+.gp-nav-item:hover svg{stroke:rgba(255,255,255,.7)}
+.gp-nav-item.gp-active{background:rgba(255,255,255,.12)}
+.gp-nav-item.gp-active svg{stroke:#fff}
+.gp-nav-item.gp-active::after{
+  content:'';position:absolute;left:-1px;top:50%;transform:translateY(-50%);
+  width:3px;height:20px;background:#E8C040;border-radius:0 3px 3px 0;
+}
+.gp-nav-item[data-tip]::before{
+  content:attr(data-tip);
+  position:absolute;left:calc(100% + 12px);
+  background:rgba(255,255,255,.96);color:#1A1A1A;
+  font-size:.72rem;font-weight:700;padding:5px 10px;border-radius:8px;
+  white-space:nowrap;pointer-events:none;
+  opacity:0;transform:translateX(-4px);
+  transition:opacity .18s,transform .18s;
+  box-shadow:0 4px 16px rgba(0,0,0,.1);z-index:200;
+  font-family:'DM Sans',system-ui,sans-serif;
+}
+.gp-nav-item[data-tip]:hover::before{opacity:1;transform:translateX(0)}
+.gp-nav-sep{width:28px;height:1px;background:rgba(255,255,255,.1);margin:8px 0;flex-shrink:0}
+.gp-sidebar-av{
+  margin-top:auto;width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,#D4A820,#0A4A2E);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:.85rem;color:#fff;cursor:pointer;
+  border:2px solid rgba(255,255,255,.15);transition:transform .18s;
+  flex-shrink:0;
+}
+.gp-sidebar-av:hover{transform:scale(1.08)}
+
+/* ── MAIN ── */
+.gp-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* ── TOPBAR ── */
+.gp-topbar{
+  height:64px;padding:0 320px 0 28px;
+  display:flex;align-items:center;gap:12px;
+  border-bottom:1px solid rgba(0,0,0,.07);
+  background:#F5F2EA;flex-shrink:0;
+}
+.gp-topbar-greet{
+  font-size:.6rem;font-weight:700;color:#7A7A6A;
+  text-transform:uppercase;letter-spacing:.12em;
+  font-family:'DM Mono',monospace;
+}
+.gp-topbar-title{
+  font-size:1.2rem;font-weight:800;color:#1A1A1A;letter-spacing:-.02em;
+}
+.gp-topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.gp-topbar-notif{
+  width:38px;height:38px;border-radius:11px;background:rgba(0,0,0,.05);
+  border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:background .15s;position:relative;
+}
+.gp-topbar-notif:hover{background:rgba(0,0,0,.09)}
+.gp-topbar-notif svg{width:18px;height:18px;stroke:#5A5A5A;stroke-width:1.9;fill:none}
+.gp-notif-badge{
+  position:absolute;top:7px;right:7px;width:8px;height:8px;
+  border-radius:50%;background:#22C55E;border:2px solid #F5F2EA;display:none;
+}
+.gp-topbar-av{
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,#D4A820,#0A4A2E);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:.82rem;color:#fff;cursor:pointer;
+  border:2px solid rgba(0,0,0,.08);transition:transform .15s;
+  font-family:'DM Sans',system-ui,sans-serif;
+}
+.gp-topbar-av:hover{transform:scale(1.05)}
+
+/* ── CONTENT ── */
+.gp-content{
+  flex:1;overflow-y:auto;
+  padding:24px 368px 36px 28px;
+  display:flex;flex-direction:column;gap:18px;
+}
+.gp-content::-webkit-scrollbar{width:4px}
+.gp-content::-webkit-scrollbar-track{background:transparent}
+.gp-content::-webkit-scrollbar-thumb{background:rgba(0,0,0,.12);border-radius:100px}
+
+/* ── STAT CARDS ── */
+.gp-cards-row{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+.gp-card{
+  border-radius:22px;padding:20px 22px 18px;
+  position:relative;overflow:hidden;
+  transition:transform .2s,box-shadow .2s;
+  animation:gpFadeUp .35s ease both;
+}
+.gp-card:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,0,0,.12)}
+.gp-card::before{
+  content:'';position:absolute;
+  width:100px;height:100px;border-radius:50%;
+  background:rgba(255,255,255,.18);right:-20px;bottom:-30px;pointer-events:none;
+}
+.gp-card::after{
+  content:'';position:absolute;
+  width:60px;height:60px;border-radius:50%;
+  background:rgba(255,255,255,.1);right:46px;top:-16px;pointer-events:none;
+}
+.gp-card-gold{
+  background:linear-gradient(145deg,#C8960A,#D4A820,#E8C040);
+  box-shadow:0 6px 24px rgba(200,150,10,.28);
+}
+.gp-card-gold .gp-card-label{color:rgba(0,0,0,.42)}
+.gp-card-gold .gp-card-value{color:#5A3A00}
+.gp-card-gold .gp-card-sub{color:rgba(0,0,0,.35)}
+.gp-card-forest{
+  background:linear-gradient(145deg,#0A4A2E,#0F5C38,#1A6B40);
+  box-shadow:0 6px 24px rgba(10,74,46,.28);
+}
+.gp-card-forest .gp-card-label,.gp-card-forest .gp-card-sub{color:rgba(255,255,255,.45)}
+.gp-card-forest .gp-card-value{color:#fff}
+.gp-card-green{
+  background:linear-gradient(145deg,#16A34A,#22C55E,#4ADE80);
+  box-shadow:0 6px 24px rgba(22,163,74,.28);
+}
+.gp-card-green .gp-card-label,.gp-card-green .gp-card-sub{color:rgba(255,255,255,.5)}
+.gp-card-green .gp-card-value{color:#fff}
+.gp-card-purple{
+  background:linear-gradient(145deg,#9B59D0,#B47DE8,#C084FC);
+  box-shadow:0 6px 24px rgba(155,89,208,.28);
+}
+.gp-card-purple .gp-card-label,.gp-card-purple .gp-card-sub{color:rgba(255,255,255,.5)}
+.gp-card-purple .gp-card-value{color:#fff}
+.gp-card-label{
+  font-family:'DM Mono',monospace;font-size:.54rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:.16em;margin-bottom:8px;display:block;
+}
+.gp-card-value{
+  font-size:1.65rem;font-weight:900;letter-spacing:-.03em;
+  line-height:1;display:block;margin-bottom:5px;
+  font-family:'DM Sans',system-ui,sans-serif;
+}
+.gp-card-sub{
+  font-size:.6rem;font-weight:500;display:block;
+  font-family:'DM Mono',monospace;
+}
+
+/* ── DASHBOARD ROW ── */
+.gp-dashboard-row{display:grid;grid-template-columns:1.5fr 1fr;gap:13px;flex:1;min-height:0}
+.gp-chart-card,.gp-activity-card{
+  background:#fff;border-radius:22px;
+  padding:22px 24px;
+  border:1px solid rgba(0,0,0,.05);
+  box-shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  display:flex;flex-direction:column;
+  animation:gpFadeUp .4s .2s ease both;
+}
+.gp-section-title{
+  font-size:.78rem;font-weight:800;color:#1A1A1A;margin-bottom:18px;
+  display:flex;align-items:center;justify-content:space-between;
+  font-family:'DM Sans',system-ui,sans-serif;
+}
+.gp-section-title span{
+  font-size:.62rem;font-weight:400;color:#9A9A9A;
+  font-family:'DM Mono',monospace;
+}
+/* Bar chart */
+.gp-bar-chart{display:flex;align-items:flex-end;gap:9px;flex:1;min-height:100px}
+.gp-bar-col{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1}
+.gp-bar{
+  width:100%;border-radius:7px 7px 0 0;min-height:5px;
+  transition:opacity .2s;position:relative;overflow:hidden;
+}
+.gp-bar::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.22) 0%,transparent 50%);
+}
+.gp-bar.gp-forest{background:linear-gradient(180deg,#1A6B40,#0A4A2E)}
+.gp-bar.gp-gold{background:linear-gradient(180deg,#E8C040,#D4A820)}
+.gp-bar-col:hover .gp-bar{opacity:.78}
+.gp-bar-lbl{font-family:'DM Mono',monospace;font-size:.58rem;color:#9A9A9A;text-align:center}
+.gp-bar-val{font-family:'DM Mono',monospace;font-size:.58rem;color:#5A5A5A;text-align:center}
+
+/* Activity */
+.gp-activity-card{overflow:hidden}
+.gp-activity-list{display:flex;flex-direction:column;flex:1;overflow-y:auto}
+.gp-activity-list::-webkit-scrollbar{display:none}
+.gp-act-item{
+  display:flex;align-items:center;gap:11px;
+  padding:10px 6px;border-bottom:1px solid rgba(0,0,0,.05);
+  cursor:pointer;border-radius:8px;
+  transition:background .12s;
+  animation:gpFadeUp .3s ease both;
+}
+.gp-act-item:last-child{border-bottom:none}
+.gp-act-item:hover{background:rgba(0,0,0,.025)}
+.gp-act-av{
+  width:36px;height:36px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:.78rem;color:#fff;flex-shrink:0;
+}
+.gp-act-info{flex:1;min-width:0}
+.gp-act-name{
+  font-size:.8rem;font-weight:700;color:#1A1A1A;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-family:'DM Sans',system-ui,sans-serif;
+}
+.gp-act-meta{font-size:.6rem;color:#9A9A9A;margin-top:2px;font-family:'DM Mono',monospace}
+.gp-act-amount{
+  font-size:.8rem;font-weight:800;flex-shrink:0;
+  font-family:'DM Mono',monospace;letter-spacing:-.01em;
+}
+.gp-act-amount.cr{color:#16A34A}
+.gp-act-amount.db{color:#DC2626}
+
+/* ── PHONE-HINT panel (non-home) ── */
+.gp-phone-hint{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:14px;color:#9A9A9A;text-align:center;
+  font-family:'DM Sans',system-ui,sans-serif;
+}
+.gp-phone-hint svg{stroke:#9A9A9A;stroke-width:1.4;fill:none;opacity:.5}
+.gp-phone-hint strong{font-size:1rem;font-weight:800;color:#5A5A5A}
+.gp-phone-hint p{font-size:.78rem;max-width:220px;line-height:1.5}
+
+/* ── ANIMATIONS ── */
+@keyframes gpFadeUp{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.gp-card:nth-child(1){animation-delay:.04s}
+.gp-card:nth-child(2){animation-delay:.09s}
+.gp-card:nth-child(3){animation-delay:.14s}
+.gp-card:nth-child(4){animation-delay:.19s}
+
+/* ── Petit écrans ≤ 360px (iPhone SE, vieux Android) ─────────────── */
 @media(max-width:360px){
   .bal-amt{font-size:1.75rem}
   .amt-val{font-size:2.4rem}
@@ -796,50 +1061,77 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 </head>
 <body>
 
-<!-- Sidebar PC — masquée sur mobile/tablette via CSS, visible ≥1280px -->
-<div class="desktop-side">
-  <div>
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
-      <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0A4A2E" stroke-width="2.2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-      </div>
+<!-- ── DESKTOP LAYOUT (≥1280px) ────────────────────── -->
+<div class="gp-layout" id="gp-layout">
+  <aside class="gp-sidebar">
+    <button class="gp-sidebar-logo" onclick="G.desktopNav('home')" title="GhettoPay">
+      <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    </button>
+    <nav class="gp-nav">
+      <button class="gp-nav-item gp-active" data-gp="home" data-tip="Accueil" onclick="G.desktopNav('home')">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </button>
+      <button class="gp-nav-item" data-gp="send" data-tip="Envoyer" onclick="G.desktopNav('send')">
+        <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+      <button class="gp-nav-item" data-gp="coffre" data-tip="Coffre" onclick="G.desktopNav('coffre')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </button>
+      <button class="gp-nav-item" data-gp="budget" data-tip="Budget" onclick="G.desktopNav('budget')">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      </button>
+      <div class="gp-nav-sep"></div>
+      <button class="gp-nav-item" data-gp="tontine" data-tip="Tontines" onclick="G.desktopNav('tontine')">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </button>
+      <button class="gp-nav-item" data-gp="notifs" data-tip="Notifications" onclick="G.desktopNav('notifs')">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </button>
+      <button class="gp-nav-item" data-gp="profil" data-tip="Profil" onclick="G.desktopNav('profil')">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
+    </nav>
+    <div class="gp-sidebar-av" id="gp-sb-av" onclick="G.desktopNav('profil')">?</div>
+  </aside>
+
+  <div class="gp-main">
+    <header class="gp-topbar">
       <div>
-        <div style="font-size:1.6rem;font-weight:900;letter-spacing:-.03em">GhettoPay</div>
-        <div style="font-size:.72rem;color:rgba(255,255,255,.55);font-weight:500;margin-top:1px">Paiement mobile · Gabon</div>
+        <div class="gp-topbar-greet" id="gp-greet">Bienvenue</div>
+        <div class="gp-topbar-title" id="gp-title">Tableau de bord</div>
       </div>
-    </div>
-    <p style="font-size:1.05rem;font-weight:700;line-height:1.45;color:rgba(255,255,255,.9);margin-top:16px">
-      Envoie et reçois de l'argent<br>instantanément au Gabon.
-    </p>
-    <p style="font-size:.8rem;color:rgba(255,255,255,.5);line-height:1.6;margin-top:10px">
-      Rejoins des tontines, gère tes factures,<br>sécurise ton épargne dans un coffre.
-    </p>
-  </div>
+      <div class="gp-topbar-right">
+        <button class="gp-topbar-notif" onclick="G.desktopNav('notifs')">
+          <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <div class="gp-notif-badge" id="gp-notif-badge"></div>
+        </button>
+        <div class="gp-topbar-av" id="gp-top-av" onclick="G.desktopNav('profil')">?</div>
+      </div>
+    </header>
 
-  <div style="display:flex;flex-direction:column;gap:12px">
-    <div style="display:flex;align-items:center;gap:12px;padding:13px 16px;background:rgba(255,255,255,.07);border-radius:14px;border:1px solid rgba(255,255,255,.1)">
-      <div style="width:36px;height:36px;border-radius:10px;background:rgba(212,160,23,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--gold2)" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    <main class="gp-content" id="gp-content">
+      <!-- HOME DASHBOARD -->
+      <div id="gp-home-panel">
+        <div class="gp-cards-row" id="gp-cards-row"></div>
+        <div class="gp-dashboard-row">
+          <div class="gp-chart-card">
+            <div class="gp-section-title">Volume des transactions <span id="gp-chart-period">6 derniers mois</span></div>
+            <div class="gp-bar-chart" id="gp-bar-chart"></div>
+          </div>
+          <div class="gp-activity-card">
+            <div class="gp-section-title">Activité récente</div>
+            <div class="gp-activity-list" id="gp-activity-list"></div>
+          </div>
+        </div>
       </div>
-      <div><div style="font-size:.82rem;font-weight:700;color:#fff">Transferts instantanés</div><div style="font-size:.68rem;color:rgba(255,255,255,.45);margin-top:2px">Envoi entre utilisateurs en 1 clic</div></div>
-    </div>
-    <div style="display:flex;align-items:center;gap:12px;padding:13px 16px;background:rgba(255,255,255,.07);border-radius:14px;border:1px solid rgba(255,255,255,.1)">
-      <div style="width:36px;height:36px;border-radius:10px;background:rgba(22,163,74,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      </div>
-      <div><div style="font-size:.82rem;font-weight:700;color:#fff">Tontines digitales</div><div style="font-size:.68rem;color:rgba(255,255,255,.45);margin-top:2px">Gère tes tontines avec ton groupe</div></div>
-    </div>
-    <div style="display:flex;align-items:center;gap:12px;padding:13px 16px;background:rgba(255,255,255,.07);border-radius:14px;border:1px solid rgba(255,255,255,.1)">
-      <div style="width:36px;height:36px;border-radius:10px;background:rgba(99,102,241,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#818CF8" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-      </div>
-      <div><div style="font-size:.82rem;font-weight:700;color:#fff">Coffre sécurisé</div><div style="font-size:.68rem;color:rgba(255,255,255,.45);margin-top:2px">Épargne avec objectif et date limite</div></div>
-    </div>
-  </div>
 
-  <div style="padding:16px;background:rgba(255,255,255,.06);border-radius:16px;border:1px solid rgba(255,255,255,.1)">
-    <div style="font-size:.65rem;font-weight:700;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Accès mobile</div>
-    <div style="font-size:.8rem;color:rgba(255,255,255,.7);line-height:1.6">Scanne le QR de la page "Recevoir" depuis ton téléphone pour t'envoyer un paiement, ou ouvre ce site directement sur mobile.</div>
+      <!-- NON-HOME hint -->
+      <div id="gp-phone-hint" class="gp-phone-hint" style="display:none">
+        <svg width="44" height="44" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        <strong>Navigue sur le téléphone →</strong>
+        <p>Utilise le téléphone à droite pour accéder à cette section</p>
+      </div>
+    </main>
   </div>
 </div>
 
@@ -951,11 +1243,11 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
       <div style="background:rgba(255,255,255,.07);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.11);border-radius:24px;padding:22px 18px;display:flex;flex-direction:column;gap:13px">
         <div>
           <div style="font-size:.59rem;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px">Adresse email</div>
-          <input id="login-email" class="inp" type="email" autocomplete="email" placeholder="ton@email.com" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.13);color:#fff"/>
+          <input id="login-email" class="inp" type="email" autocomplete="email" placeholder="ton@email.com" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.13);color:#fff" oninput="G._loginEmailChanged(this.value)"/>
         </div>
         <div>
-          <div style="font-size:.59rem;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px">Code PIN</div>
-          <input id="login-pin" class="inp" type="password" maxlength="4" inputmode="numeric" placeholder="• • • •" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.13);color:#fff;letter-spacing:.28em;font-size:1.05rem"/>
+          <div id="login-pin-label" style="font-size:.59rem;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px">Code PIN</div>
+          <input id="login-pin" class="inp" type="password" maxlength="4" inputmode="numeric" placeholder="• • • •" autocomplete="current-password" style="background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.13);color:#fff;letter-spacing:.28em;font-size:1.05rem" onkeydown="if(event.key==='Enter')G.login()"/>
         </div>
         <button class="btn btn-gold" onclick="G.login()" style="width:100%;margin-top:2px">
           <svg><use href="#ar"/></svg>Se connecter
@@ -1814,7 +2106,9 @@ const si = (ic, col, sz=18) => `<svg width="${sz}" height="${sz}" viewBox="0 0 2
 
 // ── DÉMARRAGE ──
 async function appStart() {
-  // Vérifier si session existante
+  // Desktop : render le dashboard immédiatement avec les données cachées
+  if (window.innerWidth >= 1280) G.renderDesktopHome();
+
   const { data: { session } } = await db.auth.getSession();
   if (session) {
     await loadUserData(session.user.id);
@@ -1862,6 +2156,11 @@ async function loadUserData(authId) {
     localStorage.setItem('gp_photo', user.avatar_url);
   }
 
+  // Mettre à jour le dashboard desktop si visible
+  if (window.innerWidth >= 1280) {
+    setTimeout(() => G.renderDesktopHome(), 100);
+  }
+
   // ── REALTIME : écouter les changements de solde du wallet ──
   if (walletChannel) { db.removeChannel(walletChannel); walletChannel = null; }
   walletChannel = db.channel('wallet_' + user.id)
@@ -1877,6 +2176,8 @@ async function loadUserData(authId) {
         }
         $('cstrip-val').textContent = f(nc);
       }
+      // Mettre à jour les cartes du dashboard desktop en temps réel
+      if (window.innerWidth >= 1280) G.renderDesktopHome();
     })
     .subscribe();
 }
@@ -4014,13 +4315,38 @@ const G = {
 
   showLogin() { G.go('login'); },
   hideLogin() {},
+  _loginEmailChanged(email) {
+    const pinInput = $('login-pin');
+    const pinLabel = $('login-pin-label');
+    if (!pinInput) return;
+    const isAdmin = email.trim() === 'admin@ghettopay.ga';
+    if (isAdmin) {
+      pinInput.removeAttribute('maxlength');
+      pinInput.removeAttribute('inputmode');
+      pinInput.placeholder = 'Mot de passe admin';
+      pinInput.style.letterSpacing = '.04em';
+      pinInput.style.fontSize = '.92rem';
+      if (pinLabel) pinLabel.textContent = 'Mot de passe';
+    } else {
+      pinInput.maxLength = 4;
+      pinInput.inputMode = 'numeric';
+      pinInput.placeholder = '• • • •';
+      pinInput.style.letterSpacing = '.28em';
+      pinInput.style.fontSize = '1.05rem';
+      if (pinLabel) pinLabel.textContent = 'Code PIN';
+    }
+    pinInput.value = '';
+  },
+
   async login() {
     const email = document.getElementById('login-email')?.value.trim();
     const pin = document.getElementById('login-pin')?.value.trim();
-    if (!email || !pin) { G.toast('Email et PIN requis', 'err'); return; }
+    const isAdmin = email === 'admin@ghettopay.ga';
+    if (!email || !pin) { G.toast(isAdmin ? 'Email et mot de passe requis' : 'Email et PIN requis', 'err'); return; }
 
     G.toast('Connexion...', 'inf');
-    const password = pin + 'GhettoPay2024';
+    // Admin utilise son mot de passe directement ; les autres utilisent PIN + suffixe
+    const password = isAdmin ? pin : pin + 'GhettoPay2024';
 
     const { data, error } = await db.auth.signInWithPassword({ email, password });
     if (error) {
@@ -4276,6 +4602,179 @@ const G = {
       }
     } catch(e) { G.toast('Biométrie annulée ou non disponible', 'err'); }
   },
+  // ── DESKTOP NAVIGATION & RENDER ────────────────────────
+  desktopNav(section) {
+    if (window.innerWidth < 1280) { G.go(section); return; }
+    // Active nav item
+    document.querySelectorAll('.gp-nav-item').forEach(el => el.classList.remove('gp-active'));
+    const btn = document.querySelector(`[data-gp="${section}"]`);
+    if (btn) btn.classList.add('gp-active');
+    // Topbar title
+    const titles = { home:'Tableau de bord', send:'Envoyer de l\'argent', coffre:'Coffre épargne', budget:'Budget', tontine:'Tontines', notifs:'Notifications', profil:'Profil' };
+    const t = $('gp-title'); if (t) t.textContent = titles[section] || section;
+    // Panels
+    const homePanel = $('gp-home-panel'), hint = $('gp-phone-hint');
+    if (section === 'home') {
+      if (homePanel) homePanel.style.display = '';
+      if (hint) hint.style.display = 'none';
+      G.renderDesktopHome();
+    } else {
+      if (homePanel) homePanel.style.display = 'none';
+      if (hint) hint.style.display = 'flex';
+      G.go(section);
+    }
+  },
+
+  renderDesktopHome() {
+    if (window.innerWidth < 1280) return;
+    const bal = S.get('bal', 0), cbal = S.get('coffre', 0), cash = S.get('cash', 0);
+    const u = S.get('user', {});
+    const tontines = G._tontinesList || [];
+    const av = u.avatar || (u.name || '?')[0].toUpperCase();
+    const firstName = (u.name || 'Utilisateur').split(' ')[0];
+
+    // Topbar + sidebar avatar
+    const greet = $('gp-greet'); if (greet) greet.textContent = `Bonjour, ${firstName}`;
+    const sbAv = $('gp-sb-av'); if (sbAv) sbAv.textContent = av;
+    const topAv = $('gp-top-av'); if (topAv) topAv.textContent = av;
+
+    // Notif badge
+    const unread = S.get('notifs', []).filter(n => !n.read).length;
+    const badge = $('gp-notif-badge'); if (badge) badge.style.display = unread ? 'block' : 'none';
+
+    // Cards
+    const cards = $('gp-cards-row');
+    if (cards) cards.innerHTML = `
+      <div class="gp-card gp-card-gold">
+        <span class="gp-card-label">Solde principal</span>
+        <span class="gp-card-value">${f(bal)}</span>
+        <span class="gp-card-sub">FCFA disponible</span>
+      </div>
+      <div class="gp-card gp-card-forest">
+        <span class="gp-card-label">Coffre épargne</span>
+        <span class="gp-card-value">${f(cbal)}</span>
+        <span class="gp-card-sub">FCFA épargnés</span>
+      </div>
+      <div class="gp-card gp-card-green">
+        <span class="gp-card-label">Cashback</span>
+        <span class="gp-card-value">${f(cash)}</span>
+        <span class="gp-card-sub">FCFA accumulés</span>
+      </div>
+      <div class="gp-card gp-card-purple">
+        <span class="gp-card-label">Tontines actives</span>
+        <span class="gp-card-value">${tontines.length}</span>
+        <span class="gp-card-sub">${tontines.length === 1 ? 'tontine' : 'tontines'}</span>
+      </div>`;
+
+    G._renderDesktopChart();
+    G._renderDesktopActivity();
+  },
+
+  _renderDesktopChart() {
+    const chart = $('gp-bar-chart'); if (!chart) return;
+    const now = new Date();
+    const months = Array.from({length:6}, (_,i) => {
+      const d = new Date(now.getFullYear(), now.getMonth() - (5-i), 1);
+      return { y:d.getFullYear(), m:d.getMonth(), label:d.toLocaleDateString('fr-FR',{month:'short'}), val:0 };
+    });
+    // Use cached txs from DB or local
+    const txs = S.get('txs', []);
+    txs.forEach(t => {
+      const d = new Date(t.date || t.created_at || 0);
+      const mo = months.find(m => m.y === d.getFullYear() && m.m === d.getMonth());
+      if (mo) mo.val += (t.amount || 0);
+    });
+    const maxV = Math.max(...months.map(m => m.val), 1);
+    const colors = ['gp-forest','gp-gold','gp-forest','gp-gold','gp-forest','gp-gold'];
+    chart.innerHTML = months.map((m, i) => {
+      const h = Math.max(5, Math.round((m.val / maxV) * 110));
+      return `<div class="gp-bar-col">
+        <div class="gp-bar-val">${m.val >= 1000 ? (m.val/1000).toFixed(0)+'k' : ''}</div>
+        <div class="gp-bar ${colors[i]}" style="height:${h}px"></div>
+        <div class="gp-bar-lbl">${m.label}</div>
+      </div>`;
+    }).join('');
+
+    // If connected, fetch real DB data for the chart
+    if (currentUser) {
+      const since = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString();
+      db.from('transactions').select('amount,created_at').or(`from_user_id.eq.${currentUser.id},to_user_id.eq.${currentUser.id}`).gte('created_at', since)
+        .then(({ data: dbTxs }) => {
+          if (!dbTxs?.length) return;
+          months.forEach(m => m.val = 0);
+          dbTxs.forEach(t => {
+            const d = new Date(t.created_at);
+            const mo = months.find(m => m.y === d.getFullYear() && m.m === d.getMonth());
+            if (mo) mo.val += (t.amount || 0);
+          });
+          const maxV2 = Math.max(...months.map(m => m.val), 1);
+          chart.innerHTML = months.map((m, i) => {
+            const h = Math.max(5, Math.round((m.val / maxV2) * 110));
+            return `<div class="gp-bar-col">
+              <div class="gp-bar-val">${m.val >= 1000 ? (m.val/1000).toFixed(0)+'k' : ''}</div>
+              <div class="gp-bar ${colors[i]}" style="height:${h}px"></div>
+              <div class="gp-bar-lbl">${m.label}</div>
+            </div>`;
+          }).join('');
+        }).catch(() => {});
+    }
+  },
+
+  _renderDesktopActivity() {
+    const list = $('gp-activity-list'); if (!list) return;
+    const grads = ['linear-gradient(135deg,#0A4A2E,#16A34A)','linear-gradient(135deg,#7c3aed,#a78bfa)','linear-gradient(135deg,#0284c7,#38bdf8)','linear-gradient(135deg,#d97706,#fcd34d)','linear-gradient(135deg,#dc2626,#f87171)'];
+    const txs = S.get('txs', []).slice(0, 8);
+    if (!txs.length) {
+      list.innerHTML = '<div style="text-align:center;padding:24px;color:#9A9A9A;font-size:.78rem">Aucune transaction récente</div>';
+      return;
+    }
+    list.innerHTML = txs.map((t, i) => {
+      const isCredit = t.type === 'credit' || t.type === 'recv';
+      const sign = isCredit ? '+' : '-';
+      const cls = isCredit ? 'cr' : 'db';
+      const name = t.name || 'Inconnu';
+      const av = (name[0] || '?').toUpperCase();
+      const cat = t.cat || t.category || t.type || '';
+      const time = t.time || (t.created_at ? new Date(t.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}) : '—');
+      return `<div class="gp-act-item" style="animation-delay:${i*0.06}s">
+        <div class="gp-act-av" style="background:${grads[i%grads.length]}">${av}</div>
+        <div class="gp-act-info">
+          <div class="gp-act-name">${name}</div>
+          <div class="gp-act-meta">${cat} · ${time}</div>
+        </div>
+        <div class="gp-act-amount ${cls}">${sign}${f(t.amount)}<span style="font-size:.55rem;opacity:.65"> F</span></div>
+      </div>`;
+    }).join('');
+
+    // Refresh from DB if connected
+    if (currentUser) {
+      db.from('transactions').select('*,from_user:from_user_id(name),to_user:to_user_id(name)')
+        .or(`from_user_id.eq.${currentUser.id},to_user_id.eq.${currentUser.id}`)
+        .order('created_at',{ascending:false}).limit(8)
+        .then(({data:rows}) => {
+          if (!rows?.length) return;
+          list.innerHTML = rows.map((t, i) => {
+            const isCredit = t.to_user_id === currentUser.id;
+            const name = isCredit ? (t.from_user?.name||'—') : (t.to_user?.name || t.merchant_name || '—');
+            const av = (name[0]||'?').toUpperCase();
+            const sign = isCredit ? '+' : '-';
+            const cls = isCredit ? 'cr' : 'db';
+            const cats = {transfer:'Transfert',qr:'QR Pay',recharge:'Recharge',coffre_deposit:'Coffre',tontine:'Tontine'};
+            const cat = cats[t.type] || t.type || '';
+            const time = new Date(t.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+            return `<div class="gp-act-item" style="animation-delay:${i*0.06}s">
+              <div class="gp-act-av" style="background:${grads[i%grads.length]}">${av}</div>
+              <div class="gp-act-info">
+                <div class="gp-act-name">${name}</div>
+                <div class="gp-act-meta">${cat} · ${time}</div>
+              </div>
+              <div class="gp-act-amount ${cls}">${sign}${f(t.amount)}<span style="font-size:.55rem;opacity:.65"> F</span></div>
+            </div>`;
+          }).join('');
+        }).catch(()=>{});
+    }
+  },
+
   async _bioAuth() {
     if (!window.PublicKeyCredential) { G.toast('WebAuthn non supporté', 'err'); return; }
     const rawId = localStorage.getItem('gp_bio_id');
