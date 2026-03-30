@@ -1139,7 +1139,7 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
       <div id="gp-coffre-panel" style="display:none;flex-direction:column;gap:18px">
         <div style="display:flex;align-items:center;justify-content:space-between">
           <div><div style="font-size:.62rem;color:#7A7A6A;font-family:monospace;text-transform:uppercase;letter-spacing:.1em">Total épargné</div><div id="gp-coffre-total" style="font-size:2rem;font-weight:900;color:#0A4A2E;letter-spacing:-.02em">0 FCFA</div></div>
-          <button onclick="G.showModal('nc')" style="padding:12px 20px;border:none;border-radius:14px;background:linear-gradient(135deg,#0A4A2E,#16A34A);color:#fff;font-weight:800;font-size:.85rem;cursor:pointer;font-family:'DM Sans',sans-serif">+ Nouveau coffre</button>
+          <button onclick="G.gp_openNewCoffre()" style="padding:12px 20px;border:none;border-radius:14px;background:linear-gradient(135deg,#0A4A2E,#16A34A);color:#fff;font-weight:800;font-size:.85rem;cursor:pointer;font-family:'DM Sans',sans-serif">+ Nouveau coffre</button>
         </div>
         <div id="gp-coffre-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px"></div>
       </div>
@@ -1161,7 +1161,7 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
       <div id="gp-tontine-panel" style="display:none;flex-direction:column;gap:18px">
         <div style="display:flex;align-items:center;justify-content:space-between">
           <div style="font-size:.78rem;font-weight:800;color:#1A1A1A">Mes tontines</div>
-          <button onclick="G.showModal('mt')" style="padding:12px 20px;border:none;border-radius:14px;background:linear-gradient(135deg,#9B59D0,#B47DE8);color:#fff;font-weight:800;font-size:.85rem;cursor:pointer;font-family:'DM Sans',sans-serif">+ Créer une tontine</button>
+          <button onclick="G.gp_openNewTontine()" style="padding:12px 20px;border:none;border-radius:14px;background:linear-gradient(135deg,#9B59D0,#B47DE8);color:#fff;font-weight:800;font-size:.85rem;cursor:pointer;font-family:'DM Sans',sans-serif">+ Créer une tontine</button>
         </div>
         <div id="gp-tontine-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px"></div>
       </div>
@@ -1186,15 +1186,15 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
               <div style="background:#F5F2EA;border-radius:12px;padding:12px;text-align:center"><div id="gp-prof-txc" style="font-size:1.2rem;font-weight:900;color:#1A1A1A">0</div><div style="font-size:.58rem;color:#9A9A9A;font-family:monospace;margin-top:2px">TRANSACTIONS</div></div>
               <div style="background:#F5F2EA;border-radius:12px;padding:12px;text-align:center"><div id="gp-prof-cash" style="font-size:1.2rem;font-weight:900;color:#16A34A">0</div><div style="font-size:.58rem;color:#9A9A9A;font-family:monospace;margin-top:2px">CASHBACK F</div></div>
             </div>
-            <button onclick="G.showModal('mp')" style="width:100%;padding:12px;border:none;border-radius:12px;background:linear-gradient(135deg,#0A4A2E,#16A34A);color:#fff;font-weight:800;font-size:.82rem;cursor:pointer;font-family:'DM Sans',sans-serif">Modifier le profil</button>
+            <button onclick="G.gp_openEditProfil()" style="width:100%;padding:12px;border:none;border-radius:12px;background:linear-gradient(135deg,#0A4A2E,#16A34A);color:#fff;font-weight:800;font-size:.82rem;cursor:pointer;font-family:'DM Sans',sans-serif">Modifier le profil</button>
             <button onclick="G.logout()" style="width:100%;padding:12px;border:1.5px solid rgba(220,38,38,.3);border-radius:12px;background:rgba(220,38,38,.06);color:#DC2626;font-weight:800;font-size:.82rem;cursor:pointer;font-family:'DM Sans',sans-serif">Déconnexion</button>
           </div>
           <div style="display:flex;flex-direction:column;gap:14px">
             <div style="background:#fff;border-radius:18px;padding:20px;border:1px solid rgba(0,0,0,.05)">
               <div style="font-size:.72rem;font-weight:800;color:#1A1A1A;margin-bottom:14px">Paramètres du compte</div>
               <div style="display:flex;flex-direction:column;gap:0">
-                <div onclick="G.showModal('m-kyc')" style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid rgba(0,0,0,.05);cursor:pointer"><div style="width:36px;height:36px;border-radius:10px;background:rgba(212,160,23,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C8960A" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div style="flex:1"><div style="font-size:.82rem;font-weight:700;color:#1A1A1A">Vérification identité (KYC)</div><div id="gp-kyc-sub" style="font-size:.65rem;color:#9A9A9A;margin-top:1px">Compléter pour niveau Gold</div></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A9A9A" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
-                <div onclick="G._openReferral()" style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid rgba(0,0,0,.05);cursor:pointer"><div style="width:36px;height:36px;border-radius:10px;background:rgba(22,163,74,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div><div style="flex:1"><div style="font-size:.82rem;font-weight:700;color:#1A1A1A">Parrainer un ami</div><div style="font-size:.65rem;color:#9A9A9A;margin-top:1px">+500 FCFA par filleul</div></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A9A9A" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+                <div onclick="G.gp_openKyc()" style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid rgba(0,0,0,.05);cursor:pointer"><div style="width:36px;height:36px;border-radius:10px;background:rgba(212,160,23,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C8960A" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div style="flex:1"><div style="font-size:.82rem;font-weight:700;color:#1A1A1A">Vérification identité (KYC)</div><div id="gp-kyc-sub" style="font-size:.65rem;color:#9A9A9A;margin-top:1px">Compléter pour niveau Gold</div></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A9A9A" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+                <div onclick="G.gp_openReferral()" style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid rgba(0,0,0,.05);cursor:pointer"><div style="width:36px;height:36px;border-radius:10px;background:rgba(22,163,74,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div><div style="flex:1"><div style="font-size:.82rem;font-weight:700;color:#1A1A1A">Parrainer un ami</div><div style="font-size:.65rem;color:#9A9A9A;margin-top:1px">+500 FCFA par filleul</div></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A9A9A" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
                 <div onclick="G.toggleDark()" style="display:flex;align-items:center;gap:12px;padding:13px 0;cursor:pointer"><div style="width:36px;height:36px;border-radius:10px;background:rgba(10,74,46,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0A4A2E" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div><div style="flex:1"><div style="font-size:.82rem;font-weight:700;color:#1A1A1A">Mode sombre</div><div style="font-size:.65rem;color:#9A9A9A;margin-top:1px">Basculer le thème</div></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A9A9A" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
               </div>
             </div>
@@ -1202,6 +1202,11 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
         </div>
       </div>
     </main>
+  </div>
+
+  <!-- DESKTOP MODAL OVERLAY -->
+  <div id="gp-modal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.48);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);align-items:center;justify-content:center" onclick="if(event.target===this)G.gpCloseModal()">
+    <div id="gp-modal-box" style="background:#fff;border-radius:22px;padding:32px 28px;width:min(540px,94vw);max-height:88vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.22);font-family:'DM Sans',system-ui,sans-serif;position:relative"></div>
   </div>
 </div>
 
@@ -2862,8 +2867,10 @@ const G = {
     }
 
     G.closeModal('mc');
-    $('nc-name').value = ''; $('nc-target').value = '';
+    const ncn = $('nc-name'); if (ncn) ncn.value = '';
+    const nct = $('nc-target'); if (nct) nct.value = '';
     G.r_coffre();
+    if (window.innerWidth >= 1280) G.gp_renderCoffre();
     G.toast('Coffre créé !', 'ok');
   },
 
@@ -3062,6 +3069,7 @@ const G = {
     }
 
     G.r_coffre();
+    if (window.innerWidth >= 1280) G.gp_renderCoffre();
     G.toast(`${f(amount)} FCFA déposés dans ${coffreName}`, 'ok');
   },
 
@@ -3340,8 +3348,22 @@ const G = {
   _setFreq(v) {
     const inp = $('nt-freq'); if (inp) inp.value = v;
     const w = $('nt-freq-w'), m = $('nt-freq-m');
-    if (w) w.classList.toggle('on', v === 'weekly');
-    if (m) m.classList.toggle('on', v === 'monthly');
+    if (w) {
+      w.classList.toggle('on', v === 'weekly');
+      if (w.style.background !== undefined && window.innerWidth >= 1280) {
+        w.style.background = v==='weekly' ? '#0A4A2E' : 'none';
+        w.style.borderColor = v==='weekly' ? '#0A4A2E' : 'rgba(0,0,0,.1)';
+        w.style.color = v==='weekly' ? '#fff' : '#5A5A5A';
+      }
+    }
+    if (m) {
+      m.classList.toggle('on', v === 'monthly');
+      if (m.style.background !== undefined && window.innerWidth >= 1280) {
+        m.style.background = v==='monthly' ? '#0A4A2E' : 'none';
+        m.style.borderColor = v==='monthly' ? '#0A4A2E' : 'rgba(0,0,0,.1)';
+        m.style.color = v==='monthly' ? '#fff' : '#5A5A5A';
+      }
+    }
   },
 
   _updateNtCount() {
@@ -3474,6 +3496,7 @@ const G = {
     G._tontineMembers = [];
     G._closeTontineModal();
     G.r_tontine();
+    if (window.innerWidth >= 1280) G.gp_renderTontine();
     G.toast('Tontine créée !', 'ok');
   },
 
@@ -4266,6 +4289,7 @@ const G = {
 
     G.closeModal('mp');
     G.render('profil');
+    if (window.innerWidth >= 1280) G.gp_renderProfil();
     G.toast('Profil mis à jour', 'inf');
   },
 
@@ -4411,6 +4435,7 @@ const G = {
   // ── OVERLAY / TOAST / MODAL ──
   _okCb: null,
   ok(title, sub, cb) {
+    if (window.innerWidth >= 1280) { G.toast(title, 'ok'); if (cb) setTimeout(cb, 400); return; }
     $('ov-title').textContent = title;
     $('ov-sub').textContent = sub || '';
     $('overlay').classList.add('on');
@@ -4488,8 +4513,11 @@ const G = {
     await loadUserData(data.user.id);
     G.go('pin');
   },
-  showModal(id) { $(id).classList.add('on'); },
-  closeModal(id) { $(id).classList.remove('on'); },
+  showModal(id) { const el = $(id); if (el) el.classList.add('on'); },
+  closeModal(id) {
+    const el = $(id); if (el) el.classList.remove('on');
+    const gpOv = $('gp-modal'); if (gpOv && gpOv.style.display !== 'none') gpOv.style.display = 'none';
+  },
 
   // ── PARRAINAGE ──
   _openReferral() {
@@ -4850,7 +4878,7 @@ const G = {
         <div style="font-size:1.5rem;font-weight:900;color:#1A1A1A;margin-bottom:4px">${f(c.current_amount||0)} <span style="font-size:.65rem;font-weight:600;color:#9A9A9A">FCFA</span></div>
         ${c.goal_amount ? `<div style="font-size:.62rem;color:#9A9A9A;margin-bottom:10px">Objectif : ${f(c.goal_amount)} FCFA</div><div style="height:6px;background:#F0EDE4;border-radius:6px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${cols[i%cols.length]};border-radius:6px;transition:width .4s"></div></div><div style="font-size:.6rem;color:#9A9A9A;margin-top:4px">${pct}% atteint</div>` : ''}
         <div style="display:flex;gap:8px;margin-top:14px">
-          <button onclick="G.showModal('nc',${JSON.stringify(c).replace(/"/g,'&quot;')})" style="flex:1;padding:9px;border:none;border-radius:10px;background:${cols[i%cols.length]};color:#fff;font-weight:800;font-size:.72rem;cursor:pointer;font-family:'DM Sans',sans-serif">Déposer</button>
+          <button onclick="G.gp_openDeposit('${c.id}')" style="flex:1;padding:9px;border:none;border-radius:10px;background:${cols[i%cols.length]};color:#fff;font-weight:800;font-size:.72rem;cursor:pointer;font-family:'DM Sans',sans-serif">Déposer</button>
           <button onclick="G._withdrawCoffre('${c.id}')" style="flex:1;padding:9px;border:1.5px solid rgba(0,0,0,.1);border-radius:10px;background:none;font-weight:700;font-size:.72rem;cursor:pointer;font-family:'DM Sans',sans-serif;color:#5A5A5A">Retirer</button>
         </div>
       </div>`;
@@ -5221,6 +5249,228 @@ const G = {
       S.set('txs', txs);
     }
     G.ok(`${f(n)} FCFA envoyés`, `À ${sc.name} · Frais ${f(fee)} FCFA · Confirmé ✓`, () => G.go('home'));
+  },
+
+  // ── DESKTOP MODAL SYSTEM ─────────────────────────────────
+  gpModal(html) {
+    const box = $('gp-modal-box'), ov = $('gp-modal');
+    if (!box || !ov) return;
+    box.innerHTML = html;
+    ov.style.display = 'flex';
+    setTimeout(() => { const first = box.querySelector('input:not([type=hidden])'); if (first) first.focus(); }, 80);
+  },
+  gpCloseModal() {
+    const ov = $('gp-modal'); if (ov) ov.style.display = 'none';
+    const box = $('gp-modal-box'); if (box) box.innerHTML = '';
+  },
+
+  // ── DESKTOP MODAL OPENERS ───────────────────────────────
+  gp_openNewCoffre() {
+    G.gpModal(`
+      <div style="font-size:1.05rem;font-weight:900;color:#1A1A1A;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between">
+        <span>Nouveau coffre</span>
+        <button onclick="G.gpCloseModal()" style="border:none;background:rgba(0,0,0,.06);border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div>
+          <div style="font-size:.6rem;font-weight:800;color:#7A7A6A;text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px">Nom du coffre</div>
+          <input id="nc-name" class="inp" placeholder="Ex : Voyage en France, Voiture…" style="width:100%"/>
+        </div>
+        <div>
+          <div style="font-size:.6rem;font-weight:800;color:#7A7A6A;text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px">Objectif en FCFA (optionnel)</div>
+          <input id="nc-target" class="inp" type="number" placeholder="Ex : 500 000" style="width:100%"/>
+          <input id="nc-months" type="hidden" value="3"/>
+        </div>
+        <div>
+          <div style="font-size:.6rem;font-weight:800;color:#7A7A6A;text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Durée de blocage</div>
+          <div style="display:flex;gap:8px" id="gp-dur-btns">
+            <button onclick="G._gpSetDur(this,3)" class="gp-dur-btn" style="flex:1;padding:10px 0;border:1.5px solid #0A4A2E;border-radius:11px;background:#0A4A2E;color:#fff;font-weight:800;font-size:.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s">3 mois</button>
+            <button onclick="G._gpSetDur(this,6)" class="gp-dur-btn" style="flex:1;padding:10px 0;border:1.5px solid rgba(0,0,0,.1);border-radius:11px;background:none;color:#5A5A5A;font-weight:700;font-size:.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s">6 mois</button>
+            <button onclick="G._gpSetDur(this,12)" class="gp-dur-btn" style="flex:1;padding:10px 0;border:1.5px solid rgba(0,0,0,.1);border-radius:11px;background:none;color:#5A5A5A;font-weight:700;font-size:.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s">1 an</button>
+            <button onclick="G._gpSetDur(this,24)" class="gp-dur-btn" style="flex:1;padding:10px 0;border:1.5px solid rgba(0,0,0,.1);border-radius:11px;background:none;color:#5A5A5A;font-weight:700;font-size:.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s">2 ans</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button onclick="G.createCoffre()" style="flex:1;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,#0A4A2E,#16A34A);color:#fff;font-weight:900;font-size:.88rem;cursor:pointer;font-family:'DM Sans',sans-serif">Créer ce coffre</button>
+          <button onclick="G.gpCloseModal()" style="padding:14px 20px;border:1.5px solid rgba(0,0,0,.1);border-radius:14px;background:none;font-weight:700;font-size:.88rem;cursor:pointer;font-family:'DM Sans',sans-serif;color:#5A5A5A">Annuler</button>
+        </div>
+      </div>`);
+  },
+  _gpSetDur(btn, val) {
+    document.querySelectorAll('.gp-dur-btn').forEach(b => {
+      b.style.background = 'none'; b.style.borderColor = 'rgba(0,0,0,.1)'; b.style.color = '#5A5A5A';
+    });
+    btn.style.background = '#0A4A2E'; btn.style.borderColor = '#0A4A2E'; btn.style.color = '#fff';
+    const inp = $('nc-months'); if (inp) inp.value = val;
+  },
+
+  gp_openNewTontine() {
+    G._tontineMembers = [];
+    G.gpModal(`
+      <div style="font-size:1.05rem;font-weight:900;color:#1A1A1A;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between">
+        <span>Nouvelle tontine</span>
+        <button onclick="G._closeTontineModal()" style="border:none;background:rgba(0,0,0,.06);border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div>
+          <div style="font-size:.6rem;font-weight:800;color:#7A7A6A;text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px">Nom de la tontine</div>
+          <input id="nt-name" class="inp" placeholder="Ex : Amis Libreville, Famille 2025…" style="width:100%"/>
+        </div>
+        <div>
+          <div style="font-size:.6rem;font-weight:800;color:#7A7A6A;text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px">Montant par cycle (FCFA)</div>
+          <input id="nt-amount" class="inp" type="number" placeholder="Ex : 50 000" style="width:100%"/>
+        </div>
+        <div>
+          <div style="font-size:.6rem;font-weight:800;color:#7A7A6A;text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Fréquence</div>
+          <div style="display:flex;gap:8px">
+            <button id="nt-freq-w" onclick="G._setFreq('weekly')" style="flex:1;padding:10px 0;border:1.5px solid rgba(0,0,0,.1);border-radius:11px;background:none;color:#5A5A5A;font-weight:700;font-size:.78rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s">Hebdomadaire</button>
+            <button id="nt-freq-m" onclick="G._setFreq('monthly')" style="flex:1;padding:10px 0;border:1.5px solid #0A4A2E;border-radius:11px;background:#0A4A2E;color:#fff;font-weight:800;font-size:.78rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s">Mensuelle</button>
+          </div>
+          <input id="nt-freq" type="hidden" value="monthly"/>
+        </div>
+        <div style="background:#F5F2EA;border-radius:16px;padding:16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <div style="font-size:.7rem;font-weight:800;color:#1A1A1A">Membres</div>
+            <span id="nt-count-txt" style="font-size:.65rem;font-weight:700;color:#0A4A2E">0 membre</span>
+          </div>
+          <div id="nt-members-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px"></div>
+          <div style="display:flex;gap:6px;margin-bottom:8px">
+            <input id="nt-member-name" class="inp" placeholder="Nom…" style="flex:1.3;font-size:.82rem"/>
+            <input id="nt-member-phone" class="inp" type="tel" placeholder="+241…" style="flex:1;font-size:.82rem"/>
+            <button onclick="G.addTontineMember()" style="padding:0 14px;border:none;border-radius:12px;background:#0A4A2E;color:#fff;font-weight:900;font-size:1.1rem;cursor:pointer;flex-shrink:0;height:44px">+</button>
+          </div>
+          <div style="position:relative">
+            <input id="nt-search" class="inp" type="text" placeholder="Rechercher un utilisateur GhettoPay…" oninput="G.searchTontineUsers(this.value)" autocomplete="off" style="width:100%;font-size:.82rem"/>
+            <div id="nt-search-results" style="display:none;position:absolute;left:0;right:0;background:#fff;border-radius:12px;border:1px solid rgba(0,0,0,.08);box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:50;max-height:180px;overflow-y:auto;margin-top:4px"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button onclick="G.createTontine()" style="flex:1;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,#9B59D0,#B47DE8);color:#fff;font-weight:900;font-size:.88rem;cursor:pointer;font-family:'DM Sans',sans-serif">Créer la tontine</button>
+          <button onclick="G._closeTontineModal()" style="padding:14px 20px;border:1.5px solid rgba(0,0,0,.1);border-radius:14px;background:none;font-weight:700;font-size:.88rem;cursor:pointer;font-family:'DM Sans',sans-serif;color:#5A5A5A">Annuler</button>
+        </div>
+      </div>`);
+  },
+
+  gp_openEditProfil() {
+    const u = S.get('user', {});
+    G.gpModal(`
+      <div style="font-size:1.05rem;font-weight:900;color:#1A1A1A;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between">
+        <span>Modifier le profil</span>
+        <button onclick="G.gpCloseModal()" style="border:none;background:rgba(0,0,0,.06);border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div>
+          <div style="font-size:.6rem;font-weight:800;color:#7A7A6A;text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px">Nom complet</div>
+          <input id="ep-name" class="inp" value="${(u.name||'').replace(/"/g,'&quot;')}" placeholder="Nom complet" style="width:100%"/>
+        </div>
+        <div>
+          <div style="font-size:.6rem;font-weight:800;color:#7A7A6A;text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px">Téléphone</div>
+          <input id="ep-phone" class="inp" type="tel" value="${(u.phone||'').replace(/"/g,'&quot;')}" placeholder="+241 77 00 00 00" style="width:100%"/>
+        </div>
+        <div>
+          <div style="font-size:.6rem;font-weight:800;color:#7A7A6A;text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px">Ville</div>
+          <input id="ep-loc" class="inp" value="${(u.loc||'').replace(/"/g,'&quot;')}" placeholder="Ex : Libreville" style="width:100%"/>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button onclick="G.saveProfile()" style="flex:1;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,#0A4A2E,#16A34A);color:#fff;font-weight:900;font-size:.88rem;cursor:pointer;font-family:'DM Sans',sans-serif">Sauvegarder</button>
+          <button onclick="G.gpCloseModal()" style="padding:14px 20px;border:1.5px solid rgba(0,0,0,.1);border-radius:14px;background:none;font-weight:700;font-size:.88rem;cursor:pointer;font-family:'DM Sans',sans-serif;color:#5A5A5A">Annuler</button>
+        </div>
+      </div>`);
+  },
+
+  gp_openKyc() {
+    G.gpModal(`
+      <div style="font-size:1.05rem;font-weight:900;color:#1A1A1A;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between">
+        <span>Vérification d'identité</span>
+        <button onclick="G.gpCloseModal()" style="border:none;background:rgba(0,0,0,.06);border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0">✕</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <div style="flex:1;padding:8px;border-radius:10px;background:rgba(22,163,74,.1);border:1.5px solid #16A34A;text-align:center;font-size:.68rem;font-weight:800;color:#16A34A">Silver ✓</div>
+        <div style="flex:1;padding:8px;border-radius:10px;background:rgba(212,160,23,.08);border:1.5px dashed rgba(212,160,23,.4);text-align:center;font-size:.68rem;font-weight:700;color:#D4A017">Gold</div>
+        <div style="flex:1;padding:8px;border-radius:10px;background:#F5F2EA;border:1.5px dashed rgba(0,0,0,.08);text-align:center;font-size:.68rem;font-weight:700;color:#9A9A9A">Platinum</div>
+      </div>
+      <div style="font-size:.78rem;color:#5A5A5A;margin-bottom:16px">Pour accéder au niveau Gold, fournis tes documents d'identité.</div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div>
+          <div style="font-size:.6rem;font-weight:800;color:#7A7A6A;text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px">Pièce d'identité (CNI / Passeport)</div>
+          <input id="kyc-name" class="inp" placeholder="Nom complet (tel que sur la pièce)" style="width:100%"/>
+        </div>
+        <div>
+          <div style="font-size:.6rem;font-weight:800;color:#7A7A6A;text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px">Numéro de la pièce</div>
+          <input id="kyc-id" class="inp" placeholder="Numéro de la pièce d'identité" style="width:100%"/>
+        </div>
+        <div>
+          <div style="font-size:.6rem;font-weight:800;color:#7A7A6A;text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px">Selfie avec la pièce</div>
+          <div id="kyc-photo-zone" onclick="G._kycPickPhoto()" style="border:2px dashed rgba(0,0,0,.1);border-radius:14px;padding:20px;text-align:center;cursor:pointer;color:#9A9A9A;font-size:.78rem;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;background:#F8F6F0">
+            <svg id="kyc-photo-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#user"/></svg>
+            <span id="kyc-photo-label">Cliquer pour importer une photo</span>
+            <img id="kyc-photo-preview" style="display:none;max-height:120px;border-radius:10px;object-fit:cover"/>
+          </div>
+          <input type="file" id="kyc-photo-input" accept="image/*" style="display:none" onchange="G._onKycPhotoChosen(this)"/>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button onclick="G._submitKyc()" style="flex:1;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,#D4A017,#E8C040);color:#3A2000;font-weight:900;font-size:.88rem;cursor:pointer;font-family:'DM Sans',sans-serif">Soumettre</button>
+          <button onclick="G.gpCloseModal()" style="padding:14px 20px;border:1.5px solid rgba(0,0,0,.1);border-radius:14px;background:none;font-weight:700;font-size:.88rem;cursor:pointer;font-family:'DM Sans',sans-serif;color:#5A5A5A">Annuler</button>
+        </div>
+      </div>`);
+  },
+
+  gp_openDeposit(id) {
+    const coffres = S.get('coffres_list', []);
+    const c = coffres.find(x => String(x.id) === String(id));
+    const name = c?.name || 'Coffre';
+    const bal = S.get('bal', 0);
+    G._depCoffreId = id;
+    G._depCoffreName = name;
+    G.gpModal(`
+      <div style="font-size:1.05rem;font-weight:900;color:#1A1A1A;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between">
+        <span>Déposer dans "${name}"</span>
+        <button onclick="G.gpCloseModal()" style="border:none;background:rgba(0,0,0,.06);border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0">✕</button>
+      </div>
+      <div style="font-size:.72rem;color:#9A9A9A;margin-bottom:20px">Solde disponible : <strong style="color:#1A1A1A">${f(bal)} FCFA</strong></div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div>
+          <div style="font-size:.6rem;font-weight:800;color:#7A7A6A;text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px">Montant (FCFA)</div>
+          <input id="mdep-amount" class="inp" type="number" inputmode="decimal" placeholder="Ex : 10 000" style="width:100%;font-size:1.1rem"/>
+        </div>
+        <div style="display:flex;gap:8px">
+          ${[5000,10000,25000,50000].map(v=>`<button onclick="document.getElementById('mdep-amount').value=${v}" style="flex:1;padding:9px 0;border:1.5px solid rgba(0,0,0,.1);border-radius:10px;background:none;font-size:.72rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;color:#5A5A5A">${f(v)}</button>`).join('')}
+        </div>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button onclick="G._doDeposit()" style="flex:1;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,#0A4A2E,#16A34A);color:#fff;font-weight:900;font-size:.88rem;cursor:pointer;font-family:'DM Sans',sans-serif">Déposer</button>
+          <button onclick="G.gpCloseModal()" style="padding:14px 20px;border:1.5px solid rgba(0,0,0,.1);border-radius:14px;background:none;font-weight:700;font-size:.88rem;cursor:pointer;font-family:'DM Sans',sans-serif;color:#5A5A5A">Annuler</button>
+        </div>
+      </div>`);
+  },
+
+  gp_openReferral() {
+    const u = S.get('user', {});
+    const code = 'GP-' + (u.name || 'USER').toUpperCase().replace(/\s+/g,'').slice(0,6).padEnd(6,'0');
+    const refs = parseInt(localStorage.getItem('gp_refs') || '0');
+    G.gpModal(`
+      <div style="font-size:1.05rem;font-weight:900;color:#1A1A1A;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between">
+        <span>Parrainer un ami</span>
+        <button onclick="G.gpCloseModal()" style="border:none;background:rgba(0,0,0,.06);border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0">✕</button>
+      </div>
+      <div style="background:linear-gradient(135deg,#0A4A2E,#16A34A);border-radius:16px;padding:24px;text-align:center;margin-bottom:20px">
+        <div style="font-size:.6rem;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.15em;margin-bottom:8px">Ton code de parrainage</div>
+        <div style="font-size:1.6rem;font-weight:900;color:#fff;letter-spacing:.12em;font-family:'DM Mono',monospace">${code}</div>
+        <div style="font-size:.68rem;color:rgba(255,255,255,.6);margin-top:6px">+500 FCFA par filleul</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+        <div style="background:#F5F2EA;border-radius:14px;padding:16px;text-align:center">
+          <div style="font-size:1.4rem;font-weight:900;color:#1A1A1A">${refs}</div>
+          <div style="font-size:.6rem;color:#9A9A9A;margin-top:3px;text-transform:uppercase;letter-spacing:.08em">Invités</div>
+        </div>
+        <div style="background:#F5F2EA;border-radius:14px;padding:16px;text-align:center">
+          <div style="font-size:1.4rem;font-weight:900;color:#16A34A">${f(refs*500)} F</div>
+          <div style="font-size:.6rem;color:#9A9A9A;margin-top:3px;text-transform:uppercase;letter-spacing:.08em">Gagné</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button onclick="G._shareReferral()" style="flex:1;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,#0A4A2E,#16A34A);color:#fff;font-weight:900;font-size:.88rem;cursor:pointer;font-family:'DM Sans',sans-serif">Partager le code</button>
+        <button onclick="G.gpCloseModal()" style="padding:14px 20px;border:1.5px solid rgba(0,0,0,.1);border-radius:14px;background:none;font-weight:700;font-size:.88rem;cursor:pointer;font-family:'DM Sans',sans-serif;color:#5A5A5A">Fermer</button>
+      </div>`);
   },
 };
 
