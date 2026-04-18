@@ -2,7 +2,11 @@ const CACHE = 'ghettopay-v1';
 const ASSETS = [
   './',
   './index.html',
-  './app.js',
+  './styles.css',
+  './main.js',
+  './utils.js',
+  './state.js',
+  './api.js',
   './manifest.json'
 ];
 
