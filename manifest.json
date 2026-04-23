@@ -27,7 +27,29 @@
     }
   ],
   "categories": ["finance", "utilities"],
-  "screenshots": [],
+  "screenshots": [
+    {
+      "src": "screenshot-home.png",
+      "sizes": "828x1792",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Accueil — solde et transactions"
+    },
+    {
+      "src": "screenshot-send.png",
+      "sizes": "828x1792",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Envoyer de l'argent"
+    },
+    {
+      "src": "screenshot-coffre.png",
+      "sizes": "828x1792",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Coffre d'épargne"
+    }
+  ],
   "prefer_related_applications": false,
   "iarc_rating_id": ""
 }
