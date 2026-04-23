@@ -1,13 +1,17 @@
 {
+  "id": "/",
   "name": "GhettoPay",
   "short_name": "GhettoPay",
   "description": "Le portefeuille mobile gabonais — Envoyer, recevoir, épargner",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "any",
   "background_color": "#060d08",
   "theme_color": "#060d08",
   "lang": "fr",
+  "dir": "ltr",
   "icons": [
     {
       "src": "icon-192.png",
@@ -24,5 +28,6 @@
   ],
   "categories": ["finance", "utilities"],
   "screenshots": [],
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "iarc_rating_id": ""
 }

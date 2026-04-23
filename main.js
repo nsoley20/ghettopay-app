@@ -3422,8 +3422,4 @@ $('install-btn')?.addEventListener('click', async () => {
   if (dp) { dp.prompt(); await dp.userChoice; dp = null; }
 });
 
-// ── SERVICE WORKER ──
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(e => console.warn('SW:', e));
-}
 
