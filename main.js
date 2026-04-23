@@ -1,6 +1,10 @@
 import { f, $, si, esc, tryCatch, validateAmount, validatePhone, validateName } from './utils.js';
 import { store } from './store.js';
 import { db } from './api.js';
+import { homeScreen } from './screens/home.js';
+import { budgetScreen } from './screens/budget.js';
+import { facturesScreen } from './screens/factures.js';
+import { notifsScreen } from './screens/notifs.js';
 
 
 // ── DÉMARRAGE ──
@@ -152,93 +156,6 @@ const G = {
       qr: () => G.r_qr(),
     };
     renders[scr]?.();
-  },
-
-  // ── HOME ──
-  r_home() {
-    const bal = store.get('bal', 0), cbal = store.get('coffre', 0), u = store.get('user', {});
-    $('home-name').textContent = (u.name || 'Utilisateur').split(' ')[0] + ' ' + ((u.name || '').split(' ')[1]?.[0] || '') + '.';
-    const photo = localStorage.getItem('gp_photo');
-    const hav = $('home-av');
-    if (hav) {
-      if (photo) { hav.textContent = ''; hav.style.backgroundImage = `url(${photo})`; hav.style.backgroundSize = 'cover'; hav.style.backgroundPosition = 'center'; }
-      else { hav.style.backgroundImage = ''; hav.textContent = u.avatar || '?'; }
-    }
-    $('bal-amt').innerHTML = `<span class="cur">FCFA </span>${store.balVis ? f(bal) : '• • • •'}`;
-    $('bal-sub').textContent = `+ Coffre : ${f(cbal)} FCFA`;
-    $('cstrip-val').textContent = f(cbal);
-    const unread = store.get('notifs', []).filter(n => !n.read).length;
-    $('notif-dot').style.display = unread ? 'block' : 'none';
-    G.r_txList();
-    // Rafraîchir le solde depuis la DB (non-bloquant, met à jour si différent)
-    if (store.currentUser) {
-      db.from('wallets').select('balance,coffre_balance,cashback').eq('user_id', store.currentUser.id).single()
-        .then(({ data }) => {
-          if (!data || store.cur !== 'home') return;
-          const nb = data.balance || 0, nc = data.coffre_balance || 0;
-          if (nb !== store.get('bal', 0) || nc !== store.get('coffre', 0)) {
-            store.set('bal', nb); store.set('coffre', nc); store.set('cash', data.cashback || 0);
-            if (store.balVis) {
-              $('bal-amt').innerHTML = `<span class="cur">FCFA </span>${f(nb)}`;
-              $('bal-sub').textContent = `+ Coffre : ${f(nc)} FCFA`;
-            }
-            $('cstrip-val').textContent = f(nc);
-            G.r_txList();
-          }
-        }).catch(() => {});
-    }
-  },
-
-  // ── LOGIN ──
-  r_login() {
-    // Mettre le focus sur le champ email après la transition
-    setTimeout(() => { $('login-email')?.focus(); }, 350);
-  },
-
-  _txRow(isCredit, name, ico, col, bg, cat, time, amount) {
-    const sign = isCredit ? '+' : '-';
-    return `<div class="tx"><div class="tx-av" style="background:${bg}">${si(ico, col, 15)}</div><div class="tx-info"><div class="tx-name">${esc(name)}</div><div class="tx-meta">${esc(cat)} · ${esc(time)}</div></div><div class="tx-right"><div class="tx-amt ${isCredit?'cr':'db'}">${sign}${f(amount)} <span style="font-size:.6rem;opacity:.65">F</span></div></div></div>`;
-  },
-
-  async r_txList() {
-    const empty = '<div style="padding:28px;text-align:center;color:var(--txt3);font-size:.82rem">Aucune transaction récente</div>';
-    if (!store.currentUser) {
-      const txs = store.get('txs', []);
-      if (!txs.length) { $('tx-list').innerHTML = empty; return; }
-      $('tx-list').innerHTML = txs.slice(0, 8).map(t => {
-        const isCredit = t.type === 'recv';
-        const ico = { recv:'recv', send:'send', qr:'qric', recharge:'phone', bill:'pay', coffre_deposit:'lock', tontine:'users' }[t.type] || 'send';
-        const col = isCredit ? '#16A34A' : '#DC2626';
-        const bg = isCredit ? 'rgba(22,163,74,.12)' : 'rgba(212,160,23,.12)';
-        const cat = { recv:'Reçu', send:'Envoyé', qr:'QR Pay', recharge:'Recharge', bill:'Facture', coffre_deposit:'Coffre', tontine:'Tontine' }[t.type] || t.type;
-        return G._txRow(isCredit, t.name || 'Inconnu', ico, col, bg, cat, t.time || '—', t.amount);
-      }).join('');
-      return;
-    }
-    const { data: txs } = await db.from('transactions')
-      .select('*, from_user:from_user_id(name,avatar), to_user:to_user_id(name,avatar)')
-      .or(`from_user_id.eq.${store.currentUser.id},to_user_id.eq.${store.currentUser.id}`)
-      .order('created_at', { ascending: false }).limit(8);
-    if (!txs?.length) { $('tx-list').innerHTML = empty; return; }
-    $('tx-list').innerHTML = txs.map(t => {
-      const isCredit = t.to_user_id === store.currentUser.id;
-      const other = isCredit ? t.from_user : t.to_user;
-      const name = other?.name || t.merchant_name || 'GhettoPay';
-      const ico = { transfer: isCredit?'recv':'send', qr:'qric', recharge:'phone', bill:'pay', coffre_deposit:'lock', tontine:'users' }[t.type] || 'send';
-      const col = isCredit ? '#16A34A' : '#DC2626';
-      const bg = isCredit ? 'rgba(22,163,74,.12)' : 'rgba(212,160,23,.12)';
-      const cat = { transfer:'Transfert', qr:'QR Pay', recharge:'Recharge', bill:'Facture', coffre_deposit:'Coffre', tontine:'Tontine' }[t.type] || t.type;
-      const time = new Date(t.created_at).toLocaleDateString('fr-FR', { day:'numeric', month:'short' });
-      return G._txRow(isCredit, name, ico, col, bg, cat, time, t.amount);
-    }).join('');
-  },
-
-  toggleBal() {
-    store.balVis = !store.balVis;
-    const bal = store.get('bal', 0), cbal = store.get('coffre', 0);
-    $('bal-amt').innerHTML = `<span class="cur">FCFA </span>${store.balVis ? f(bal) : '• • • •'}`;
-    $('bal-sub').textContent = store.balVis ? `+ Coffre : ${f(cbal)} FCFA` : '••••••••';
-    $('eye-ic').innerHTML = store.balVis ? '<use href="#eye"/>' : '<use href="#eyeoff"/>';
   },
 
   // ── SEND ──
@@ -893,86 +810,6 @@ const G = {
     G.r_coffre();
     if (window.innerWidth >= 1280) G.gp_renderCoffre();
     G.toast(`${f(amount)} FCFA déposés dans ${coffreName}`, 'ok');
-  },
-
-  // ── BUDGET ──
-  r_budget() {
-    const txs = store.get('txs', []);
-    const out = txs.filter(t => t.type === 'send' || t.type === 'qr' || t.type === 'bill' || t.type === 'recharge' || t.type === 'coffre_deposit');
-    const inp = txs.filter(t => t.type === 'recv' || t.type === 'transfer_in');
-    const totalOut = out.reduce((s, t) => s + (t.amount || 0), 0);
-    const totalIn = inp.reduce((s, t) => s + (t.amount || 0), 0);
-    $('bud-out').textContent = f(totalOut) + ' F';
-    $('bud-in').textContent = f(totalIn) + ' F';
-    
-    // Catégories
-    const cats = [
-      { name: 'Transferts', ico: 'send', col: '#D4A017', bg: 'rgba(212,160,23,.12)', types: ['send', 'transfer'] },
-      { name: 'Paiements', ico: 'pay', col: '#3b82f6', bg: 'rgba(59,130,246,.12)', types: ['qr', 'bill'] },
-      { name: 'Recharges', ico: 'phone', col: '#dc2626', bg: 'rgba(220,38,38,.12)', types: ['recharge'] },
-      { name: 'Coffre', ico: 'lock', col: '#0A4A2E', bg: 'rgba(10,74,46,.12)', types: ['coffre_deposit'] },
-    ];
-    $('cat-list').innerHTML = cats.map(cat => {
-      const total = txs.filter(t => cat.types.includes(t.type)).reduce((s, t) => s + (t.amount || 0), 0);
-      const pct = totalOut > 0 ? Math.round(total / totalOut * 100) : 0;
-      return `<div class="cat-item"><div class="cat-ic" style="background:${cat.bg}">${si(cat.ico, cat.col, 15)}</div><div style="flex:1"><div class="cat-name">${cat.name}</div><div class="cat-bar-wrap" style="margin-top:5px"><div class="cat-bar-fill" style="width:${pct}%;background:${cat.col}"></div></div></div><div class="cat-right"><div class="cat-val">${f(total)} F</div><div class="cat-pct">${pct}%</div></div></div>`;
-    }).join('');
-
-    // Bar chart local (transactions localStorage)
-    G._renderBudgetChart(txs.map(t => ({ from_user_id: t.type !== 'recv' ? 'me' : null, amount: t.amount, created_at: new Date().toISOString(), type: t.type })), 'me');
-
-    // All transactions
-    if (store.currentUser) {
-      db.from('transactions')
-        .select('*, from_user:from_user_id(name,avatar), to_user:to_user_id(name,avatar)')
-        .or(`from_user_id.eq.${store.currentUser.id},to_user_id.eq.${store.currentUser.id}`)
-        .order('created_at', { ascending: false })
-        .limit(50)
-        .then(({ data: txs2 }) => {
-          if (!txs2?.length) { $('all-tx').innerHTML = '<div style="padding:16px;text-align:center;color:var(--txt3);font-size:.8rem">Aucune transaction</div>'; return; }
-          G._renderBudgetChart(txs2, store.currentUser.id);
-          // Recalculate totals from DB data
-          let dbOut = 0, dbIn = 0;
-          txs2.forEach(t => {
-            if (t.to_user_id === store.currentUser.id) dbIn += (t.amount || 0);
-            else dbOut += (t.amount || 0);
-          });
-          if ($('bud-out')) $('bud-out').textContent = f(dbOut) + ' F';
-          if ($('bud-in')) $('bud-in').textContent = f(dbIn) + ' F';
-          // Recalculer les catégories depuis les données DB
-          const dbCats = [
-            { name: 'Transferts', ico: 'send', col: '#D4A017', bg: 'rgba(212,160,23,.12)', types: ['transfer'] },
-            { name: 'Paiements', ico: 'pay', col: '#3b82f6', bg: 'rgba(59,130,246,.12)', types: ['qr', 'bill'] },
-            { name: 'Recharges', ico: 'phone', col: '#dc2626', bg: 'rgba(220,38,38,.12)', types: ['recharge'] },
-            { name: 'Coffre', ico: 'lock', col: '#0A4A2E', bg: 'rgba(10,74,46,.12)', types: ['coffre_deposit'] },
-          ];
-          if ($('cat-list')) $('cat-list').innerHTML = dbCats.map(cat => {
-            const total = txs2.filter(t => t.from_user_id === store.currentUser.id && cat.types.includes(t.type)).reduce((s,t) => s+(t.amount||0), 0);
-            const pct = dbOut > 0 ? Math.round(total / dbOut * 100) : 0;
-            return `<div class="cat-item"><div class="cat-ic" style="background:${cat.bg}">${si(cat.ico, cat.col, 15)}</div><div style="flex:1"><div class="cat-name">${cat.name}</div><div class="cat-bar-wrap" style="margin-top:5px"><div class="cat-bar-fill" style="width:${pct}%;background:${cat.col}"></div></div></div><div class="cat-right"><div class="cat-val">${f(total)} F</div><div class="cat-pct">${pct}%</div></div></div>`;
-          }).join('');
-          $('all-tx').innerHTML = txs2.map(t => {
-            const isCredit = t.to_user_id === store.currentUser.id;
-            const other = isCredit ? t.from_user : t.to_user;
-            const name = other?.name || t.merchant_name || 'GhettoPay';
-            const ico = { transfer: isCredit?'recv':'send', qr:'qric', recharge:'phone', bill:'pay', coffre_deposit:'lock', tontine:'users' }[t.type] || 'send';
-            const col = isCredit ? '#16A34A' : '#DC2626';
-            const bg = isCredit ? 'rgba(22,163,74,.12)' : 'rgba(212,160,23,.12)';
-            const cat = { transfer:'Transfert', qr:'QR Pay', recharge:'Recharge', bill:'Facture', coffre_deposit:'Coffre', tontine:'Tontine' }[t.type] || t.type;
-            const time = new Date(t.created_at).toLocaleDateString('fr-FR', { day:'numeric', month:'short' });
-            return G._txRow(isCredit, name, ico, col, bg, cat, time, t.amount);
-          }).join('');
-        });
-    } else {
-      $('all-tx').innerHTML = txs.length ? txs.map(t => {
-        const isCredit = t.type === 'recv';
-        const ico = { recv:'recv', send:'send', qr:'qric', recharge:'phone', bill:'pay', coffre_deposit:'lock', tontine:'users' }[t.type] || 'send';
-        const col = isCredit ? '#16A34A' : '#DC2626';
-        const bg = isCredit ? 'rgba(22,163,74,.12)' : 'rgba(212,160,23,.12)';
-        const cat = t.cat || { recv:'Reçu', send:'Envoyé', qr:'QR Pay', recharge:'Recharge', bill:'Facture', coffre_deposit:'Coffre', tontine:'Tontine' }[t.type] || t.type;
-        return G._txRow(isCredit, t.name||'Inconnu', ico, col, bg, cat, t.time||'—', t.amount);
-      }).join('') : '<div style="padding:16px;text-align:center;color:var(--txt3);font-size:.8rem">Aucune transaction</div>';
-    }
   },
 
   // ── TONTINE ──
@@ -1832,182 +1669,6 @@ const G = {
     store.set('tontines', tontines);
   },
 
-  // ── FACTURES ──
-  r_factures() {
-    const bills = store.get('bills', []);
-    const todo = bills.filter(b => !b.paid);
-    $('bills-todo').innerHTML = todo.map(b => `
-      <div class="bill-item" id="bill-${b.id}">
-        <div class="bill-ic" style="background:rgba(220,38,38,.1)">${si('pay', '#dc2626', 20)}</div>
-        <div><div class="bill-name">${esc(b.name)}</div><div class="bill-ref">${esc(b.ref || 'Réf: —')}</div></div>
-        <div class="bill-right"><div class="bill-val">${f(b.amount)} F</div><div class="bill-due">${b.due || '—'}</div></div>
-        <button onclick="G.payBill('${b.id}')" style="margin-left:8px;padding:6px 12px;background:var(--forest);color:#fff;border:none;border-radius:8px;font-size:.72rem;font-weight:700;cursor:pointer">Payer</button>
-      </div>`).join('') || '<div style="padding:20px;text-align:center;color:var(--txt3);font-size:.82rem">Toutes les factures sont à jour</div>';
-  },
-
-  payBill(id) {
-    const bills = store.get('bills', []);
-    const b = bills.find(x => x.id == id);
-    if (!b) return;
-    const bal = store.get('bal', 0);
-    if (b.amount > bal) { G.toast('Solde insuffisant', 'err'); return; }
-    b.paid = true;
-    store.set('bal', bal - b.amount);
-    store.set('bills', bills);
-    if (store.currentUser) {
-      db.from('transactions').insert({ from_user_id: store.currentUser.id, amount: b.amount, type: 'bill', merchant_name: b.name, status: 'completed' });
-      db.from('wallets').update({ balance: bal - b.amount }).eq('user_id', store.currentUser.id);
-    }
-    // Animate removal from DOM immediately
-    const el = $('bill-' + id);
-    if (el) { el.style.transition = 'opacity .3s,transform .3s'; el.style.opacity = '0'; el.style.transform = 'translateX(40px)'; setTimeout(() => { el.remove(); G.r_factures(); }, 320); }
-    else { G.r_factures(); }
-    G.toast(`${b.name} payée · ${f(b.amount)} FCFA`, 'inf');
-  },
-
-  payAll() {
-    const bills = store.get('bills', []).filter(b => !b.paid);
-    if (!bills.length) { G.toast('Toutes les factures sont déjà payées', 'inf'); return; }
-    let bal = store.get('bal', 0);
-    const total = bills.reduce((s, b) => s + b.amount, 0);
-    if (total > bal) { G.toast('Solde insuffisant', 'err'); return; }
-    const allBills = store.get('bills', []);
-    for (const b of bills) { b.paid = true; bal -= b.amount; }
-    store.set('bal', bal);
-    store.set('bills', allBills);
-    // Animate all out
-    bills.forEach(b => {
-      const el = $('bill-' + b.id);
-      if (el) { el.style.transition = 'opacity .3s,transform .3s'; el.style.opacity = '0'; el.style.transform = 'translateX(40px)'; }
-    });
-    setTimeout(() => {
-      G.r_factures();
-      G.ok(`${bills.length} facture${bills.length>1?'s':''} payée${bills.length>1?'s':''}`, `Total : ${f(total)} FCFA · Confirmé ✓`, () => G.go('home'));
-    }, 350);
-  },
-
-  // ── RECHARGE ──
-  setOp(n, on, off) { $('rch-op').value = n; $(on).classList.add('on'); $(off).classList.remove('on'); },
-  setPill(el, v) { el.closest('.pills').querySelectorAll('.pill').forEach(p => p.classList.remove('on')); el.classList.add('on'); $('rch-amt').value = v; },
-  setDur(el, m) { document.querySelectorAll('#mc .pill').forEach(p => p.classList.remove('on')); el.classList.add('on'); $('nc-months').value = m; G._coffreCalc(); },
-  _coffreCalc() {
-    const target = parseInt($('nc-target')?.value) || 0;
-    const months = parseInt($('nc-months')?.value) || 3;
-    const ass = $('nc-assistant');
-    if (!ass) return;
-    if (target <= 0) { ass.style.display = 'none'; return; }
-    ass.style.display = 'block';
-    const perDay = Math.ceil(target / (months * 30));
-    const perWeek = Math.ceil(target / (months * 4.33));
-    const perMonth = Math.ceil(target / months);
-    if ($('nc-per-day')) $('nc-per-day').textContent = f(perDay) + ' F';
-    if ($('nc-per-week')) $('nc-per-week').textContent = f(perWeek) + ' F';
-    if ($('nc-per-month')) $('nc-per-month').textContent = f(perMonth) + ' F';
-  },
-
-  doRecharge() {
-    const op = $('rch-op')?.value, ph = $('rch-phone')?.value.trim(), n = parseInt($('rch-amt')?.value) || 0;
-    const rchPhoneErr = validatePhone(ph);
-    if (rchPhoneErr) { G.toast(rchPhoneErr, 'err'); return; }
-    const bal = store.get('bal', 0);
-    const rchAmtErr = validateAmount(n, bal);
-    if (rchAmtErr) { G.toast(rchAmtErr, 'err'); return; }
-    store.set('bal', bal - n);
-    if (store.currentUser) {
-      db.from('wallets').update({ balance: bal - n }).eq('user_id', store.currentUser.id);
-      db.from('transactions').insert({ from_user_id: store.currentUser.id, amount: n, type: 'recharge', merchant_name: `Recharge ${op}`, status: 'completed' });
-    }
-    G.ok('Recharge effectuée', `${f(n)} FCFA de crédit ${op}`, () => G.go('home'));
-  },
-
-  // ── NOTIFS ──
-  r_notifs() {
-    // Affichage immédiat depuis le cache
-    G._renderNotifsList(store.get('notifs', []));
-    // Puis sync depuis la DB
-    if (!store.currentUser) return;
-    db.from('notifications')
-      .select('*')
-      .eq('user_id', store.currentUser.id)
-      .order('created_at', { ascending: false })
-      .limit(50)
-      .then(({ data: dbNotifs }) => {
-        if (!dbNotifs?.length) return;
-        const iconFor  = t => ({ tontine_invite:'users', tontine_reminder:'users' }[t] || 'bell');
-        const bgFor    = t => t === 'tontine_reminder' ? 'rgba(212,160,23,.1)' : 'rgba(10,74,46,.12)';
-        const colorFor = t => t === 'tontine_reminder' ? 'var(--gold2)' : 'var(--forest)';
-        const existing = store.get('notifs', []);
-        const existingIds = new Set(existing.map(n => String(n.id)));
-        const newOnes = dbNotifs.filter(n => !existingIds.has(String(n.id))).map(n => ({
-          id: n.id, type: n.type || 'tontine',
-          icon: iconFor(n.type), bg: bgFor(n.type), color: colorFor(n.type),
-          title: n.title || '', desc: n.body || '',
-          time: new Date(n.created_at).toLocaleDateString('fr-FR', { day:'numeric', month:'short' }),
-          read: n.read || false
-        }));
-        if (!newOnes.length) return;
-        const merged = [...newOnes, ...existing];
-        store.set('notifs', merged);
-        G._renderNotifsList(merged);
-        const unread = merged.filter(n => !n.read).length;
-        if ($('notif-dot')) $('notif-dot').style.display = unread ? 'block' : 'none';
-      }).catch(() => {});
-  },
-
-  _renderNotifsList(notifs) {
-    if (!$('notif-list')) return;
-    const iconFor = t => ({tontine_invite:'users',tontine_reminder:'users',tontine_payment:'z',tontine_refund:'recv',transfer:'recv'}[t] || 'bell');
-    const bgFor = t => ({tontine_invite:'rgba(10,74,46,.12)',tontine_payment:'rgba(22,163,74,.12)',tontine_refund:'rgba(59,130,246,.12)',tontine_reminder:'rgba(212,160,23,.1)'}[t] || 'rgba(10,74,46,.1)');
-    const colFor = t => ({tontine_invite:'var(--forest)',tontine_payment:'var(--green)',tontine_refund:'#3b82f6',tontine_reminder:'var(--gold2)'}[t] || 'var(--forest)');
-    $('notif-list').innerHTML = notifs.map(n => {
-      const ico = n.icon || iconFor(n.type);
-      const bg = n.bg || bgFor(n.type);
-      const col = n.color || colFor(n.type);
-      return `<div class="notif-item ${n.read ? '' : 'unread'}" style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer" onclick="G._markNotifRead('${n.id}',this)">
-        <div class="notif-ic" style="background:${bg};flex-shrink:0;margin-top:2px">${si(ico, col, 17)}</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:.82rem;font-weight:${n.read ? '600' : '800'};color:var(--txt);margin-bottom:2px">${esc(n.title)}</div>
-          <div style="font-size:.7rem;color:var(--txt3);line-height:1.5">${esc(n.desc || '')}</div>
-          <div style="font-size:.6rem;color:var(--txt3);margin-top:4px;font-family:var(--fm)">${esc(n.time || '')}</div>
-        </div>
-        ${!n.read ? '<div style="width:8px;height:8px;border-radius:50%;background:var(--gold2);flex-shrink:0;margin-top:6px"></div>' : ''}
-      </div>`;
-    }).join('') || '<div style="padding:32px;text-align:center;color:var(--txt3);font-size:.82rem">Aucune notification</div>';
-    // Update count in profil
-    const unread = notifs.filter(n => !n.read).length;
-    if ($('notif-sub')) $('notif-sub').textContent = unread ? `${unread} non lue${unread>1?'s':''}` : 'Tout lu';
-    if ($('notif-dot')) $('notif-dot').style.display = unread ? 'block' : 'none';
-  },
-
-  _markNotifRead(id, el) {
-    const ns = store.get('notifs', []);
-    const n = ns.find(x => String(x.id) === String(id));
-    if (n && !n.read) {
-      n.read = true;
-      store.set('notifs', ns);
-      if (el) el.querySelector('div[style*="background:var(--gold2)"]')?.remove();
-      el?.classList.remove('unread');
-      if (store.currentUser && id) db.from('notifications').update({ read: true }).eq('id', id).catch(() => {});
-      const unread = ns.filter(n => !n.read).length;
-      if ($('notif-dot')) $('notif-dot').style.display = unread ? 'block' : 'none';
-      if ($('notif-sub')) $('notif-sub').textContent = unread ? `${unread} non lue${unread>1?'s':''}` : 'Tout lu';
-    }
-  },
-
-  readAll() {
-    const ns = store.get('notifs', []);
-    ns.forEach(n => n.read = true);
-    store.set('notifs', ns);
-    G._renderNotifsList(ns);
-    if ($('notif-dot')) $('notif-dot').style.display = 'none';
-    if ($('notif-sub')) $('notif-sub').textContent = 'Tout lu';
-    // Mark read in DB
-    if (store.currentUser) {
-      db.from('notifications').update({ read: true }).eq('user_id', store.currentUser.id).eq('read', false).catch(() => {});
-    }
-    G.toast('Toutes lues', 'inf');
-  },
-
   // ── PROFIL ──
   r_profil() {
     const u = store.get('user', {});
@@ -2444,83 +2105,6 @@ const G = {
     if (sub) sub.textContent = isDark ? 'Activé' : 'Désactivé';
     if (knob) knob.style.transform = isDark ? 'translateX(16px)' : 'translateX(0)';
     if (track) track.style.background = isDark ? 'var(--green)' : 'var(--bg3)';
-  },
-
-  // ── EXPORT CSV ──
-  exportCSV() {
-    const rows = [['Date','Type','Nom','Montant (FCFA)','Catégorie']];
-    if (store.currentUser) {
-      db.from('transactions')
-        .select('*, from_user:from_user_id(name), to_user:to_user_id(name)')
-        .or(`from_user_id.eq.${store.currentUser.id},to_user_id.eq.${store.currentUser.id}`)
-        .order('created_at', { ascending: false })
-        .limit(500)
-        .then(({ data: txs }) => {
-          (txs || []).forEach(t => {
-            const isCredit = t.to_user_id === store.currentUser.id;
-            const other = isCredit ? t.from_user : t.to_user;
-            const name = other?.name || t.merchant_name || 'GhettoPay';
-            const cat = { transfer:'Transfert', qr:'QR Pay', recharge:'Recharge', bill:'Facture', coffre_deposit:'Coffre', tontine:'Tontine' }[t.type] || t.type;
-            const date = new Date(t.created_at).toLocaleDateString('fr-FR');
-            rows.push([date, isCredit ? 'Crédit' : 'Débit', name, t.amount, cat]);
-          });
-          G._downloadCSV(rows);
-        });
-    } else {
-      const txs = store.get('txs', []);
-      txs.forEach(t => {
-        const cat = t.cat || t.type || '';
-        rows.push([t.time || '', t.type === 'recv' ? 'Crédit' : 'Débit', t.name || '', t.amount || 0, cat]);
-      });
-      G._downloadCSV(rows);
-    }
-  },
-  _downloadCSV(rows) {
-    const bom = '\uFEFF';
-    const csv = bom + rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = `ghettopay_${new Date().toISOString().slice(0,10)}.csv`;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    G.toast('Export CSV téléchargé', 'ok');
-  },
-
-  // ── BUDGET BAR CHART ──
-  _renderBudgetChart(txs2, userId) {
-    const el = $('bud-chart');
-    if (!el) return;
-    const now = new Date();
-    const months = Array.from({length:6}, (_, i) => {
-      const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
-      return { year: d.getFullYear(), month: d.getMonth(), label: d.toLocaleDateString('fr-FR',{month:'short'}), total: 0 };
-    });
-    txs2.forEach(t => {
-      const isOut = userId ? t.from_user_id === userId : (t.type !== 'recv');
-      if (!isOut) return;
-      const d = t.created_at ? new Date(t.created_at) : null;
-      if (!d) return;
-      const m = months.find(m => m.year === d.getFullYear() && m.month === d.getMonth());
-      if (m) m.total += (t.amount || 0);
-    });
-    const max = Math.max(...months.map(m => m.total), 1);
-    const W = 300, H = 80, bw = 32, gap = 14;
-    const totalW = months.length * (bw + gap) - gap;
-    const offsetX = (W - totalW) / 2;
-    const bars = months.map((m, i) => {
-      const bh = Math.max(4, Math.round((m.total / max) * H));
-      const x = offsetX + i * (bw + gap);
-      const y = H - bh;
-      const isLast = i === months.length - 1;
-      return `<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="6" fill="${isLast ? 'var(--gold2)' : 'var(--forest)'}"/>
-        <text x="${x + bw/2}" y="${H + 14}" text-anchor="middle" font-size="8" fill="var(--txt3)" font-family="var(--fm)">${m.label}</text>
-        ${m.total > 0 ? `<text x="${x + bw/2}" y="${y - 4}" text-anchor="middle" font-size="7.5" fill="${isLast ? 'var(--gold2)' : 'var(--txt2)'}" font-family="var(--fm)">${m.total >= 1000 ? Math.round(m.total/1000)+'k' : m.total}</text>` : ''}`;
-    }).join('');
-    el.innerHTML = `<div style="background:var(--card);border-radius:16px;padding:16px;border:1px solid var(--border)">
-      <div style="font-size:.68rem;font-weight:800;color:var(--txt2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Dépenses — 6 derniers mois</div>
-      <svg width="100%" viewBox="0 0 ${W} ${H+20}" style="overflow:visible">${bars}</svg>
-    </div>`;
   },
 
   // ── RESET CYCLE TONTINE ──
@@ -3327,16 +2911,12 @@ const G = {
   },
 };
 
+Object.assign(G, homeScreen, budgetScreen, facturesScreen, notifsScreen);
+
 window.G = G;
-window.setBudTab = setBudTab;
+window.setBudTab = btn => G.setBudTab(btn);
 
 appStart();
-
-function setBudTab(btn) {
-  btn.closest('.bud-tabs').querySelectorAll('.btab').forEach(b => b.classList.remove('on'));
-  btn.classList.add('on');
-  G.render('budget');
-}
 
 // ── HORLOGE ──
 function tick() {
