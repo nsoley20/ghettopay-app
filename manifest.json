@@ -2,7 +2,7 @@
   "name": "GhettoPay",
   "short_name": "GhettoPay",
   "description": "Le portefeuille mobile gabonais — Envoyer, recevoir, épargner",
-  "start_url": "./index.html",
+  "start_url": "/",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#060d08",
