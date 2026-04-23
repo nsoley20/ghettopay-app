@@ -3421,4 +3421,9 @@ $('install-btn')?.addEventListener('click', async () => {
   $('install-banner').classList.remove('on');
   if (dp) { dp.prompt(); await dp.userChoice; dp = null; }
 });
+
+// ── SERVICE WORKER ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(e => console.warn('SW:', e));
+}
 
