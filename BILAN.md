@@ -68,7 +68,24 @@
 - [ ] Notifications push (Firebase ou OneSignal)
 - [ ] Mode hors-ligne complet (sync différée des transactions échouées)
 - [ ] Version iOS — App Store (99 USD/an, processus séparé)
-- [ ] Virement bancaire réel (intégration opérateur mobile money Gabon)
+- [ ] Virement bancaire réel — intégration mobile money Gabon (voir détail ci-dessous)
+
+### Mobile Money Gabon — État réel
+
+Le Gabon (~2M habitants) n'est couvert par aucun agrégateur Pan-Africain connu (CinetPay, Paystack, Flutterwave, Wave). L'intégration passe obligatoirement par les opérateurs en direct :
+
+| Opérateur | API | Accès |
+|---|---|---|
+| Airtel Money Gabon | Airtel Africa API | Le plus accessible, sandbox disponible |
+| Orange Money Gabon | Orange Developer | Accord commercial avec Orange Gabon requis |
+| Moov Money Gabon | — | Très fermé, contact direction locale uniquement |
+
+**Prérequis pour toute intégration :**
+- RCCM (registre de commerce gabonais) obligatoire
+- Délais de négociation : plusieurs semaines à mois
+- Pas un blocage technique — c'est un blocage commercial et légal
+
+**Chemin recommandé :** commencer par Airtel Money (API la plus ouverte), puis Orange Money une fois la structure juridique en place.
 
 ---
 

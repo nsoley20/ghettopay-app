@@ -1,12 +1,6 @@
 import { f, $, si, esc, tryCatch, validateAmount, validatePhone, validateName } from './utils.js';
-import { S } from './state.js';
+import { store } from './store.js';
 import { db } from './api.js';
-
-// ── STATE ──
-let cur = 'loading', hist = [], pD = {}, selC = null, aStr = '', pinBuf = '', balVis = true;
-let currentUser = null; // utilisateur connecté
-let isNewUser = false;  // mode inscription
-let walletChannel = null; // canal realtime solde
 
 
 // ── DÉMARRAGE ──
@@ -34,7 +28,7 @@ async function loadUserData(authId) {
 
   if (!user) {
     // Tenter de compléter l'inscription avec les données en attente
-    const p = S.get('pending_reg', null);
+    const p = store.get('pending_reg', null);
     if (p && authId) {
       const { data: newUser, error } = await db.from('users').insert({
         auth_id: authId, phone: p.phone, name: p.name,
@@ -43,7 +37,7 @@ async function loadUserData(authId) {
       }).select().single();
       if (!error && newUser) {
         await db.from('wallets').insert({ user_id: newUser.id, balance: 10000, coffre_balance: 0, cashback: 0 });
-        S.set('pending_reg', null);
+        store.set('pending_reg', null);
         user = newUser;
       }
     }
@@ -52,19 +46,19 @@ async function loadUserData(authId) {
   }
 
   const { data: wallet } = await db.from('wallets').select('*').eq('user_id', user.id).single();
-  currentUser = { ...user, wallet };
+  store.currentUser = { ...user, wallet };
 
   // pin_code peut être int ou string selon la DB → toujours stocker en string
-  S.set('user', { name: user.name, phone: user.phone, pin: String(user.pin_code || ''), avatar: user.avatar, loc: user.location, level: user.level });
-  S.set('bal', wallet?.balance || 0);
-  S.set('cash', wallet?.cashback || 0);
+  store.set('user', { name: user.name, phone: user.phone, pin: String(user.pin_code || ''), avatar: user.avatar, loc: user.location, level: user.level });
+  store.set('bal', wallet?.balance || 0);
+  store.set('cash', wallet?.cashback || 0);
   // Recalculer le total coffre depuis les coffres réels (non-bloquant)
-  S.set('coffre', wallet?.coffre_balance || 0);
+  store.set('coffre', wallet?.coffre_balance || 0);
   db.from('coffres').select('saved').eq('user_id', user.id)
     .then(({ data: userCoffres }) => {
       if (!userCoffres) return;
       const realCoffre = userCoffres.reduce((s, c) => s + (c.saved || 0), 0);
-      S.set('coffre', realCoffre);
+      store.set('coffre', realCoffre);
       if (wallet && realCoffre !== (wallet.coffre_balance || 0)) {
         db.from('wallets').update({ coffre_balance: realCoffre }).eq('user_id', user.id).catch(() => {});
       }
@@ -82,15 +76,15 @@ async function loadUserData(authId) {
   }
 
   // ── REALTIME : écouter les changements de solde du wallet ──
-  if (walletChannel) { db.removeChannel(walletChannel); walletChannel = null; }
-  walletChannel = db.channel('wallet_' + user.id)
+  if (store.walletChannel) { db.removeChannel(store.walletChannel); store.walletChannel = null; }
+  store.walletChannel = db.channel('wallet_' + user.id)
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'wallets', filter: `user_id=eq.${user.id}` }, payload => {
       const d = payload.new;
       const nb = d.balance || 0, nc = d.coffre_balance || 0;
-      S.set('bal', nb); S.set('coffre', nc); S.set('cash', d.cashback || 0);
-      if (currentUser?.wallet) { currentUser.wallet.balance = nb; currentUser.wallet.coffre_balance = nc; }
-      if (cur === 'home') {
-        if (balVis) {
+      store.set('bal', nb); store.set('coffre', nc); store.set('cash', d.cashback || 0);
+      if (store.currentUser?.wallet) { store.currentUser.wallet.balance = nb; store.currentUser.wallet.coffre_balance = nc; }
+      if (store.cur === 'home') {
+        if (store.balVis) {
           $('bal-amt').innerHTML = `<span class="cur">FCFA </span>${f(nb)}`;
           $('bal-sub').textContent = `+ Coffre : ${f(nc)} FCFA`;
         }
@@ -107,15 +101,15 @@ async function loadUserData(authId) {
 const G = {
   go(scr) {
     // Stopper la caméra si on quitte l'écran scan
-    if (cur === 'scan' && scr !== 'scan') G.stopScan();
-    const p = $('sc-' + cur), n = $('sc-' + scr);
+    if (store.cur === 'scan' && scr !== 'scan') G.stopScan();
+    const p = $('sc-' + store.cur), n = $('sc-' + scr);
     if (!n) return;
     if (p) p.classList.remove('on');
     n.classList.add('on');
     // Ne pas empiler les écrans d'auth dans l'historique
     const noHist = ['onboard', 'login', 'pin'];
-    if (cur !== scr && !noHist.includes(cur)) hist.push(cur);
-    cur = scr;
+    if (store.cur !== scr && !noHist.includes(store.cur)) store.hist.push(store.cur);
+    store.cur = scr;
     G.render(scr);
     // Mettre à jour navbar
     document.querySelectorAll('.bt').forEach(b => b.classList.remove('on'));
@@ -126,14 +120,14 @@ const G = {
   },
 
   back() {
-    const scr = hist.length ? hist.pop() : 'home';
-    // Navigation directe sans passer par go() pour ne pas re-empiler dans hist
-    if (cur === 'scan' && scr !== 'scan') G.stopScan();
-    const p = $('sc-' + cur), n = $('sc-' + scr);
+    const scr = store.hist.length ? store.hist.pop() : 'home';
+    // Navigation directe sans passer par go() pour ne pas re-empiler dans store.hist
+    if (store.cur === 'scan' && scr !== 'scan') G.stopScan();
+    const p = $('sc-' + store.cur), n = $('sc-' + scr);
     if (!n) return;
     if (p) p.classList.remove('on');
     n.classList.add('on');
-    cur = scr;
+    store.cur = scr;
     G.render(scr);
     document.querySelectorAll('.bt').forEach(b => b.classList.remove('on'));
     const map = { home: 0, budget: 1, coffre: 3, profil: 4 };
@@ -162,7 +156,7 @@ const G = {
 
   // ── HOME ──
   r_home() {
-    const bal = S.get('bal', 0), cbal = S.get('coffre', 0), u = S.get('user', {});
+    const bal = store.get('bal', 0), cbal = store.get('coffre', 0), u = store.get('user', {});
     $('home-name').textContent = (u.name || 'Utilisateur').split(' ')[0] + ' ' + ((u.name || '').split(' ')[1]?.[0] || '') + '.';
     const photo = localStorage.getItem('gp_photo');
     const hav = $('home-av');
@@ -170,21 +164,21 @@ const G = {
       if (photo) { hav.textContent = ''; hav.style.backgroundImage = `url(${photo})`; hav.style.backgroundSize = 'cover'; hav.style.backgroundPosition = 'center'; }
       else { hav.style.backgroundImage = ''; hav.textContent = u.avatar || '?'; }
     }
-    $('bal-amt').innerHTML = `<span class="cur">FCFA </span>${balVis ? f(bal) : '• • • •'}`;
+    $('bal-amt').innerHTML = `<span class="cur">FCFA </span>${store.balVis ? f(bal) : '• • • •'}`;
     $('bal-sub').textContent = `+ Coffre : ${f(cbal)} FCFA`;
     $('cstrip-val').textContent = f(cbal);
-    const unread = S.get('notifs', []).filter(n => !n.read).length;
+    const unread = store.get('notifs', []).filter(n => !n.read).length;
     $('notif-dot').style.display = unread ? 'block' : 'none';
     G.r_txList();
     // Rafraîchir le solde depuis la DB (non-bloquant, met à jour si différent)
-    if (currentUser) {
-      db.from('wallets').select('balance,coffre_balance,cashback').eq('user_id', currentUser.id).single()
+    if (store.currentUser) {
+      db.from('wallets').select('balance,coffre_balance,cashback').eq('user_id', store.currentUser.id).single()
         .then(({ data }) => {
-          if (!data || cur !== 'home') return;
+          if (!data || store.cur !== 'home') return;
           const nb = data.balance || 0, nc = data.coffre_balance || 0;
-          if (nb !== S.get('bal', 0) || nc !== S.get('coffre', 0)) {
-            S.set('bal', nb); S.set('coffre', nc); S.set('cash', data.cashback || 0);
-            if (balVis) {
+          if (nb !== store.get('bal', 0) || nc !== store.get('coffre', 0)) {
+            store.set('bal', nb); store.set('coffre', nc); store.set('cash', data.cashback || 0);
+            if (store.balVis) {
               $('bal-amt').innerHTML = `<span class="cur">FCFA </span>${f(nb)}`;
               $('bal-sub').textContent = `+ Coffre : ${f(nc)} FCFA`;
             }
@@ -208,8 +202,8 @@ const G = {
 
   async r_txList() {
     const empty = '<div style="padding:28px;text-align:center;color:var(--txt3);font-size:.82rem">Aucune transaction récente</div>';
-    if (!currentUser) {
-      const txs = S.get('txs', []);
+    if (!store.currentUser) {
+      const txs = store.get('txs', []);
       if (!txs.length) { $('tx-list').innerHTML = empty; return; }
       $('tx-list').innerHTML = txs.slice(0, 8).map(t => {
         const isCredit = t.type === 'recv';
@@ -223,11 +217,11 @@ const G = {
     }
     const { data: txs } = await db.from('transactions')
       .select('*, from_user:from_user_id(name,avatar), to_user:to_user_id(name,avatar)')
-      .or(`from_user_id.eq.${currentUser.id},to_user_id.eq.${currentUser.id}`)
+      .or(`from_user_id.eq.${store.currentUser.id},to_user_id.eq.${store.currentUser.id}`)
       .order('created_at', { ascending: false }).limit(8);
     if (!txs?.length) { $('tx-list').innerHTML = empty; return; }
     $('tx-list').innerHTML = txs.map(t => {
-      const isCredit = t.to_user_id === currentUser.id;
+      const isCredit = t.to_user_id === store.currentUser.id;
       const other = isCredit ? t.from_user : t.to_user;
       const name = other?.name || t.merchant_name || 'GhettoPay';
       const ico = { transfer: isCredit?'recv':'send', qr:'qric', recharge:'phone', bill:'pay', coffre_deposit:'lock', tontine:'users' }[t.type] || 'send';
@@ -240,24 +234,24 @@ const G = {
   },
 
   toggleBal() {
-    balVis = !balVis;
-    const bal = S.get('bal', 0), cbal = S.get('coffre', 0);
-    $('bal-amt').innerHTML = `<span class="cur">FCFA </span>${balVis ? f(bal) : '• • • •'}`;
-    $('bal-sub').textContent = balVis ? `+ Coffre : ${f(cbal)} FCFA` : '••••••••';
-    $('eye-ic').innerHTML = balVis ? '<use href="#eye"/>' : '<use href="#eyeoff"/>';
+    store.balVis = !store.balVis;
+    const bal = store.get('bal', 0), cbal = store.get('coffre', 0);
+    $('bal-amt').innerHTML = `<span class="cur">FCFA </span>${store.balVis ? f(bal) : '• • • •'}`;
+    $('bal-sub').textContent = store.balVis ? `+ Coffre : ${f(cbal)} FCFA` : '••••••••';
+    $('eye-ic').innerHTML = store.balVis ? '<use href="#eye"/>' : '<use href="#eyeoff"/>';
   },
 
   // ── SEND ──
   r_send() {
-    aStr = '';
+    store.aStr = '';
     $('amt-disp').textContent = '0';
     // Si un contact est déjà sélectionné (ex: depuis scan QR), le conserver
-    if (!selC) {
+    if (!store.selC) {
       $('rec-row').style.display = 'none';
     } else {
-      if ($('rec-av')) $('rec-av').textContent = selC.av;
-      if ($('rec-name')) $('rec-name').textContent = selC.name;
-      if ($('rec-phone')) $('rec-phone').textContent = selC.phone;
+      if ($('rec-av')) $('rec-av').textContent = store.selC.av;
+      if ($('rec-name')) $('rec-name').textContent = store.selC.name;
+      if ($('rec-phone')) $('rec-phone').textContent = store.selC.phone;
       if ($('rec-row')) $('rec-row').style.display = 'flex';
     }
     G.r_contacts();
@@ -266,10 +260,10 @@ const G = {
   async r_contacts() {
     G._allContacts = [];
     G._contactMap = {};
-    if (!currentUser) {
-      G._allContacts = S.get('contacts', []);
+    if (!store.currentUser) {
+      G._allContacts = store.get('contacts', []);
     } else {
-      const { data: users } = await db.from('users').select('id,name,avatar,phone').neq('id', currentUser.id).limit(30);
+      const { data: users } = await db.from('users').select('id,name,avatar,phone').neq('id', store.currentUser.id).limit(30);
       G._allContacts = users || [];
       (users||[]).forEach(u => G._contactMap[u.id] = u);
     }
@@ -296,19 +290,19 @@ const G = {
   },
 
   selContact(id) {
-    let c = G._contactMap?.[id] || (S.get('contacts',[])).find(x => x.id === id) || (G._allContacts||[]).find(x => x.id === id);
+    let c = G._contactMap?.[id] || (store.get('contacts',[])).find(x => x.id === id) || (G._allContacts||[]).find(x => x.id === id);
     if (!c) return;
-    selC = { id: c.id, name: c.name, phone: c.phone||'', av: c.avatar || c.av || (c.name||'?')[0].toUpperCase() };
-    $('rec-av').textContent = selC.av;
-    $('rec-name').textContent = selC.name;
-    $('rec-phone').textContent = selC.phone;
+    store.selC = { id: c.id, name: c.name, phone: c.phone||'', av: c.avatar || c.av || (c.name||'?')[0].toUpperCase() };
+    $('rec-av').textContent = store.selC.av;
+    $('rec-name').textContent = store.selC.name;
+    $('rec-phone').textContent = store.selC.phone;
     $('rec-row').style.display = 'flex';
   },
 
   kp(v) {
-    if (v === 'del') { aStr = aStr.slice(0, -1); }
-    else if (aStr.length < 9) { aStr += v; }
-    const n = parseInt(aStr) || 0;
+    if (v === 'del') { store.aStr = store.aStr.slice(0, -1); }
+    else if (store.aStr.length < 9) { store.aStr += v; }
+    const n = parseInt(store.aStr) || 0;
     $('amt-disp').textContent = f(n);
     const fee = Math.round(n * 0.015);
     const fd = $('fee-disp');
@@ -317,9 +311,9 @@ const G = {
 
   _pendingSend: null, _mpcBuf: '',
   async doSend() {
-    if (!selC) { G.toast('Choisis un destinataire', 'err'); return; }
-    const n = parseInt(aStr) || 0;
-    const bal = S.get('bal', 0);
+    if (!store.selC) { G.toast('Choisis un destinataire', 'err'); return; }
+    const n = parseInt(store.aStr) || 0;
+    const bal = store.get('bal', 0);
     const amtErr = validateAmount(n, bal, { withFee: true });
     if (amtErr) { G.toast(amtErr, 'err'); return; }
     const fee = Math.round(n * 0.015);
@@ -328,31 +322,31 @@ const G = {
 
     // PIN confirmation si montant > 100 000 FCFA
     const PIN_THRESHOLD = 100000;
-    if (n >= PIN_THRESHOLD && S.get('user', {}).pin) {
-      G._pendingSend = { selC, n, fee, total, bal, note };
+    if (n >= PIN_THRESHOLD && store.get('user', {}).pin) {
+      G._pendingSend = { store.selC, n, fee, total, bal, note };
       G._mpcBuf = '';
       G._mpcUpdateDots();
-      if ($('mpc-desc')) $('mpc-desc').textContent = `Transfert de ${f(n)} FCFA à ${selC.name} — Entre ton PIN pour valider`;
+      if ($('mpc-desc')) $('mpc-desc').textContent = `Transfert de ${f(n)} FCFA à ${store.selC.name} — Entre ton PIN pour valider`;
       G.showModal('m-pin-confirm');
       return;
     }
 
-    if (currentUser) {
+    if (store.currentUser) {
       G.toast('Envoi en cours...', 'inf');
       const { data, error } = await db.rpc('transfer_money', {
-        p_from_user_id: currentUser.id, p_to_user_id: selC.id, p_amount: n, p_note: note
+        p_from_user_id: store.currentUser.id, p_to_user_id: store.selC.id, p_amount: n, p_note: note
       });
       if (error || !data?.success) { G.toast(data?.error || 'Erreur de transfert', 'err'); return; }
       const newBal = bal - total;
-      S.set('bal', newBal);
-      if (currentUser.wallet) currentUser.wallet.balance = newBal;
+      store.set('bal', newBal);
+      if (store.currentUser.wallet) store.currentUser.wallet.balance = newBal;
     } else {
-      S.set('bal', bal - total);
-      const txs = S.get('txs', []);
-      txs.unshift({ id: Date.now(), name: selC.name, av: selC.av, amount: n, fee, type: 'send', cat: 'Transfert', time: "À l'instant" });
-      S.set('txs', txs);
+      store.set('bal', bal - total);
+      const txs = store.get('txs', []);
+      txs.unshift({ id: Date.now(), name: store.selC.name, av: store.selC.av, amount: n, fee, type: 'send', cat: 'Transfert', time: "À l'instant" });
+      store.set('txs', txs);
     }
-    G.ok(`${f(n)} FCFA envoyés`, `À ${selC.name} · Frais ${f(fee)} FCFA · Confirmé ✓`, () => G.go('home'));
+    G.ok(`${f(n)} FCFA envoyés`, `À ${store.selC.name} · Frais ${f(fee)} FCFA · Confirmé ✓`, () => G.go('home'));
   },
 
   // ── QR HUB ──
@@ -448,13 +442,13 @@ const G = {
       }
       if (!phone) { G.toast('QR non reconnu par GhettoPay', 'err'); return; }
       // Lookup real user ID by phone — required for transfer_money RPC
-      if (!currentUser) { G.toast('Connecte-toi pour envoyer de l\'argent', 'err'); return; }
+      if (!store.currentUser) { G.toast('Connecte-toi pour envoyer de l\'argent', 'err'); return; }
       G.toast('Recherche du destinataire…', 'inf');
       const { data: found } = await db.from('users').select('id,name').eq('phone', phone).maybeSingle();
       if (!found) { G.toast('Cet utilisateur n\'est pas encore sur GhettoPay', 'err'); return; }
       const nm = found.name || name || phone;
-      // Définir selC AVANT go('send') pour que r_send() le détecte
-      selC = { id: found.id, name: nm, phone, av: (nm[0] || '?').toUpperCase() };
+      // Définir store.selC AVANT go('send') pour que r_send() le détecte
+      store.selC = { id: found.id, name: nm, phone, av: (nm[0] || '?').toUpperCase() };
       G.go('send');
       G.toast(`Destinataire : ${nm}`, 'inf');
     } catch(e) {
@@ -466,17 +460,17 @@ const G = {
     const phone = $('scan-phone')?.value.trim();
     const phoneErr = validatePhone(phone);
     if (phoneErr) { G.toast(phoneErr, 'err'); return; }
-    if (!currentUser) { G.toast('Connecte-toi pour envoyer de l\'argent', 'err'); return; }
+    if (!store.currentUser) { G.toast('Connecte-toi pour envoyer de l\'argent', 'err'); return; }
     G.toast('Recherche du destinataire…', 'inf');
     const { data: found } = await db.from('users').select('id,name').eq('phone', phone).maybeSingle();
     if (!found) { G.toast('Numéro introuvable sur GhettoPay', 'err'); return; }
     const nm = found.name || phone;
-    selC = { id: found.id, name: nm, phone, av: (nm[0] || '?').toUpperCase() };
+    store.selC = { id: found.id, name: nm, phone, av: (nm[0] || '?').toUpperCase() };
     G.go('send');
     setTimeout(() => {
-      if ($('rec-av')) $('rec-av').textContent = selC.av;
-      if ($('rec-name')) $('rec-name').textContent = selC.name;
-      if ($('rec-phone')) $('rec-phone').textContent = selC.phone;
+      if ($('rec-av')) $('rec-av').textContent = store.selC.av;
+      if ($('rec-name')) $('rec-name').textContent = store.selC.name;
+      if ($('rec-phone')) $('rec-phone').textContent = store.selC.phone;
       if ($('rec-row')) $('rec-row').style.display = 'flex';
     }, 150);
   },
@@ -489,7 +483,7 @@ const G = {
 
   // ── RECEVOIR — QR personnel ──
   r_recv() {
-    const u = S.get('user', {});
+    const u = store.get('user', {});
     if ($('recv-name')) $('recv-name').textContent = u.name || 'Utilisateur';
     if ($('recv-phone')) $('recv-phone').textContent = u.phone || '';
     if (!window.QRCode) return;
@@ -502,7 +496,7 @@ const G = {
   },
 
   shareQR() {
-    const u = S.get('user', {});
+    const u = store.get('user', {});
     const qrEl = $('recv-qr-real');
     const canvas = qrEl?.querySelector('canvas');
     const img = qrEl?.querySelector('img');
@@ -524,7 +518,7 @@ const G = {
   },
 
   copyPayLink() {
-    const u = S.get('user', {});
+    const u = store.get('user', {});
     const link = `${location.origin}${location.pathname}?phone=${encodeURIComponent(u.phone||'')}&name=${encodeURIComponent(u.name||'')}`;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(link)
@@ -539,10 +533,10 @@ const G = {
     const phone = $('manual-phone')?.value.trim();
     const phoneErr2 = validatePhone(phone);
     if (phoneErr2) { G.toast(phoneErr2, 'err'); return; }
-    selC = { id: 'manual_' + phone, name: phone, phone, av: '#' };
-    $('rec-av').textContent = selC.av;
-    $('rec-name').textContent = selC.name;
-    $('rec-phone').textContent = selC.phone;
+    store.selC = { id: 'manual_' + phone, name: phone, phone, av: '#' };
+    $('rec-av').textContent = store.selC.av;
+    $('rec-name').textContent = store.selC.name;
+    $('rec-phone').textContent = store.selC.phone;
     $('rec-row').style.display = 'flex';
     if ($('manual-phone')) $('manual-phone').value = '';
     G.toast('Destinataire défini', 'inf');
@@ -558,10 +552,10 @@ const G = {
         const c = contacts[0];
         const phone = c.tel?.[0] || '';
         const name = c.name?.[0] || phone;
-        selC = { id: 'contact_' + phone, name, phone, av: (name[0]||'?').toUpperCase() };
-        $('rec-av').textContent = selC.av;
-        $('rec-name').textContent = selC.name;
-        $('rec-phone').textContent = selC.phone;
+        store.selC = { id: 'contact_' + phone, name, phone, av: (name[0]||'?').toUpperCase() };
+        $('rec-av').textContent = store.selC.av;
+        $('rec-name').textContent = store.selC.name;
+        $('rec-phone').textContent = store.selC.phone;
         $('rec-row').style.display = 'flex';
       }
     } catch(e) { G.toast('Accès contacts refusé', 'err'); }
@@ -572,51 +566,51 @@ const G = {
     const amount = parseInt($('qr-amount')?.value) || 0;
     const merchantErr = validateName(merchant, { label: 'Nom du commerçant' });
     if (merchantErr) { G.toast(merchantErr, 'err'); return; }
-    const bal = S.get('bal', 0);
+    const bal = store.get('bal', 0);
     const qrAmtErr = validateAmount(amount, bal);
     if (qrAmtErr) { G.toast(qrAmtErr, 'err'); return; }
 
-    if (currentUser) {
+    if (store.currentUser) {
       // Enregistrer le paiement QR
       db.from('transactions').insert({
-        from_user_id: currentUser.id,
+        from_user_id: store.currentUser.id,
         amount,
         type: 'qr',
         merchant_name: merchant,
         status: 'completed'
       }).then(({ error }) => {
         if (error) { G.toast('Erreur paiement', 'err'); return; }
-        S.set('bal', bal - amount);
+        store.set('bal', bal - amount);
         G.ok(`${f(amount)} FCFA payés`, `${merchant} · Confirmé ✓`, () => G.go('home'));
       });
     } else {
-      S.set('bal', bal - amount);
+      store.set('bal', bal - amount);
       G.ok(`${f(amount)} FCFA payés`, `${merchant} · Confirmé ✓`, () => G.go('home'));
     }
   },
 
   // ── COFFRE ──
   r_coffre() {
-    const cbal = S.get('coffre', 0);
+    const cbal = store.get('coffre', 0);
     $('coffre-total').textContent = f(cbal) + ' FCFA';
     G.r_coffreList();
   },
 
   r_coffreList() {
     // Affichage instantané depuis le cache
-    const cached = S.get('coffres', []);
+    const cached = store.get('coffres', []);
     G._renderCoffreList(cached);
 
-    if (!currentUser) return;
+    if (!store.currentUser) return;
     // Mise à jour silencieuse depuis la DB
-    db.from('coffres').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false })
+    db.from('coffres').select('*').eq('user_id', store.currentUser.id).order('created_at', { ascending: false })
       .then(({ data }) => {
         if (!data) return;
-        S.set('coffres', data);
+        store.set('coffres', data);
         G._renderCoffreList(data);
         // Mettre à jour le total coffre
         const total = data.reduce((s, c) => s + (c.saved || 0), 0);
-        S.set('coffre', total);
+        store.set('coffre', total);
         if ($('coffre-total')) $('coffre-total').textContent = f(total) + ' FCFA';
       }).catch(() => {});
   },
@@ -682,16 +676,16 @@ const G = {
     const unlockDate = new Date();
     unlockDate.setMonth(unlockDate.getMonth() + months);
 
-    if (currentUser) {
+    if (store.currentUser) {
       const { error } = await db.from('coffres').insert({
-        user_id: currentUser.id, name, target, saved: 0,
+        user_id: store.currentUser.id, name, target, saved: 0,
         unlock_date: unlockDate.toISOString().split('T')[0]
       });
       if (error) { G.toast('Erreur création coffre', 'err'); return; }
     } else {
-      const coffres = S.get('coffres', []);
+      const coffres = store.get('coffres', []);
       coffres.unshift({ id: Date.now().toString(), name, target, saved: 0, unlock_date: unlockDate.toISOString().split('T')[0] });
-      S.set('coffres', coffres);
+      store.set('coffres', coffres);
     }
 
     G.closeModal('mc');
@@ -704,46 +698,46 @@ const G = {
 
   async deleteCoffre(coffreId, name) {
     if (!confirm(`Supprimer le coffre "${name}" ? Les fonds seront remboursés sur ton solde.`)) return;
-    const coffres = S.get('coffres', []);
+    const coffres = store.get('coffres', []);
     const c = coffres.find(x => String(x.id) === String(coffreId));
     const saved = c?.saved || 0;
-    if (currentUser) {
+    if (store.currentUser) {
       await db.from('coffres').delete().eq('id', coffreId);
       if (saved > 0) {
-        const bal = S.get('bal', 0);
-        const newCoffre = Math.max(0, S.get('coffre', 0) - saved);
-        await db.from('wallets').update({ balance: bal + saved, coffre_balance: newCoffre }).eq('user_id', currentUser.id);
-        S.set('bal', bal + saved);
-        S.set('coffre', newCoffre);
+        const bal = store.get('bal', 0);
+        const newCoffre = Math.max(0, store.get('coffre', 0) - saved);
+        await db.from('wallets').update({ balance: bal + saved, coffre_balance: newCoffre }).eq('user_id', store.currentUser.id);
+        store.set('bal', bal + saved);
+        store.set('coffre', newCoffre);
       }
     }
     const newCoffres = coffres.filter(x => String(x.id) !== String(coffreId));
-    S.set('coffres', newCoffres);
-    if (saved > 0) S.set('coffre', Math.max(0, S.get('coffre',0) - saved));
+    store.set('coffres', newCoffres);
+    if (saved > 0) store.set('coffre', Math.max(0, store.get('coffre',0) - saved));
     G.r_coffre();
     G.toast('Coffre supprimé', 'inf');
   },
 
   async _withdrawCoffre(coffreId) {
-    const coffres = S.get('coffres', []);
+    const coffres = store.get('coffres', []);
     const c = coffres.find(x => String(x.id) === String(coffreId));
     if (!c) { G.toast('Coffre introuvable', 'err'); return; }
     const saved = c.saved || 0;
     if (saved <= 0) { G.toast('Coffre vide', 'err'); return; }
     if (!confirm(`Retirer ${f(saved)} FCFA du coffre "${c.name}" ?`)) return;
-    const bal = S.get('bal', 0);
-    const newCoffre = Math.max(0, S.get('coffre', 0) - saved);
-    if (currentUser) {
+    const bal = store.get('bal', 0);
+    const newCoffre = Math.max(0, store.get('coffre', 0) - saved);
+    if (store.currentUser) {
       await Promise.all([
         db.from('coffres').update({ saved: 0 }).eq('id', coffreId),
-        db.from('wallets').update({ balance: bal + saved, coffre_balance: newCoffre }).eq('user_id', currentUser.id),
-        db.from('transactions').insert({ from_user_id: currentUser.id, amount: saved, type: 'coffre_withdraw', merchant_name: c.name, status: 'completed' })
+        db.from('wallets').update({ balance: bal + saved, coffre_balance: newCoffre }).eq('user_id', store.currentUser.id),
+        db.from('transactions').insert({ from_user_id: store.currentUser.id, amount: saved, type: 'coffre_withdraw', merchant_name: c.name, status: 'completed' })
       ]).catch(e => { G.toast('Erreur retrait : ' + (e.message||''), 'err'); return; });
     }
-    S.set('bal', bal + saved);
-    S.set('coffre', newCoffre);
+    store.set('bal', bal + saved);
+    store.set('coffre', newCoffre);
     const updated = coffres.map(x => String(x.id)===String(coffreId) ? {...x, saved:0} : x);
-    S.set('coffres', updated);
+    store.set('coffres', updated);
     G.r_coffre();
     if (window.innerWidth >= 1280) G.gp_renderCoffre();
     G.toast(`${f(saved)} FCFA retirés dans votre solde`, 'ok');
@@ -770,7 +764,7 @@ const G = {
 
   async deleteTontine(tontineId, name) {
     const t = G._curTontine;
-    const isCreator = currentUser && t?.creator_id === currentUser.id;
+    const isCreator = store.currentUser && t?.creator_id === store.currentUser.id;
 
     if (isCreator) {
       G._askConfirm(
@@ -793,7 +787,7 @@ const G = {
 
   async _doDeleteTontine(tontineId, name) {
     const t = G._curTontine;
-    const isCreator = currentUser && t?.creator_id === currentUser.id;
+    const isCreator = store.currentUser && t?.creator_id === store.currentUser.id;
 
     if (isCreator) {
 
@@ -807,12 +801,12 @@ const G = {
       let selfRefunded = false;
 
       for (const row of (paidRows || [])) {
-        if (!row.user_id || row.user_id === currentUser.id) {
+        if (!row.user_id || row.user_id === store.currentUser.id) {
           // Rembourser le créateur localement
-          if (row.user_id === currentUser.id) {
-            const bal = S.get('bal', 0);
-            S.set('bal', bal + amt);
-            await db.from('wallets').update({ balance: bal + amt }).eq('user_id', currentUser.id).catch(() => {});
+          if (row.user_id === store.currentUser.id) {
+            const bal = store.get('bal', 0);
+            store.set('bal', bal + amt);
+            await db.from('wallets').update({ balance: bal + amt }).eq('user_id', store.currentUser.id).catch(() => {});
             if ($('bal-amt')) $('bal-amt').textContent = f(bal + amt);
             selfRefunded = true;
           }
@@ -841,16 +835,16 @@ const G = {
 
     } else {
       // Membre non-créateur : quitter seulement
-      if (currentUser) {
+      if (store.currentUser) {
         const { error: leaveErr } = await db.from('tontine_members').delete()
-          .eq('tontine_id', tontineId).eq('user_id', currentUser.id);
+          .eq('tontine_id', tontineId).eq('user_id', store.currentUser.id);
         if (leaveErr) { G.toast('Erreur : ' + leaveErr.message, 'err'); return; }
       }
       G.toast('Tontine quittée', 'inf');
     }
 
-    const tontines = S.get('tontines', []).filter(x => String(x.id) !== String(tontineId));
-    S.set('tontines', tontines);
+    const tontines = store.get('tontines', []).filter(x => String(x.id) !== String(tontineId));
+    store.set('tontines', tontines);
     G._tontinesList = G._tontinesList.filter(x => String(x.id) !== String(tontineId));
     G._curTontine = null;
     G.go('tontine');
@@ -861,7 +855,7 @@ const G = {
     G._depCoffreName = coffreName;
     if ($('mdep-title')) $('mdep-title').textContent = coffreName;
     if ($('mdep-sub')) $('mdep-sub').textContent = `Ajouter des fonds dans "${coffreName}"`;
-    if ($('mdep-bal')) $('mdep-bal').textContent = f(S.get('bal', 0)) + ' FCFA';
+    if ($('mdep-bal')) $('mdep-bal').textContent = f(store.get('bal', 0)) + ' FCFA';
     if ($('mdep-amount')) $('mdep-amount').value = '';
     G.showModal('mdep');
     setTimeout(() => $('mdep-amount')?.focus(), 300);
@@ -871,29 +865,29 @@ const G = {
     const coffreId = G._depCoffreId;
     const coffreName = G._depCoffreName;
     const amount = parseInt($('mdep-amount')?.value) || 0;
-    const bal = S.get('bal', 0);
+    const bal = store.get('bal', 0);
     const depErr = validateAmount(amount, bal);
     if (depErr) { G.toast(depErr, 'err'); return; }
 
     G.closeModal('mdep');
 
-    const newCoffre = S.get('coffre', 0) + amount;
-    if (currentUser) {
+    const newCoffre = store.get('coffre', 0) + amount;
+    if (store.currentUser) {
       const { data: cof } = await db.from('coffres').select('saved').eq('id', coffreId).single();
       await Promise.all([
-        db.from('wallets').update({ balance: bal - amount, coffre_balance: newCoffre }).eq('user_id', currentUser.id),
+        db.from('wallets').update({ balance: bal - amount, coffre_balance: newCoffre }).eq('user_id', store.currentUser.id),
         db.from('coffres').update({ saved: (cof?.saved || 0) + amount }).eq('id', coffreId),
-        db.from('transactions').insert({ from_user_id: currentUser.id, amount, type: 'coffre_deposit', merchant_name: coffreName, status: 'completed' })
+        db.from('transactions').insert({ from_user_id: store.currentUser.id, amount, type: 'coffre_deposit', merchant_name: coffreName, status: 'completed' })
       ]);
-      S.set('bal', bal - amount);
-      S.set('coffre', newCoffre);
+      store.set('bal', bal - amount);
+      store.set('coffre', newCoffre);
     } else {
-      S.set('bal', bal - amount);
-      S.set('coffre', newCoffre);
-      const coffres = S.get('coffres', []);
+      store.set('bal', bal - amount);
+      store.set('coffre', newCoffre);
+      const coffres = store.get('coffres', []);
       const c = coffres.find(x => x.id == coffreId);
       if (c) c.saved += amount;
-      S.set('coffres', coffres);
+      store.set('coffres', coffres);
     }
 
     G.r_coffre();
@@ -903,7 +897,7 @@ const G = {
 
   // ── BUDGET ──
   r_budget() {
-    const txs = S.get('txs', []);
+    const txs = store.get('txs', []);
     const out = txs.filter(t => t.type === 'send' || t.type === 'qr' || t.type === 'bill' || t.type === 'recharge' || t.type === 'coffre_deposit');
     const inp = txs.filter(t => t.type === 'recv' || t.type === 'transfer_in');
     const totalOut = out.reduce((s, t) => s + (t.amount || 0), 0);
@@ -928,19 +922,19 @@ const G = {
     G._renderBudgetChart(txs.map(t => ({ from_user_id: t.type !== 'recv' ? 'me' : null, amount: t.amount, created_at: new Date().toISOString(), type: t.type })), 'me');
 
     // All transactions
-    if (currentUser) {
+    if (store.currentUser) {
       db.from('transactions')
         .select('*, from_user:from_user_id(name,avatar), to_user:to_user_id(name,avatar)')
-        .or(`from_user_id.eq.${currentUser.id},to_user_id.eq.${currentUser.id}`)
+        .or(`from_user_id.eq.${store.currentUser.id},to_user_id.eq.${store.currentUser.id}`)
         .order('created_at', { ascending: false })
         .limit(50)
         .then(({ data: txs2 }) => {
           if (!txs2?.length) { $('all-tx').innerHTML = '<div style="padding:16px;text-align:center;color:var(--txt3);font-size:.8rem">Aucune transaction</div>'; return; }
-          G._renderBudgetChart(txs2, currentUser.id);
+          G._renderBudgetChart(txs2, store.currentUser.id);
           // Recalculate totals from DB data
           let dbOut = 0, dbIn = 0;
           txs2.forEach(t => {
-            if (t.to_user_id === currentUser.id) dbIn += (t.amount || 0);
+            if (t.to_user_id === store.currentUser.id) dbIn += (t.amount || 0);
             else dbOut += (t.amount || 0);
           });
           if ($('bud-out')) $('bud-out').textContent = f(dbOut) + ' F';
@@ -953,12 +947,12 @@ const G = {
             { name: 'Coffre', ico: 'lock', col: '#0A4A2E', bg: 'rgba(10,74,46,.12)', types: ['coffre_deposit'] },
           ];
           if ($('cat-list')) $('cat-list').innerHTML = dbCats.map(cat => {
-            const total = txs2.filter(t => t.from_user_id === currentUser.id && cat.types.includes(t.type)).reduce((s,t) => s+(t.amount||0), 0);
+            const total = txs2.filter(t => t.from_user_id === store.currentUser.id && cat.types.includes(t.type)).reduce((s,t) => s+(t.amount||0), 0);
             const pct = dbOut > 0 ? Math.round(total / dbOut * 100) : 0;
             return `<div class="cat-item"><div class="cat-ic" style="background:${cat.bg}">${si(cat.ico, cat.col, 15)}</div><div style="flex:1"><div class="cat-name">${cat.name}</div><div class="cat-bar-wrap" style="margin-top:5px"><div class="cat-bar-fill" style="width:${pct}%;background:${cat.col}"></div></div></div><div class="cat-right"><div class="cat-val">${f(total)} F</div><div class="cat-pct">${pct}%</div></div></div>`;
           }).join('');
           $('all-tx').innerHTML = txs2.map(t => {
-            const isCredit = t.to_user_id === currentUser.id;
+            const isCredit = t.to_user_id === store.currentUser.id;
             const other = isCredit ? t.from_user : t.to_user;
             const name = other?.name || t.merchant_name || 'GhettoPay';
             const ico = { transfer: isCredit?'recv':'send', qr:'qric', recharge:'phone', bill:'pay', coffre_deposit:'lock', tontine:'users' }[t.type] || 'send';
@@ -986,7 +980,7 @@ const G = {
 
   // Affiche immédiatement le cache local, puis rafraîchit depuis la DB en parallèle
   _loadTontines() {
-    const cached = S.get('tontines', []);
+    const cached = store.get('tontines', []);
     G._tontinesList = cached;
 
     // Rendu instantané depuis le cache
@@ -994,7 +988,7 @@ const G = {
       G._renderTontinesList(cached);
     } else {
       // Skeleton si aucune donnée en cache et utilisateur connecté
-      $('tontine-list').innerHTML = currentUser
+      $('tontine-list').innerHTML = store.currentUser
         ? [0,0].map(() => `<div style="background:var(--card);border-radius:18px;padding:18px;border:1px solid var(--border)">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
               <div class="skel" style="width:38px;height:38px;border-radius:50%;flex-shrink:0"></div>
@@ -1007,15 +1001,15 @@ const G = {
         : '<div style="text-align:center;padding:32px;color:var(--txt3);font-size:.82rem">Aucune tontine. Crée ou rejoins-en une !</div><button class="btn btn-gold" onclick="G.showModal(\'mt\')" style="margin:0 16px"><svg><use href="#plus"/></svg>Créer une tontine</button>';
     }
 
-    if (!currentUser) return;
+    if (!store.currentUser) return;
 
     // 3 requêtes en parallèle pour couvrir tous les cas :
     // A) tontines créées par l'utilisateur (toujours accessible)
     // B) IDs des tontines où l'utilisateur est membre (tontine_members)
     // C) membres de toutes les tontines connues (pour affichage)
     Promise.all([
-      db.from('tontines').select('*').eq('creator_id', currentUser.id),
-      db.from('tontine_members').select('tontine_id').eq('user_id', currentUser.id)
+      db.from('tontines').select('*').eq('creator_id', store.currentUser.id),
+      db.from('tontine_members').select('tontine_id').eq('user_id', store.currentUser.id)
     ]).then(async ([{ data: ownTontines }, { data: memberships }]) => {
 
       // IDs des tontines où l'utilisateur est membre mais pas créateur
@@ -1069,7 +1063,7 @@ const G = {
         return { ...t, members, paid_by, members_paid: paid_by.length, members_count: members.length };
       });
 
-      S.set('tontines', result);
+      store.set('tontines', result);
       G._tontinesList = result;
       G._renderTontinesList(result);
       G._syncNotifs();
@@ -1115,18 +1109,18 @@ const G = {
   },
 
   _syncNotifs() {
-    if (!currentUser) return;
-    db.from('notifications').select('*').eq('user_id', currentUser.id).eq('read', false)
+    if (!store.currentUser) return;
+    db.from('notifications').select('*').eq('user_id', store.currentUser.id).eq('read', false)
       .then(({ data: dbNotifs }) => {
         if (!dbNotifs?.length) return;
-        const existing = S.get('notifs', []);
+        const existing = store.get('notifs', []);
         const existingIds = new Set(existing.map(n => String(n.id)));
         const newOnes = dbNotifs.filter(n => !existingIds.has(String(n.id))).map(n => ({
           id: n.id, type: n.type || 'tontine', icon: 'users',
           bg: 'rgba(10,74,46,.12)', color: 'var(--forest)',
           title: n.title, desc: n.body || '', time: new Date(n.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}), read: false
         }));
-        if (newOnes.length) S.set('notifs', [...newOnes, ...existing]);
+        if (newOnes.length) store.set('notifs', [...newOnes, ...existing]);
       }).catch(() => {});
   },
 
@@ -1206,14 +1200,14 @@ const G = {
     if (!res) return;
     if (!q || q.length < 2) { res.style.display = 'none'; return; }
     let users = [];
-    if (currentUser) {
+    if (store.currentUser) {
       const { data } = await db.from('users').select('id,name,phone,avatar')
-        .neq('id', currentUser.id)
+        .neq('id', store.currentUser.id)
         .or(`name.ilike.%${q}%,phone.ilike.%${q}%`)
         .limit(8);
       users = data || [];
     } else {
-      users = (S.get('contacts', [])).filter(u => (u.name||'').toLowerCase().includes(q.toLowerCase()) || (u.phone||'').includes(q));
+      users = (store.get('contacts', [])).filter(u => (u.name||'').toLowerCase().includes(q.toLowerCase()) || (u.phone||'').includes(q));
     }
     if (!users.length) { res.style.display = 'none'; return; }
     G._ntSearchCache = users;
@@ -1266,17 +1260,17 @@ const G = {
     if (amount <= 0) { G.toast('Montant requis', 'err'); return; }
 
     // Creator always first member, then invited members
-    const creatorEntry = { name: S.get('user',{}).name || 'Moi', phone: currentUser?.phone || '', userId: currentUser?.id };
+    const creatorEntry = { name: store.get('user',{}).name || 'Moi', phone: store.currentUser?.phone || '', userId: store.currentUser?.id };
     const rawMembers = G._tontineMembers.length > 0 ? [creatorEntry, ...G._tontineMembers] : [creatorEntry];
     // Noms pour affichage et DB
     const memberNames = rawMembers.map(m => typeof m === 'string' ? m : m.name);
 
     let localId = Date.now().toString();
-    if (currentUser) {
+    if (store.currentUser) {
       try {
         const startDate = new Date().toISOString();
         const { data: dbT, error } = await db.from('tontines').insert({
-          name, creator_id: currentUser.id,
+          name, creator_id: store.currentUser.id,
           amount_per_cycle: amount, frequency: freq,
           start_date: startDate
         }).select().single();
@@ -1301,12 +1295,12 @@ const G = {
 
           // Envoyer une notification DB à chaque membre GhettoPay (sauf le créateur)
           const notifInserts = inserts
-            .filter(r => r.user_id && r.user_id !== currentUser.id)
+            .filter(r => r.user_id && r.user_id !== store.currentUser.id)
             .map(r => ({
               user_id: r.user_id,
               type: 'tontine_invite',
               title: `Tu as été ajouté à "${name}"`,
-              body: `${S.get('user',{}).name || 'Quelqu\'un'} t\'a invité dans la tontine "${name}" · ${freq === 'weekly' ? 'Hebdo' : 'Mensuel'} · ${f(amount)} FCFA`,
+              body: `${store.get('user',{}).name || 'Quelqu\'un'} t\'a invité dans la tontine "${name}" · ${freq === 'weekly' ? 'Hebdo' : 'Mensuel'} · ${f(amount)} FCFA`,
               read: false
             }));
           if (notifInserts.length) {
@@ -1316,10 +1310,10 @@ const G = {
       } catch(e) { /* fall through to localStorage */ }
     }
 
-    const tontines = S.get('tontines', []);
+    const tontines = store.get('tontines', []);
     if (!tontines.find(t => String(t.id) === String(localId))) {
       tontines.unshift({ id: localId, name, amount_per_cycle: amount, frequency: freq, members_count: rawMembers.length, members_paid: 0, paid_by: [], members: rawMembers, start_date: new Date().toISOString() });
-      S.set('tontines', tontines);
+      store.set('tontines', tontines);
     }
 
     G._tontineMembers = [];
@@ -1335,7 +1329,7 @@ const G = {
   },
 
   async _checkAutoDistribute(tontineId, newPaid, tData) {
-    if (!currentUser || !tData) return;
+    if (!store.currentUser || !tData) return;
     // Récupérer tous les membres dans l'ordre
     const { data: members } = await db.from('tontine_members')
       .select('user_id, member_name, turn_order')
@@ -1406,9 +1400,9 @@ const G = {
     }
 
     // Si c'est le current user qui reçoit, mettre à jour son solde local
-    if (recipient.user_id === currentUser.id) {
-      const newBal = S.get('bal', 0) + totalAmount;
-      S.set('bal', newBal);
+    if (recipient.user_id === store.currentUser.id) {
+      const newBal = store.get('bal', 0) + totalAmount;
+      store.set('bal', newBal);
       if ($('bal-amt')) $('bal-amt').textContent = f(newBal);
       setTimeout(() => G.ok(`🎉 Tu as reçu la cagnotte !`, `${f(totalAmount)} FCFA de "${tontineName}" ont été versés sur ton compte.`, () => G.go('home')), 1500);
     } else {
@@ -1418,27 +1412,27 @@ const G = {
 
   async payTontine(tontineId, amount, name) {
     const n = parseInt(amount) || 0;
-    const bal = S.get('bal', 0);
+    const bal = store.get('bal', 0);
     const payErr = validateAmount(n, bal);
     if (payErr) { G.toast(payErr, 'err'); return; }
-    const u = S.get('user', {});
+    const u = store.get('user', {});
 
     // Vérifier si déjà payé (DB d'abord, cache ensuite)
-    if (currentUser) {
+    if (store.currentUser) {
       const { data: myRow } = await db.from('tontine_members')
-        .select('has_paid').eq('tontine_id', tontineId).eq('user_id', currentUser.id).maybeSingle();
+        .select('has_paid').eq('tontine_id', tontineId).eq('user_id', store.currentUser.id).maybeSingle();
       if (myRow?.has_paid) { G.toast('Tu as déjà cotisé ce cycle', 'err'); return; }
     } else {
-      const lt = S.get('tontines', []).find(x => String(x.id) === String(tontineId));
+      const lt = store.get('tontines', []).find(x => String(x.id) === String(tontineId));
       if (lt?.paid_by?.includes(u.name || 'Moi')) { G.toast('Tu as déjà cotisé ce cycle', 'err'); return; }
     }
 
-    if (currentUser) {
+    if (store.currentUser) {
       // 1. Débiter le wallet
-      await db.from('wallets').update({ balance: bal - n }).eq('user_id', currentUser.id);
+      await db.from('wallets').update({ balance: bal - n }).eq('user_id', store.currentUser.id);
       // 2. Marquer has_paid dans tontine_members
       await db.from('tontine_members').update({ has_paid: true })
-        .eq('tontine_id', tontineId).eq('user_id', currentUser.id);
+        .eq('tontine_id', tontineId).eq('user_id', store.currentUser.id);
       // 3. Récupérer infos tontine + compter les paiements réels (évite les race conditions)
       const { data: tData } = await db.from('tontines')
         .select('creator_id, amount_per_cycle, frequency, start_date, name').eq('id', tontineId).maybeSingle();
@@ -1449,10 +1443,10 @@ const G = {
       await db.from('tontines').update({ members_paid: newPaid }).eq('id', tontineId);
       // 4. Transaction
       await db.from('transactions').insert({
-        from_user_id: currentUser.id, amount: n, type: 'tontine', merchant_name: name, status: 'completed'
+        from_user_id: store.currentUser.id, amount: n, type: 'tontine', merchant_name: name, status: 'completed'
       });
       // 5. Notification au créateur
-      if (tData?.creator_id && tData.creator_id !== currentUser.id) {
+      if (tData?.creator_id && tData.creator_id !== store.currentUser.id) {
         await db.from('notifications').insert({
           user_id: tData.creator_id, type: 'tontine_payment',
           title: `Cotisation reçue — ${name}`,
@@ -1462,7 +1456,7 @@ const G = {
       }
       // 6. Notifications aux autres membres GhettoPay
       const { data: otherRows } = await db.from('tontine_members')
-        .select('user_id').eq('tontine_id', tontineId).neq('user_id', currentUser.id);
+        .select('user_id').eq('tontine_id', tontineId).neq('user_id', store.currentUser.id);
       const otherIds = [...new Set((otherRows || []).map(r => r.user_id).filter(id => id && id !== tData?.creator_id))];
       if (otherIds.length) {
         await db.from('notifications').insert(otherIds.map(uid => ({
@@ -1474,13 +1468,13 @@ const G = {
       }
       // 7. Vérifier si tout le monde a payé → versement automatique
       await G._checkAutoDistribute(tontineId, newPaid, tData);
-      S.set('bal', bal - n);
+      store.set('bal', bal - n);
     } else {
-      S.set('bal', bal - n);
+      store.set('bal', bal - n);
     }
 
     // Mettre à jour le cache local
-    const tontines = S.get('tontines', []);
+    const tontines = store.get('tontines', []);
     const lt = tontines.find(x => String(x.id) === String(tontineId));
     const tgt = lt || G._curTontine;
     if (tgt) {
@@ -1489,18 +1483,18 @@ const G = {
         tgt.paid_by.push(u.name || 'Moi');
         tgt.members_paid = (tgt.members_paid || 0) + 1;
       }
-      if (lt) { lt.paid_by = tgt.paid_by; lt.members_paid = tgt.members_paid; S.set('tontines', tontines); }
+      if (lt) { lt.paid_by = tgt.paid_by; lt.members_paid = tgt.members_paid; store.set('tontines', tontines); }
       if (G._curTontine) { G._curTontine.paid_by = [...(tgt.paid_by||[])]; G._curTontine.members_paid = tgt.members_paid; }
     }
 
-    const txList = S.get('txs', []);
+    const txList = store.get('txs', []);
     txList.unshift({ id: Date.now(), type: 'tontine', name, amount: n, time: new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'short'}), cat: 'Tontine' });
-    S.set('txs', txList);
+    store.set('txs', txList);
 
     // Actualiser l'affichage solde
     if ($('bal-amt')) $('bal-amt').textContent = f(bal - n);
 
-    if (cur === 'tontine-detail') G.r_tontine_detail();
+    if (store.cur === 'tontine-detail') G.r_tontine_detail();
     else G.r_tontine();
     G.ok(`${f(n)} FCFA cotisés`, `${name} · Confirmé ✓`, () => {});
   },
@@ -1513,7 +1507,7 @@ const G = {
   openTontine(id) {
     // Search in the last loaded list (covers DB UUIDs and localStorage timestamps)
     G._curTontine = G._tontinesList.find(t => String(t.id) === String(id))
-                 || S.get('tontines', []).find(t => String(t.id) === String(id))
+                 || store.get('tontines', []).find(t => String(t.id) === String(id))
                  || null;
     G._tontineManageOpen = false;
     G.go('tontine-detail');
@@ -1524,11 +1518,11 @@ const G = {
     if (!t) { G.back(); return; }
     if ($('td-title')) $('td-title').textContent = t.name;
 
-    const u = S.get('user', {});
+    const u = store.get('user', {});
     const members = t.members || [];
     const mName = m => typeof m === 'string' ? m : (m?.name || '?');
     const mPhone = m => typeof m === 'string' ? '' : (m?.phone || '');
-    const isCreator = !!(currentUser && t.creator_id === currentUser.id);
+    const isCreator = !!(store.currentUser && t.creator_id === store.currentUser.id);
     if ($('td-manage-btn')) {
       $('td-manage-btn').style.display = '';
       $('td-manage-btn').textContent = isCreator ? 'Gérer' : 'Membres';
@@ -1547,7 +1541,7 @@ const G = {
     else cycleIdx = (now.getFullYear() - startDate.getFullYear()) * 12 + (now.getMonth() - startDate.getMonth());
     const currentTurnIdx = members.length > 0 ? cycleIdx % members.length : 0;
     const currentRecipient = members[currentTurnIdx] ? mName(members[currentTurnIdx]) : '—';
-    const myMember = members.find(m => m.user_id && currentUser && m.user_id === currentUser.id);
+    const myMember = members.find(m => m.user_id && store.currentUser && m.user_id === store.currentUser.id);
     const alreadyPaid = myMember?.has_paid || t.paid_by?.includes(u.name || 'Moi');
 
     // Build schedule (show up to 12 upcoming cycles)
@@ -1716,7 +1710,7 @@ const G = {
     G._saveCurTontine();
 
     // Ajouter dans Supabase avec le vrai user_id si le membre est un utilisateur GhettoPay
-    if (currentUser) {
+    if (store.currentUser) {
       try {
         let invitedId = null;
         if (phone) {
@@ -1734,7 +1728,7 @@ const G = {
         });
         // Notifier l'utilisateur GhettoPay invité
         if (invitedId) {
-          const creator = S.get('user', {});
+          const creator = store.get('user', {});
           await db.from('notifications').insert({
             user_id: invitedId, type: 'tontine_invite',
             title: `Tu as été ajouté à "${t.name}"`,
@@ -1747,23 +1741,23 @@ const G = {
     }
 
     // Notification locale pour le créateur
-    const notifs = S.get('notifs', []);
+    const notifs = store.get('notifs', []);
     notifs.unshift({ id: Date.now(), type: 'tontine', icon: 'users', bg: 'rgba(10,74,46,.12)', color: 'var(--forest)', title: 'Membre ajouté', desc: `${name} a été ajouté à la tontine "${t.name}"`, time: 'À l\'instant', read: false });
-    S.set('notifs', notifs);
+    store.set('notifs', notifs);
 
     G.r_tontine_detail();
   },
 
   _remindMember(name, phone, tontineName) {
     // Notification locale
-    const notifs = S.get('notifs', []);
+    const notifs = store.get('notifs', []);
     notifs.unshift({ id: Date.now(), type: 'tontine', icon: 'users', bg: 'rgba(212,160,23,.1)', color: 'var(--gold2)', title: `Rappel envoyé à ${name}`, desc: `Rappel de cotiser "${tontineName}" envoyé`, time: 'À l\'instant', read: false });
-    S.set('notifs', notifs);
+    store.set('notifs', notifs);
     // Rappel via DB si user GhettoPay
-    if (currentUser && phone) {
+    if (store.currentUser && phone) {
       db.from('users').select('id').eq('phone', phone).maybeSingle().then(({ data: u }) => {
         if (u) {
-          db.from('notifications').insert({ user_id: u.id, type: 'tontine_reminder', title: `Rappel tontine`, body: `${S.get('user',{}).name||'Le créateur'} te rappelle de cotiser pour "${tontineName}"`, read: false }).catch(()=>{});
+          db.from('notifications').insert({ user_id: u.id, type: 'tontine_reminder', title: `Rappel tontine`, body: `${store.get('user',{}).name||'Le créateur'} te rappelle de cotiser pour "${tontineName}"`, read: false }).catch(()=>{});
         }
       });
     }
@@ -1772,15 +1766,15 @@ const G = {
 
   _sendToRecipient(name, phone, amount) {
     // Pre-fill send screen with recipient
-    selC = { id: 'tontine_' + phone, name, phone, av: (name[0]||'?').toUpperCase() };
+    store.selC = { id: 'tontine_' + phone, name, phone, av: (name[0]||'?').toUpperCase() };
     G.go('send');
     setTimeout(() => {
-      if ($('rec-av')) $('rec-av').textContent = selC.av;
-      if ($('rec-name')) $('rec-name').textContent = selC.name;
-      if ($('rec-phone')) $('rec-phone').textContent = selC.phone;
+      if ($('rec-av')) $('rec-av').textContent = store.selC.av;
+      if ($('rec-name')) $('rec-name').textContent = store.selC.name;
+      if ($('rec-phone')) $('rec-phone').textContent = store.selC.phone;
       if ($('rec-row')) $('rec-row').style.display = 'flex';
       // Pre-fill amount
-      aStr = String(amount);
+      store.aStr = String(amount);
       if ($('amt-disp')) $('amt-disp').textContent = f(amount);
     }, 150);
   },
@@ -1811,7 +1805,7 @@ const G = {
     t.members_count = t.members.length;
     G._saveCurTontine();
     // Supprimer de la DB (par phone → user_id, sinon par member_name)
-    if (currentUser && t.id) {
+    if (store.currentUser && t.id) {
       if (mp) {
         const { data: found } = await db.from('users').select('id').eq('phone', mp).maybeSingle();
         if (found) {
@@ -1832,15 +1826,15 @@ const G = {
   _saveCurTontine() {
     const t = G._curTontine;
     if (!t) return;
-    const tontines = S.get('tontines', []);
+    const tontines = store.get('tontines', []);
     const idx = tontines.findIndex(x => String(x.id) === String(t.id));
     if (idx >= 0) tontines[idx] = t;
-    S.set('tontines', tontines);
+    store.set('tontines', tontines);
   },
 
   // ── FACTURES ──
   r_factures() {
-    const bills = S.get('bills', []);
+    const bills = store.get('bills', []);
     const todo = bills.filter(b => !b.paid);
     $('bills-todo').innerHTML = todo.map(b => `
       <div class="bill-item" id="bill-${b.id}">
@@ -1852,17 +1846,17 @@ const G = {
   },
 
   payBill(id) {
-    const bills = S.get('bills', []);
+    const bills = store.get('bills', []);
     const b = bills.find(x => x.id == id);
     if (!b) return;
-    const bal = S.get('bal', 0);
+    const bal = store.get('bal', 0);
     if (b.amount > bal) { G.toast('Solde insuffisant', 'err'); return; }
     b.paid = true;
-    S.set('bal', bal - b.amount);
-    S.set('bills', bills);
-    if (currentUser) {
-      db.from('transactions').insert({ from_user_id: currentUser.id, amount: b.amount, type: 'bill', merchant_name: b.name, status: 'completed' });
-      db.from('wallets').update({ balance: bal - b.amount }).eq('user_id', currentUser.id);
+    store.set('bal', bal - b.amount);
+    store.set('bills', bills);
+    if (store.currentUser) {
+      db.from('transactions').insert({ from_user_id: store.currentUser.id, amount: b.amount, type: 'bill', merchant_name: b.name, status: 'completed' });
+      db.from('wallets').update({ balance: bal - b.amount }).eq('user_id', store.currentUser.id);
     }
     // Animate removal from DOM immediately
     const el = $('bill-' + id);
@@ -1872,15 +1866,15 @@ const G = {
   },
 
   payAll() {
-    const bills = S.get('bills', []).filter(b => !b.paid);
+    const bills = store.get('bills', []).filter(b => !b.paid);
     if (!bills.length) { G.toast('Toutes les factures sont déjà payées', 'inf'); return; }
-    let bal = S.get('bal', 0);
+    let bal = store.get('bal', 0);
     const total = bills.reduce((s, b) => s + b.amount, 0);
     if (total > bal) { G.toast('Solde insuffisant', 'err'); return; }
-    const allBills = S.get('bills', []);
+    const allBills = store.get('bills', []);
     for (const b of bills) { b.paid = true; bal -= b.amount; }
-    S.set('bal', bal);
-    S.set('bills', allBills);
+    store.set('bal', bal);
+    store.set('bills', allBills);
     // Animate all out
     bills.forEach(b => {
       const el = $('bill-' + b.id);
@@ -1915,13 +1909,13 @@ const G = {
     const op = $('rch-op')?.value, ph = $('rch-phone')?.value.trim(), n = parseInt($('rch-amt')?.value) || 0;
     const rchPhoneErr = validatePhone(ph);
     if (rchPhoneErr) { G.toast(rchPhoneErr, 'err'); return; }
-    const bal = S.get('bal', 0);
+    const bal = store.get('bal', 0);
     const rchAmtErr = validateAmount(n, bal);
     if (rchAmtErr) { G.toast(rchAmtErr, 'err'); return; }
-    S.set('bal', bal - n);
-    if (currentUser) {
-      db.from('wallets').update({ balance: bal - n }).eq('user_id', currentUser.id);
-      db.from('transactions').insert({ from_user_id: currentUser.id, amount: n, type: 'recharge', merchant_name: `Recharge ${op}`, status: 'completed' });
+    store.set('bal', bal - n);
+    if (store.currentUser) {
+      db.from('wallets').update({ balance: bal - n }).eq('user_id', store.currentUser.id);
+      db.from('transactions').insert({ from_user_id: store.currentUser.id, amount: n, type: 'recharge', merchant_name: `Recharge ${op}`, status: 'completed' });
     }
     G.ok('Recharge effectuée', `${f(n)} FCFA de crédit ${op}`, () => G.go('home'));
   },
@@ -1929,12 +1923,12 @@ const G = {
   // ── NOTIFS ──
   r_notifs() {
     // Affichage immédiat depuis le cache
-    G._renderNotifsList(S.get('notifs', []));
+    G._renderNotifsList(store.get('notifs', []));
     // Puis sync depuis la DB
-    if (!currentUser) return;
+    if (!store.currentUser) return;
     db.from('notifications')
       .select('*')
-      .eq('user_id', currentUser.id)
+      .eq('user_id', store.currentUser.id)
       .order('created_at', { ascending: false })
       .limit(50)
       .then(({ data: dbNotifs }) => {
@@ -1942,7 +1936,7 @@ const G = {
         const iconFor  = t => ({ tontine_invite:'users', tontine_reminder:'users' }[t] || 'bell');
         const bgFor    = t => t === 'tontine_reminder' ? 'rgba(212,160,23,.1)' : 'rgba(10,74,46,.12)';
         const colorFor = t => t === 'tontine_reminder' ? 'var(--gold2)' : 'var(--forest)';
-        const existing = S.get('notifs', []);
+        const existing = store.get('notifs', []);
         const existingIds = new Set(existing.map(n => String(n.id)));
         const newOnes = dbNotifs.filter(n => !existingIds.has(String(n.id))).map(n => ({
           id: n.id, type: n.type || 'tontine',
@@ -1953,7 +1947,7 @@ const G = {
         }));
         if (!newOnes.length) return;
         const merged = [...newOnes, ...existing];
-        S.set('notifs', merged);
+        store.set('notifs', merged);
         G._renderNotifsList(merged);
         const unread = merged.filter(n => !n.read).length;
         if ($('notif-dot')) $('notif-dot').style.display = unread ? 'block' : 'none';
@@ -1986,14 +1980,14 @@ const G = {
   },
 
   _markNotifRead(id, el) {
-    const ns = S.get('notifs', []);
+    const ns = store.get('notifs', []);
     const n = ns.find(x => String(x.id) === String(id));
     if (n && !n.read) {
       n.read = true;
-      S.set('notifs', ns);
+      store.set('notifs', ns);
       if (el) el.querySelector('div[style*="background:var(--gold2)"]')?.remove();
       el?.classList.remove('unread');
-      if (currentUser && id) db.from('notifications').update({ read: true }).eq('id', id).catch(() => {});
+      if (store.currentUser && id) db.from('notifications').update({ read: true }).eq('id', id).catch(() => {});
       const unread = ns.filter(n => !n.read).length;
       if ($('notif-dot')) $('notif-dot').style.display = unread ? 'block' : 'none';
       if ($('notif-sub')) $('notif-sub').textContent = unread ? `${unread} non lue${unread>1?'s':''}` : 'Tout lu';
@@ -2001,22 +1995,22 @@ const G = {
   },
 
   readAll() {
-    const ns = S.get('notifs', []);
+    const ns = store.get('notifs', []);
     ns.forEach(n => n.read = true);
-    S.set('notifs', ns);
+    store.set('notifs', ns);
     G._renderNotifsList(ns);
     if ($('notif-dot')) $('notif-dot').style.display = 'none';
     if ($('notif-sub')) $('notif-sub').textContent = 'Tout lu';
     // Mark read in DB
-    if (currentUser) {
-      db.from('notifications').update({ read: true }).eq('user_id', currentUser.id).eq('read', false).catch(() => {});
+    if (store.currentUser) {
+      db.from('notifications').update({ read: true }).eq('user_id', store.currentUser.id).eq('read', false).catch(() => {});
     }
     G.toast('Toutes lues', 'inf');
   },
 
   // ── PROFIL ──
   r_profil() {
-    const u = S.get('user', {});
+    const u = store.get('user', {});
     const photo = localStorage.getItem('gp_photo');
     const av = $('prof-av');
     if (av) {
@@ -2047,10 +2041,10 @@ const G = {
     $('prof-phone').textContent = u.phone || '';
     $('prof-loc').textContent = u.loc || 'Libreville, Gabon';
     $('prof-level').textContent = u.level || 'Silver';
-    $('prof-txc').textContent = S.get('txs', []).length;
-    $('prof-cash').textContent = f(S.get('cash', 0));
+    $('prof-txc').textContent = store.get('txs', []).length;
+    $('prof-cash').textContent = f(store.get('cash', 0));
     // Notif count
-    const unread = S.get('notifs', []).filter(n => !n.read).length;
+    const unread = store.get('notifs', []).filter(n => !n.read).length;
     if ($('notif-sub')) $('notif-sub').textContent = unread ? `${unread} non lue${unread > 1 ? 's' : ''}` : 'Tout lu';
     if ($('notif-dot')) $('notif-dot').style.display = unread ? 'block' : 'none';
     // Dark mode toggle state
@@ -2079,16 +2073,16 @@ const G = {
       G._applyProfilePhoto(src);
       G.toast('Photo de profil mise à jour', 'ok');
       // Persister sur Supabase Storage si connecté
-      if (currentUser) {
+      if (store.currentUser) {
         try {
           const ext = file.name.split('.').pop() || 'jpg';
-          const path = `avatars/${currentUser.id}.${ext}`;
+          const path = `avatars/${store.currentUser.id}.${ext}`;
           const { error: upErr } = await db.storage.from('avatars').upload(path, file, { upsert: true, contentType: file.type });
           if (!upErr) {
             const { data: urlData } = db.storage.from('avatars').getPublicUrl(path);
             if (urlData?.publicUrl) {
-              await db.from('users').update({ avatar_url: urlData.publicUrl }).eq('id', currentUser.id);
-              currentUser.avatar_url = urlData.publicUrl;
+              await db.from('users').update({ avatar_url: urlData.publicUrl }).eq('id', store.currentUser.id);
+              store.currentUser.avatar_url = urlData.publicUrl;
             }
           }
         } catch (_) {}
@@ -2107,16 +2101,16 @@ const G = {
     const name = $('ep-name')?.value.trim();
     const profNameErr = validateName(name, { label: 'Nom complet', min: 2 });
     if (profNameErr) { G.toast(profNameErr, 'err'); return; }
-    const u = S.get('user', {});
+    const u = store.get('user', {});
     u.name = name;
     u.phone = $('ep-phone')?.value.trim();
     u.loc = $('ep-loc')?.value.trim();
     u.avatar = name[0].toUpperCase();
-    S.set('user', u);
+    store.set('user', u);
 
-    if (currentUser) {
-      await db.from('users').update({ name, phone: u.phone, location: u.loc, avatar: u.avatar }).eq('id', currentUser.id);
-      currentUser.name = name;
+    if (store.currentUser) {
+      await db.from('users').update({ name, phone: u.phone, location: u.loc, avatar: u.avatar }).eq('id', store.currentUser.id);
+      store.currentUser.name = name;
     }
 
     G.closeModal('mp');
@@ -2127,17 +2121,17 @@ const G = {
 
   async logout() {
     G.toast('Déconnexion...', 'inf');
-    if (currentUser) await db.auth.signOut();
-    currentUser = null;
+    if (store.currentUser) await db.auth.signOut();
+    store.currentUser = null;
     localStorage.clear();
     setTimeout(() => G.go('onboard'), 1000);
   },
 
   // ── PIN (vérification) ──
   r_pin() {
-    pinBuf = '';
+    store.pinBuf = '';
     document.querySelectorAll('.pin-dot').forEach(d => d.classList.remove('fill', 'err'));
-    const u = S.get('user', {});
+    const u = store.get('user', {});
     if ($('pin-sub')) {
       const name = (u.name || '').split(' ')[0];
       $('pin-sub').textContent = name ? `Bonjour ${name} · Saisis ton PIN` : 'Entre ton code PIN';
@@ -2145,15 +2139,15 @@ const G = {
   },
 
   pinKey(v) {
-    if (pinBuf.length >= 4) return;
-    pinBuf += v;
-    document.querySelectorAll('.pin-dot').forEach((d, i) => d.classList.toggle('fill', i < pinBuf.length));
-    if (pinBuf.length === 4) G._checkPin();
+    if (store.pinBuf.length >= 4) return;
+    store.pinBuf += v;
+    document.querySelectorAll('.pin-dot').forEach((d, i) => d.classList.toggle('fill', i < store.pinBuf.length));
+    if (store.pinBuf.length === 4) G._checkPin();
   },
 
   pinDel() {
-    pinBuf = pinBuf.slice(0, -1);
-    document.querySelectorAll('.pin-dot').forEach((d, i) => d.classList.toggle('fill', i < pinBuf.length));
+    store.pinBuf = store.pinBuf.slice(0, -1);
+    document.querySelectorAll('.pin-dot').forEach((d, i) => d.classList.toggle('fill', i < store.pinBuf.length));
   },
 
   _pinFailures: 0,
@@ -2161,7 +2155,7 @@ const G = {
   _PIN_MAX_ATTEMPTS: 5,
 
   _showPinErrAnim() {
-    pinBuf = '';
+    store.pinBuf = '';
     document.querySelectorAll('.pin-dot').forEach(d => {
       d.classList.remove('fill');
       d.classList.add('err');
@@ -2171,7 +2165,7 @@ const G = {
 
   _checkPin() {
     setTimeout(() => {
-      const u = S.get('user', {});
+      const u = store.get('user', {});
       if (!u.pin) {
         G.toast('Session expirée, reconnecte-toi', 'err');
         setTimeout(() => { G.go('login'); }, 1200);
@@ -2185,10 +2179,10 @@ const G = {
         G.toast(`Trop de tentatives · réessaie dans ${secs}s`, 'err');
         return;
       }
-      if (String(pinBuf) === String(u.pin)) {
+      if (String(store.pinBuf) === String(u.pin)) {
         G._pinFailures = 0;
         sessionStorage.removeItem('gp_pin_locked');
-        hist = [];
+        store.hist = [];
         G.go('home');
       } else {
         G._pinFailures++;
@@ -2231,20 +2225,20 @@ const G = {
     // Email de confirmation requis — sauvegarder tout localement pour que le PIN fonctionne dès la connexion
     if (!authData.session) {
       const avatar = name[0].toUpperCase();
-      S.set('pending_reg', { name, phone, pin, email, avatar });
+      store.set('pending_reg', { name, phone, pin, email, avatar });
       // Données complètes en local dès maintenant — le profil DB sera créé après confirmation
-      S.set('user', { name, phone, email, pin: String(pin), avatar, loc: 'Libreville, Gabon', level: 'Silver' });
-      S.set('bal', 10000);
-      S.set('coffre', 0); S.set('cash', 0);
-      S.set('bills', [
+      store.set('user', { name, phone, email, pin: String(pin), avatar, loc: 'Libreville, Gabon', level: 'Silver' });
+      store.set('bal', 10000);
+      store.set('coffre', 0); store.set('cash', 0);
+      store.set('bills', [
         { id: 1, name: 'SEEG Eau', ref: 'Réf: EAU-2024', amount: 28000, due: '31 déc.' },
         { id: 2, name: 'SEEG Électricité', ref: 'Réf: ELEC-2024', amount: 35000, due: '31 déc.' }
       ]);
-      S.set('notifs', [
+      store.set('notifs', [
         { id: 1, title: 'Bienvenue sur GhettoPay !', desc: 'Ton compte est créé · 10 000 FCFA offerts', time: "À l'instant", read: false, icon: 'z', color: 'var(--gold2)', bg: 'rgba(212,160,23,.12)' },
         { id: 2, title: 'Sécurité activée', desc: 'PIN configuré · Compte vérifié', time: "À l'instant", read: false, icon: 'shield', color: 'var(--green)', bg: 'rgba(22,163,74,.12)' }
       ]);
-      S.set('txs', []); S.set('coffres', []); S.set('tontines', []);
+      store.set('txs', []); store.set('coffres', []); store.set('tontines', []);
       G.ok(
         'Vérifie ton email !',
         `Un lien de confirmation a été envoyé à ${email}. Clique dessus puis reviens te connecter avec ton PIN.`,
@@ -2274,19 +2268,19 @@ const G = {
     await loadUserData(session.user.id);
 
     // Initialiser les données locales
-    S.set('user', { name, phone, email, pin: String(pin), avatar, loc: 'Libreville, Gabon', level: 'Silver' });
-    S.set('bills', [
+    store.set('user', { name, phone, email, pin: String(pin), avatar, loc: 'Libreville, Gabon', level: 'Silver' });
+    store.set('bills', [
       { id: 1, name: 'SEEG Eau', ref: 'Réf: EAU-2024', amount: 28000, due: '31 déc.' },
       { id: 2, name: 'SEEG Électricité', ref: 'Réf: ELEC-2024', amount: 35000, due: '31 déc.' }
     ]);
-    S.set('notifs', [
+    store.set('notifs', [
       { id: 1, title: 'Bienvenue sur GhettoPay !', desc: 'Ton compte est créé · 10 000 FCFA offerts', time: "À l'instant", read: false, icon: 'z', color: 'var(--gold2)', bg: 'rgba(212,160,23,.12)' },
       { id: 2, title: 'Sécurité activée', desc: 'PIN configuré · Compte vérifié', time: "À l'instant", read: false, icon: 'shield', color: 'var(--green)', bg: 'rgba(22,163,74,.12)' }
     ]);
-    S.set('txs', []);
-    S.set('coffres', []);
-    S.set('tontines', []);
-    S.set('ok', true);
+    store.set('txs', []);
+    store.set('coffres', []);
+    store.set('tontines', []);
+    store.set('ok', true);
 
     G.ok('Compte créé !', `Bienvenue ${name} · 10 000 FCFA offerts. Connecte-toi maintenant.`, () => G.go('login'));
   },
@@ -2303,7 +2297,7 @@ const G = {
   closeOk() {
     $('overlay').classList.remove('on');
     if (G._okCb) { G._okCb(); G._okCb = null; }
-    else G.render(cur);
+    else G.render(store.cur);
   },
   toast(msg, type) {
     const t = $('toast-el');
@@ -2380,7 +2374,7 @@ const G = {
 
   // ── PARRAINAGE ──
   _openReferral() {
-    const u = S.get('user', {});
+    const u = store.get('user', {});
     const code = 'GP-' + (u.name || 'USER').toUpperCase().replace(/\s+/g,'').slice(0,6).padEnd(6,'0');
     if ($('ref-code')) $('ref-code').textContent = code;
     const refs = parseInt(localStorage.getItem('gp_refs') || '0');
@@ -2389,7 +2383,7 @@ const G = {
     G.showModal('m-ref');
   },
   _shareReferral() {
-    const u = S.get('user', {});
+    const u = store.get('user', {});
     const code = 'GP-' + (u.name || 'USER').toUpperCase().replace(/\s+/g,'').slice(0,6).padEnd(6,'0');
     const text = `Rejoins GhettoPay avec mon code de parrainage et reçois 500 FCFA offerts ! 🎁\nCode : ${code}\nTélécharge l'app : ${location.origin}${location.pathname}`;
     if (navigator.share) {
@@ -2431,11 +2425,11 @@ const G = {
     if (preview) { preview.src = ''; preview.style.display = 'none'; }
     if (icon) icon.style.display = '';
     if (label) { label.textContent = 'Appuyer pour prendre ou importer une photo'; label.style.color = ''; }
-    const u = S.get('user', {}); u.level = 'Gold'; u.kycPending = true; S.set('user', u);
+    const u = store.get('user', {}); u.level = 'Gold'; u.kycPending = true; store.set('user', u);
     if ($('kyc-sub')) $('kyc-sub').textContent = 'Vérification en cours…';
     if ($('prof-level')) $('prof-level').textContent = 'Gold';
     if ($('limit-sub')) $('limit-sub').textContent = '5 000 000 FCFA/mois';
-    if (currentUser) db.from('users').update({ level: 'Gold' }).eq('id', currentUser.id).catch(() => {});
+    if (store.currentUser) db.from('users').update({ level: 'Gold' }).eq('id', store.currentUser.id).catch(() => {});
     G.ok('Demande envoyée !', 'Ton dossier KYC est en cours de traitement. Sous 48h tu recevras une notification.', null);
   },
 
@@ -2455,15 +2449,15 @@ const G = {
   // ── EXPORT CSV ──
   exportCSV() {
     const rows = [['Date','Type','Nom','Montant (FCFA)','Catégorie']];
-    if (currentUser) {
+    if (store.currentUser) {
       db.from('transactions')
         .select('*, from_user:from_user_id(name), to_user:to_user_id(name)')
-        .or(`from_user_id.eq.${currentUser.id},to_user_id.eq.${currentUser.id}`)
+        .or(`from_user_id.eq.${store.currentUser.id},to_user_id.eq.${store.currentUser.id}`)
         .order('created_at', { ascending: false })
         .limit(500)
         .then(({ data: txs }) => {
           (txs || []).forEach(t => {
-            const isCredit = t.to_user_id === currentUser.id;
+            const isCredit = t.to_user_id === store.currentUser.id;
             const other = isCredit ? t.from_user : t.to_user;
             const name = other?.name || t.merchant_name || 'GhettoPay';
             const cat = { transfer:'Transfert', qr:'QR Pay', recharge:'Recharge', bill:'Facture', coffre_deposit:'Coffre', tontine:'Tontine' }[t.type] || t.type;
@@ -2473,7 +2467,7 @@ const G = {
           G._downloadCSV(rows);
         });
     } else {
-      const txs = S.get('txs', []);
+      const txs = store.get('txs', []);
       txs.forEach(t => {
         const cat = t.cat || t.type || '';
         rows.push([t.time || '', t.type === 'recv' ? 'Crédit' : 'Débit', t.name || '', t.amount || 0, cat]);
@@ -2543,13 +2537,13 @@ const G = {
   async _doCloseTontineCycle() {
     const t = G._curTontine;
     if (!t) return;
-    if (currentUser) {
+    if (store.currentUser) {
       await db.from('tontine_members').update({ has_paid: false }).eq('tontine_id', t.id);
       await db.from('tontines').update({ members_paid: 0 }).eq('id', t.id);
       // Notifications aux membres
       const { data: mRows } = await db.from('tontine_members').select('user_id').eq('tontine_id', t.id);
       if (mRows?.length) {
-        const notifs = mRows.filter(r => r.user_id && r.user_id !== currentUser.id).map(r => ({
+        const notifs = mRows.filter(r => r.user_id && r.user_id !== store.currentUser.id).map(r => ({
           user_id: r.user_id, type: 'tontine_reminder',
           title: `Nouveau cycle — ${t.name}`,
           body: `Le créateur a clôturé le cycle. Un nouveau cycle commence maintenant.`,
@@ -2564,9 +2558,9 @@ const G = {
       G._curTontine.paid_by = [];
       if (G._curTontine.members) G._curTontine.members.forEach(m => { if (typeof m === 'object') m.has_paid = false; });
     }
-    const ts = S.get('tontines', []);
+    const ts = store.get('tontines', []);
     const lt = ts.find(x => String(x.id) === String(t.id));
-    if (lt) { lt.members_paid = 0; lt.paid_by = []; S.set('tontines', ts); }
+    if (lt) { lt.members_paid = 0; lt.paid_by = []; store.set('tontines', ts); }
     G.r_tontine_detail();
     G.toast('Cycle clôturé — nouveau cycle démarré', 'ok');
   },
@@ -2587,12 +2581,12 @@ const G = {
   // ── BIOMÉTRIE WebAuthn ──
   async _bioRegister() {
     if (!window.PublicKeyCredential) { G.toast('WebAuthn non supporté sur ce navigateur', 'err'); return; }
-    const u = S.get('user', {});
+    const u = store.get('user', {});
     try {
       const challenge = crypto.getRandomValues(new Uint8Array(32));
       const cred = await navigator.credentials.create({ publicKey: {
         challenge, rp: { name: 'GhettoPay', id: location.hostname },
-        user: { id: new TextEncoder().encode(currentUser?.id || u.phone || 'user'), name: u.phone || 'user', displayName: u.name || 'Utilisateur' },
+        user: { id: new TextEncoder().encode(store.currentUser?.id || u.phone || 'user'), name: u.phone || 'user', displayName: u.name || 'Utilisateur' },
         pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
         authenticatorSelection: { userVerification: 'required' },
         timeout: 60000
@@ -2647,17 +2641,17 @@ const G = {
   },
   gp_loadContacts() {
     const grid = $('gp-contact-grid'); if (!grid) return;
-    const users = S.get('contacts', []);
-    if (!users.length && currentUser) {
-      db.from('users').select('id,name,phone,avatar_url').neq('id', currentUser.id).limit(40)
-        .then(({data}) => { if (data) { S.set('contacts', data); G.gp_filterContacts(''); } }).catch(()=>{});
+    const users = store.get('contacts', []);
+    if (!users.length && store.currentUser) {
+      db.from('users').select('id,name,phone,avatar_url').neq('id', store.currentUser.id).limit(40)
+        .then(({data}) => { if (data) { store.set('contacts', data); G.gp_filterContacts(''); } }).catch(()=>{});
     }
     G.gp_filterContacts('');
   },
   gp_filterContacts(q) {
     const grid = $('gp-contact-grid'); if (!grid) return;
     const q2 = (q || '').toLowerCase().trim();
-    let users = S.get('contacts', []);
+    let users = store.get('contacts', []);
     if (q2) users = users.filter(u => (u.name||'').toLowerCase().includes(q2) || (u.phone||'').includes(q2));
     if (!users.length) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:24px;color:#9A9A9A;font-size:.75rem">Aucun contact</div>'; return; }
     const grads = ['linear-gradient(135deg,#0A4A2E,#16A34A)','linear-gradient(135deg,#7c3aed,#a78bfa)','linear-gradient(135deg,#0284c7,#38bdf8)','linear-gradient(135deg,#d97706,#fcd34d)'];
@@ -2690,19 +2684,19 @@ const G = {
   },
   async gp_send() {
     if (!G._gpContact) { G.toast('Choisir un destinataire', 'err'); return; }
-    const bal = S.get('bal', 0);
+    const bal = store.get('bal', 0);
     const gpAmtErr = validateAmount(G._gpAmt || 0, bal, { withFee: true, min: 100 });
     if (gpAmtErr) { G.toast(gpAmtErr, 'err'); return; }
     const total = G._gpAmt + Math.round(G._gpAmt * 0.015);
-    if (!currentUser) { G.toast('Non connecté', 'err'); return; }
+    if (!store.currentUser) { G.toast('Non connecté', 'err'); return; }
     const btn = document.querySelector('#gp-send-panel button[onclick="G.gp_send()"]');
     if (btn) { btn.textContent = 'Envoi…'; btn.disabled = true; }
     try {
-      const {error} = await db.from('transactions').insert({ from_user_id: currentUser.id, to_user_id: G._gpContact.id, amount: G._gpAmt, type: 'transfer', status: 'completed' });
+      const {error} = await db.from('transactions').insert({ from_user_id: store.currentUser.id, to_user_id: G._gpContact.id, amount: G._gpAmt, type: 'transfer', status: 'completed' });
       if (error) throw error;
       const newBal = bal - total;
-      S.set('bal', newBal);
-      await db.from('wallets').update({ balance: newBal }).eq('user_id', currentUser.id).catch(()=>{});
+      store.set('bal', newBal);
+      await db.from('wallets').update({ balance: newBal }).eq('user_id', store.currentUser.id).catch(()=>{});
       G.toast(`${f(G._gpAmt)} FCFA envoyés à ${G._gpContact.name}`, 'ok');
       G._gpAmt = 0; G._gpContact = null;
       const disp = $('gp-amt-disp'); if (disp) disp.textContent = '0';
@@ -2714,17 +2708,17 @@ const G = {
 
   // ── DESKTOP COFFRE PANEL ────────────────────────────────
   gp_renderCoffre() {
-    const total = S.get('coffre', 0);
+    const total = store.get('coffre', 0);
     const el = $('gp-coffre-total'); if (el) el.textContent = f(total) + ' FCFA';
     G._gp_renderCoffreGrid();
-    if (currentUser) {
-      db.from('coffres').select('*').eq('user_id', currentUser.id).order('created_at',{ascending:false})
-        .then(({data}) => { if (data) { S.set('coffres_list', data); G._gp_renderCoffreGrid(); } }).catch(()=>{});
+    if (store.currentUser) {
+      db.from('coffres').select('*').eq('user_id', store.currentUser.id).order('created_at',{ascending:false})
+        .then(({data}) => { if (data) { store.set('coffres_list', data); G._gp_renderCoffreGrid(); } }).catch(()=>{});
     }
   },
   _gp_renderCoffreGrid() {
     const grid = $('gp-coffre-grid'); if (!grid) return;
-    const coffres = S.get('coffres_list', []);
+    const coffres = store.get('coffres_list', []);
     if (!coffres.length) { grid.innerHTML = '<div style="text-align:center;padding:40px;color:#9A9A9A;font-size:.78rem;background:#fff;border-radius:18px;border:1.5px dashed rgba(0,0,0,.1)">Aucun coffre — créez-en un pour commencer</div>'; return; }
     const cols = ['linear-gradient(135deg,#0A4A2E,#16A34A)','linear-gradient(135deg,#7c3aed,#a78bfa)','linear-gradient(135deg,#0284c7,#38bdf8)','linear-gradient(135deg,#d97706,#fcd34d)'];
     grid.innerHTML = coffres.map((c, i) => {
@@ -2746,7 +2740,7 @@ const G = {
 
   // ── DESKTOP BUDGET PANEL ────────────────────────────────
   gp_renderBudget() {
-    const txs = S.get('txs', []);
+    const txs = store.get('txs', []);
     let out = 0, inn = 0;
     txs.forEach(t => { if (t.type==='credit'||t.type==='recv') inn += (t.amount||0); else out += (t.amount||0); });
     const net = inn - out;
@@ -2776,19 +2770,19 @@ const G = {
         return `<div><div style="display:flex;justify-content:space-between;font-size:.72rem;margin-bottom:5px"><span style="font-weight:700;color:#1A1A1A;text-transform:capitalize">${c}</span><span style="color:#9A9A9A">${pct}%</span></div><div style="height:5px;background:#F0EDE4;border-radius:5px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${catColors[i%catColors.length]};border-radius:5px"></div></div></div>`;
       }).join('') || '<div style="color:#9A9A9A;font-size:.75rem">Aucune donnée</div>';
     }
-    if (currentUser) {
+    if (store.currentUser) {
       db.from('transactions').select('*,from_user:from_user_id(name),to_user:to_user_id(name)')
-        .or(`from_user_id.eq.${currentUser.id},to_user_id.eq.${currentUser.id}`)
+        .or(`from_user_id.eq.${store.currentUser.id},to_user_id.eq.${store.currentUser.id}`)
         .order('created_at',{ascending:false}).limit(50)
         .then(({data:rows}) => {
           if (!rows?.length) return;
           const mapped = rows.map(t => ({
-            name: t.to_user_id===currentUser.id ? (t.from_user?.name||'—') : (t.to_user?.name||t.merchant_name||'—'),
-            type: t.to_user_id===currentUser.id ? 'credit' : 'debit',
+            name: t.to_user_id===store.currentUser.id ? (t.from_user?.name||'—') : (t.to_user?.name||t.merchant_name||'—'),
+            type: t.to_user_id===store.currentUser.id ? 'credit' : 'debit',
             amount: t.amount||0,
             cat: {transfer:'Transfert',qr:'QR Pay',recharge:'Recharge',coffre_deposit:'Coffre',tontine:'Tontine'}[t.type]||t.type||'Autre'
           }));
-          S.set('txs', mapped);
+          store.set('txs', mapped);
           G.gp_renderBudget();
         }).catch(()=>{});
     }
@@ -2797,7 +2791,7 @@ const G = {
   // ── DESKTOP TONTINE PANEL ───────────────────────────────
   gp_renderTontine() {
     const grid = $('gp-tontine-grid'); if (!grid) return;
-    const list = G._tontinesList || S.get('tontines', []);
+    const list = G._tontinesList || store.get('tontines', []);
     if (!list.length) {
       grid.innerHTML = '<div style="text-align:center;padding:40px;color:#9A9A9A;font-size:.78rem;background:#fff;border-radius:18px;border:1.5px dashed rgba(0,0,0,.1)">Aucune tontine — créez-en une pour commencer</div>';
     } else {
@@ -2817,10 +2811,10 @@ const G = {
         </div>
       </div>`).join('');
     }
-    if (currentUser && !G._tontinesList?.length) {
+    if (store.currentUser && !G._tontinesList?.length) {
       Promise.all([
-        db.from('tontines').select('*').eq('creator_id', currentUser.id).order('created_at',{ascending:false}),
-        db.from('tontines').select('*').contains('members', [currentUser.id]).order('created_at',{ascending:false})
+        db.from('tontines').select('*').eq('creator_id', store.currentUser.id).order('created_at',{ascending:false}),
+        db.from('tontines').select('*').contains('members', [store.currentUser.id]).order('created_at',{ascending:false})
       ]).then(([r1, r2]) => {
         const all = [...(r1.data||[]), ...(r2.data||[])];
         const seen = new Set();
@@ -2833,7 +2827,7 @@ const G = {
   // ── DESKTOP NOTIFS PANEL ────────────────────────────────
   gp_renderNotifs() {
     const list = $('gp-notifs-list'); if (!list) return;
-    const notifs = S.get('notifs', []);
+    const notifs = store.get('notifs', []);
     // Update badge
     const badge = $('gp-notif-badge'); if (badge) badge.style.display = 'none';
     if (!notifs.length) { list.innerHTML = '<div style="text-align:center;padding:40px;color:#9A9A9A;font-size:.78rem;background:#fff;border-radius:18px;border:1.5px dashed rgba(0,0,0,.1)">Aucune notification</div>'; return; }
@@ -2847,35 +2841,35 @@ const G = {
       </div>
       ${!n.read ? '<div style="width:8px;height:8px;border-radius:50%;background:#C8960A;flex-shrink:0;margin-top:4px"></div>' : ''}
     </div>`).join('');
-    if (currentUser) {
-      db.from('notifications').select('*').eq('user_id', currentUser.id).order('created_at',{ascending:false}).limit(20)
+    if (store.currentUser) {
+      db.from('notifications').select('*').eq('user_id', store.currentUser.id).order('created_at',{ascending:false}).limit(20)
         .then(({data}) => {
           if (!data?.length) return;
           const mapped = data.map(n => ({ id:n.id, type:n.type||'system', title:n.title||'Notification', body:n.body||n.message||'', read:n.read||false, time:new Date(n.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) }));
-          S.set('notifs', mapped);
+          store.set('notifs', mapped);
           G.gp_renderNotifs();
         }).catch(()=>{});
     }
   },
   gp_markRead(id) {
-    const notifs = S.get('notifs', []).map(n => n.id==id ? {...n,read:true} : n);
-    S.set('notifs', notifs);
+    const notifs = store.get('notifs', []).map(n => n.id==id ? {...n,read:true} : n);
+    store.set('notifs', notifs);
     G.gp_renderNotifs();
-    if (id && currentUser) db.from('notifications').update({read:true}).eq('id',id).catch(()=>{});
+    if (id && store.currentUser) db.from('notifications').update({read:true}).eq('id',id).catch(()=>{});
   },
   gp_markAllRead() {
-    const notifs = S.get('notifs', []).map(n => ({...n,read:true}));
-    S.set('notifs', notifs);
+    const notifs = store.get('notifs', []).map(n => ({...n,read:true}));
+    store.set('notifs', notifs);
     G.gp_renderNotifs();
-    if (currentUser) db.from('notifications').update({read:true}).eq('user_id',currentUser.id).catch(()=>{});
+    if (store.currentUser) db.from('notifications').update({read:true}).eq('user_id',store.currentUser.id).catch(()=>{});
   },
 
   // ── DESKTOP PROFIL PANEL ────────────────────────────────
   gp_renderProfil() {
-    const u = S.get('user', {});
-    const txs = S.get('txs', []);
+    const u = store.get('user', {});
+    const txs = store.get('txs', []);
     const av = (u.name||'?')[0].toUpperCase();
-    const cash = S.get('cash', 0);
+    const cash = store.get('cash', 0);
     const el = {
       av: $('gp-prof-av'), name: $('gp-prof-name'), phone: $('gp-prof-phone'),
       level: $('gp-prof-level'), txc: $('gp-prof-txc'), cash: $('gp-prof-cash'), kycSub: $('gp-kyc-sub')
@@ -2892,8 +2886,8 @@ const G = {
 
   renderDesktopHome() {
     if (window.innerWidth < 1280) return;
-    const bal = S.get('bal', 0), cbal = S.get('coffre', 0), cash = S.get('cash', 0);
-    const u = S.get('user', {});
+    const bal = store.get('bal', 0), cbal = store.get('coffre', 0), cash = store.get('cash', 0);
+    const u = store.get('user', {});
     const tontines = G._tontinesList || [];
     const av = u.avatar || (u.name || '?')[0].toUpperCase();
     const firstName = (u.name || 'Utilisateur').split(' ')[0];
@@ -2904,7 +2898,7 @@ const G = {
     const topAv = $('gp-top-av'); if (topAv) topAv.textContent = av;
 
     // Notif badge
-    const unread = S.get('notifs', []).filter(n => !n.read).length;
+    const unread = store.get('notifs', []).filter(n => !n.read).length;
     const badge = $('gp-notif-badge'); if (badge) badge.style.display = unread ? 'block' : 'none';
 
     // Cards
@@ -2943,7 +2937,7 @@ const G = {
       return { y:d.getFullYear(), m:d.getMonth(), label:d.toLocaleDateString('fr-FR',{month:'short'}), val:0 };
     });
     // Use cached txs from DB or local
-    const txs = S.get('txs', []);
+    const txs = store.get('txs', []);
     txs.forEach(t => {
       const d = new Date(t.date || t.created_at || 0);
       const mo = months.find(m => m.y === d.getFullYear() && m.m === d.getMonth());
@@ -2961,9 +2955,9 @@ const G = {
     }).join('');
 
     // If connected, fetch real DB data for the chart
-    if (currentUser) {
+    if (store.currentUser) {
       const since = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString();
-      db.from('transactions').select('amount,created_at').or(`from_user_id.eq.${currentUser.id},to_user_id.eq.${currentUser.id}`).gte('created_at', since)
+      db.from('transactions').select('amount,created_at').or(`from_user_id.eq.${store.currentUser.id},to_user_id.eq.${store.currentUser.id}`).gte('created_at', since)
         .then(({ data: dbTxs }) => {
           if (!dbTxs?.length) return;
           months.forEach(m => m.val = 0);
@@ -2988,7 +2982,7 @@ const G = {
   _renderDesktopActivity() {
     const list = $('gp-activity-list'); if (!list) return;
     const grads = ['linear-gradient(135deg,#0A4A2E,#16A34A)','linear-gradient(135deg,#7c3aed,#a78bfa)','linear-gradient(135deg,#0284c7,#38bdf8)','linear-gradient(135deg,#d97706,#fcd34d)','linear-gradient(135deg,#dc2626,#f87171)'];
-    const txs = S.get('txs', []).slice(0, 8);
+    const txs = store.get('txs', []).slice(0, 8);
     if (!txs.length) {
       list.innerHTML = '<div style="text-align:center;padding:24px;color:#9A9A9A;font-size:.78rem">Aucune transaction récente</div>';
       return;
@@ -3012,14 +3006,14 @@ const G = {
     }).join('');
 
     // Refresh from DB if connected
-    if (currentUser) {
+    if (store.currentUser) {
       db.from('transactions').select('*,from_user:from_user_id(name),to_user:to_user_id(name)')
-        .or(`from_user_id.eq.${currentUser.id},to_user_id.eq.${currentUser.id}`)
+        .or(`from_user_id.eq.${store.currentUser.id},to_user_id.eq.${store.currentUser.id}`)
         .order('created_at',{ascending:false}).limit(8)
         .then(({data:rows}) => {
           if (!rows?.length) return;
           list.innerHTML = rows.map((t, i) => {
-            const isCredit = t.to_user_id === currentUser.id;
+            const isCredit = t.to_user_id === store.currentUser.id;
             const name = isCredit ? (t.from_user?.name||'—') : (t.to_user?.name || t.merchant_name || '—');
             const av = (name[0]||'?').toUpperCase();
             const sign = isCredit ? '+' : '-';
@@ -3053,7 +3047,7 @@ const G = {
       }});
       if (assertion) {
         // Auth biométrique réussie → connecter
-        pinBuf = S.get('user', {}).pin || '0000';
+        store.pinBuf = store.get('user', {}).pin || '0000';
         G._checkPin();
       }
     } catch(e) { G.toast('Biométrie échouée ou annulée', 'err'); }
@@ -3069,7 +3063,7 @@ const G = {
     G._mpcBuf += k;
     G._mpcUpdateDots();
     if (G._mpcBuf.length === 4) {
-      const pin = S.get('user', {}).pin || '';
+      const pin = store.get('user', {}).pin || '';
       if (G._mpcBuf === String(pin)) {
         G.closeModal('m-pin-confirm');
         G._mpcBuf = '';
@@ -3077,8 +3071,8 @@ const G = {
         const ps = G._pendingSend;
         if (!ps) return;
         G._pendingSend = null;
-        selC = ps.selC;
-        aStr = String(ps.n);
+        store.selC = ps.store.selC;
+        store.aStr = String(ps.n);
         G._execSend(ps);
       } else {
         G._mpcBuf = '';
@@ -3091,21 +3085,21 @@ const G = {
     G._mpcBuf = G._mpcBuf.slice(0, -1);
     G._mpcUpdateDots();
   },
-  async _execSend({ selC: sc, n, fee, total, bal, note }) {
-    if (currentUser) {
+  async _execSend({ store.selC: sc, n, fee, total, bal, note }) {
+    if (store.currentUser) {
       G.toast('Envoi en cours...', 'inf');
       const { data, error } = await db.rpc('transfer_money', {
-        p_from_user_id: currentUser.id, p_to_user_id: sc.id, p_amount: n, p_note: note
+        p_from_user_id: store.currentUser.id, p_to_user_id: sc.id, p_amount: n, p_note: note
       });
       if (error || !data?.success) { G.toast(data?.error || 'Erreur de transfert', 'err'); return; }
       const newBal = bal - total;
-      S.set('bal', newBal);
-      if (currentUser.wallet) currentUser.wallet.balance = newBal;
+      store.set('bal', newBal);
+      if (store.currentUser.wallet) store.currentUser.wallet.balance = newBal;
     } else {
-      S.set('bal', bal - total);
-      const txs = S.get('txs', []);
+      store.set('bal', bal - total);
+      const txs = store.get('txs', []);
       txs.unshift({ id: Date.now(), name: sc.name, av: sc.av, amount: n, fee, type: 'send', cat: 'Transfert', time: "À l'instant" });
-      S.set('txs', txs);
+      store.set('txs', txs);
     }
     G.ok(`${f(n)} FCFA envoyés`, `À ${sc.name} · Frais ${f(fee)} FCFA · Confirmé ✓`, () => G.go('home'));
   },
@@ -3211,7 +3205,7 @@ const G = {
   },
 
   gp_openEditProfil() {
-    const u = S.get('user', {});
+    const u = store.get('user', {});
     G.gpModal(`
       <div style="font-size:1.05rem;font-weight:900;color:#1A1A1A;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between">
         <span>Modifier le profil</span>
@@ -3275,10 +3269,10 @@ const G = {
   },
 
   gp_openDeposit(id) {
-    const coffres = S.get('coffres_list', []);
+    const coffres = store.get('coffres_list', []);
     const c = coffres.find(x => String(x.id) === String(id));
     const name = c?.name || 'Coffre';
-    const bal = S.get('bal', 0);
+    const bal = store.get('bal', 0);
     G._depCoffreId = id;
     G._depCoffreName = name;
     G.gpModal(`
@@ -3303,7 +3297,7 @@ const G = {
   },
 
   gp_openReferral() {
-    const u = S.get('user', {});
+    const u = store.get('user', {});
     const code = 'GP-' + (u.name || 'USER').toUpperCase().replace(/\s+/g,'').slice(0,6).padEnd(6,'0');
     const refs = parseInt(localStorage.getItem('gp_refs') || '0');
     G.gpModal(`
@@ -3378,7 +3372,7 @@ setInterval(tick, 30000);
   if (joinId) {
     history.replaceState(null, '', location.pathname);
     setTimeout(() => {
-      if (currentUser) {
+      if (store.currentUser) {
         G.openTontine(joinId);
       } else {
         G.toast('Connecte-toi pour rejoindre cette tontine', 'inf');
@@ -3395,16 +3389,16 @@ setInterval(tick, 30000);
   if (phone) {
     history.replaceState(null, '', location.pathname);
     setTimeout(async () => {
-      if (!currentUser) { G.toast('Connecte-toi pour envoyer de l\'argent', 'inf'); return; }
+      if (!store.currentUser) { G.toast('Connecte-toi pour envoyer de l\'argent', 'inf'); return; }
       const { data: found } = await db.from('users').select('id,name').eq('phone', phone).maybeSingle();
       if (!found) { G.toast('Cet utilisateur n\'est pas encore sur GhettoPay', 'err'); return; }
       const nm = found.name || name;
-      selC = { id: found.id, name: nm, phone, av: (nm[0] || '?').toUpperCase() };
+      store.selC = { id: found.id, name: nm, phone, av: (nm[0] || '?').toUpperCase() };
       G.go('send');
       setTimeout(() => {
-        if ($('rec-av')) $('rec-av').textContent = selC.av;
-        if ($('rec-name')) $('rec-name').textContent = selC.name;
-        if ($('rec-phone')) $('rec-phone').textContent = selC.phone;
+        if ($('rec-av')) $('rec-av').textContent = store.selC.av;
+        if ($('rec-name')) $('rec-name').textContent = store.selC.name;
+        if ($('rec-phone')) $('rec-phone').textContent = store.selC.phone;
         if ($('rec-row')) $('rec-row').style.display = 'flex';
       }, 200);
     }, 2000);
