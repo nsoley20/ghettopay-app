@@ -73,6 +73,7 @@ const G = {
   render(scr) {
     const renders = {
       home: () => G.r_home(),
+      pin: () => G.r_pin?.(),
       login: () => G.r_login?.(),
       send: () => G.r_send(),
       transfert: () => G.r_transfert(),

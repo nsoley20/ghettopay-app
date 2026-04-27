@@ -16,6 +16,17 @@
 <link rel="icon" href="icon-192.png" sizes="192x192"/>
 <link rel="apple-touch-icon" href="icon-192.png"/>
 <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');</script>
+<script>
+window.addEventListener('error', function(e) {
+  const el = document.getElementById('sc-loading');
+  if (el && el.classList.contains('on')) {
+    el.innerHTML = '<div style="color:#fff;text-align:center;padding:24px;font-family:sans-serif"><div style="font-size:2rem;margin-bottom:12px">⚠️</div><div style="font-weight:700;font-size:1rem;margin-bottom:8px">Erreur de chargement</div><div style="font-size:.8rem;opacity:.7;margin-bottom:16px">' + (e.message || 'Erreur inconnue') + '</div><button onclick="location.reload()" style="background:#fff;color:#000;border:none;padding:10px 20px;border-radius:8px;font-weight:700;cursor:pointer">Réessayer</button></div>';
+  }
+});
+window.addEventListener('unhandledrejection', function(e) {
+  console.error('Unhandled promise rejection:', e.reason);
+});
+</script>
 </head>
 <body>
 
