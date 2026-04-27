@@ -20,6 +20,7 @@ export const store = {
   get cur()           { return _mem.cur; },
   set cur(v)          { _mem.cur = v; },
   get hist()          { return _mem.hist; },
+  set hist(v)         { _mem.hist = v; },
   get pD()            { return _mem.pD; },
   set pD(v)           { _mem.pD = v; },
   get selC()          { return _mem.selC; },
