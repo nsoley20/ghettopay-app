@@ -634,6 +634,7 @@ export const tontineScreen = {
     const currentRecipient = members[currentTurnIdx] ? mName(members[currentTurnIdx]) : '—';
     const myMember = members.find(m => m.user_id && store.currentUser && m.user_id === store.currentUser.id);
     const alreadyPaid = myMember?.has_paid || t.paid_by?.includes(u.name || 'Moi');
+    const unpaidMembers = members.filter(m => !m.has_paid && !t.paid_by?.includes(mName(m)));
 
     const schedule = members.map((m, i) => {
       const totalCycles = Math.floor(cycleIdx / members.length) * members.length + i;
@@ -689,6 +690,7 @@ export const tontineScreen = {
         </div>
         ${isCreator ? `<div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
           ${!hasPaid&&mPhone(m)?`<button onclick="G._remindMemberByIdx(${i})" style="border:none;background:rgba(212,160,23,.12);color:var(--gold2);padding:4px 8px;border-radius:7px;font-size:.6rem;font-weight:700;cursor:pointer">Rappeler</button>`:''}
+          ${!hasPaid?`<button onclick="G._payForMember(${i})" style="border:none;background:rgba(10,74,46,.12);color:var(--forest);padding:4px 8px;border-radius:7px;font-size:.6rem;font-weight:700;cursor:pointer">Payer à sa place</button>`:''}
           ${isCurrentRecip?`<button onclick="G._sendToRecipientByIdx(${i})" style="border:none;background:var(--gold2);color:#000;padding:4px 8px;border-radius:7px;font-size:.6rem;font-weight:700;cursor:pointer">Envoyer</button>`:''}
           ${members.length>1?`<button onclick="G._removeTontineDetailMember(${i})" style="border:none;background:rgba(220,38,38,.08);color:#dc2626;padding:4px 8px;border-radius:7px;font-size:.6rem;font-weight:700;cursor:pointer">Retirer</button>`:''}
         </div>` : ''}
@@ -698,6 +700,10 @@ export const tontineScreen = {
     const manageHTML = this._tontineManageOpen ? `
       <div style="background:var(--card);border-radius:16px;padding:16px;border:1.5px solid var(--border)">
         <div class="lbl" style="margin-bottom:12px">Membres — ${paid}/${total} ont cotisé</div>
+        ${unpaidMembers.length > 0 ? `<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+          <button onclick="G._remindAllUnpaid()" style="flex:1;padding:9px;border:1px solid rgba(212,160,23,.25);border-radius:12px;background:rgba(212,160,23,.08);color:var(--gold2);font-size:.72rem;font-weight:700;cursor:pointer;font-family:var(--f)">Rappeler tous les absents</button>
+          <button onclick="G._autoDebitAll()" style="flex:1;padding:9px;border:1px solid rgba(10,74,46,.2);border-radius:12px;background:rgba(10,74,46,.08);color:var(--forest);font-size:.72rem;font-weight:700;cursor:pointer;font-family:var(--f)">Prélever les absents</button>
+        </div>` : ''}
         ${membersRows}
         ${isCreator ? `
         <div style="display:flex;gap:8px;margin-top:8px">
@@ -744,6 +750,23 @@ export const tontineScreen = {
           ${alreadyPaid ? 'Cotisation payée ce cycle' : 'Cotiser maintenant'}
         </button>
       </div>
+
+      <!-- LISTE DES NON-PAYANTS (visible par tous) -->
+      ${unpaidMembers.length > 0 ? `
+      <div style="background:var(--card);border-radius:16px;padding:16px;border:1.5px solid rgba(220,38,38,.12)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-size:.72rem;font-weight:800;color:#dc2626">${unpaidMembers.length} n'${unpaidMembers.length>1?'ont':'a'} pas encore cotisé</div>
+          <div style="font-size:.58rem;color:var(--txt3)">${paid}/${total} payé${paid>1?'s':''}</div>
+        </div>
+        ${unpaidMembers.map(m => `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+          <div style="width:26px;height:26px;border-radius:50%;background:rgba(220,38,38,.1);color:#dc2626;font-size:.65rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">${esc((mName(m)||'?')[0].toUpperCase())}</div>
+          <div style="flex:1;font-size:.78rem;font-weight:700;color:var(--txt)">${esc(mName(m))}</div>
+          <div style="font-size:.58rem;font-weight:700;color:#dc2626">En attente</div>
+        </div>`).join('')}
+      </div>` : paid === total && total > 0 ? `
+      <div style="background:rgba(22,163,74,.07);border:1px solid rgba(22,163,74,.2);border-radius:16px;padding:14px;text-align:center;font-size:.78rem;font-weight:700;color:var(--green)">
+        ✓ Tous les membres ont cotisé ce cycle !
+      </div>` : ''}
 
       ${manageHTML}
 
@@ -944,6 +967,134 @@ export const tontineScreen = {
     if (lt) { lt.members_paid = 0; lt.paid_by = []; store.set('tontines', ts); }
     this.r_tontine_detail();
     this.toast('Cycle clôturé — nouveau cycle démarré', 'ok');
+  },
+
+  // ── PAYER À LA PLACE D'UN ABSENT ──
+  _payForMember(i) {
+    const t = this._curTontine; if (!t || !store.currentUser) return;
+    const mN = m => typeof m === 'string' ? m : (m?.name || '?');
+    const m = t.members?.[i]; if (!m) return;
+    const name = mN(m);
+    this._askConfirm(
+      `Payer à la place de ${name} ?`,
+      `Si le solde de ${name} est suffisant, il sera débité. Sinon, le montant sera prélevé sur ton compte et ${name} devra te rembourser.`,
+      'Confirmer', '',
+      () => this._doPayForMember(i)
+    );
+  },
+
+  async _doPayForMember(i) {
+    const t = this._curTontine; if (!t || !store.currentUser) return;
+    const mNm = m => typeof m === 'string' ? m : (m?.name || '?');
+    const mPh = m => typeof m === 'string' ? '' : (m?.phone || '');
+    const m = t.members?.[i]; if (!m) return;
+    const memberName = mNm(m);
+    const phone = mPh(m);
+    const userId = m.user_id || null;
+    const amount = t.amount_per_cycle || 0;
+    const creatorName = store.get('user', {}).name || 'La mère tontine';
+    let debtCreated = false;
+    let paidOk = false;
+
+    if (userId) {
+      const { data: wallet } = await db.from('wallets').select('balance').eq('user_id', userId).maybeSingle().catch(() => ({ data: null }));
+      if (wallet && (wallet.balance || 0) >= amount) {
+        const { error } = await db.from('wallets').update({ balance: wallet.balance - amount }).eq('user_id', userId).catch(() => ({ error: 'err' }));
+        if (!error) paidOk = true;
+      }
+    }
+
+    if (!paidOk) {
+      const bal = store.get('bal', 0);
+      if (bal < amount) { this.toast('Solde insuffisant pour avancer la mise', 'err'); return; }
+      await db.from('wallets').update({ balance: bal - amount }).eq('user_id', store.currentUser.id).catch(() => {});
+      store.set('bal', bal - amount);
+      if ($('bal-amt')) $('bal-amt').textContent = f(bal - amount);
+      debtCreated = true;
+      paidOk = true;
+    }
+
+    if (!paidOk) return;
+
+    if (userId) {
+      await db.from('tontine_members').update({ has_paid: true }).eq('tontine_id', t.id).eq('user_id', userId).catch(() => {});
+      await db.from('notifications').insert({
+        user_id: userId, type: 'tontine_payment',
+        title: `Cotisation avancée — ${t.name}`,
+        body: `${creatorName} a payé ta cotisation de ${f(amount)} FCFA pour "${t.name}".${debtCreated ? ` Tu lui dois ${f(amount)} FCFA.` : ''}`,
+        read: false
+      }).catch(() => {});
+    } else {
+      await db.from('tontine_members').update({ has_paid: true }).eq('tontine_id', t.id).eq('member_name', memberName).catch(() => {});
+    }
+
+    if (typeof m === 'object') m.has_paid = true;
+    if (!t.paid_by) t.paid_by = [];
+    if (!t.paid_by.includes(memberName)) {
+      t.paid_by.push(memberName);
+      t.members_paid = (t.members_paid || 0) + 1;
+    }
+    this._saveCurTontine();
+
+    const { count } = await db.from('tontine_members')
+      .select('id', { count: 'exact', head: true })
+      .eq('tontine_id', t.id).eq('has_paid', true).catch(() => ({ count: null }));
+    if (count !== null) await db.from('tontines').update({ members_paid: count }).eq('id', t.id).catch(() => {});
+    const { data: tData } = await db.from('tontines').select('*').eq('id', t.id).maybeSingle().catch(() => ({ data: null }));
+    if (tData) await this._checkAutoDistribute(t.id, count ?? t.members_paid, tData);
+
+    this.toast(debtCreated
+      ? `Cotisation de ${memberName} avancée · Remboursement dû`
+      : `${memberName} débité(e) automatiquement`, 'ok');
+    this.r_tontine_detail();
+  },
+
+  // ── DÉBIT AUTOMATIQUE DE TOUS LES ABSENTS ──
+  async _autoDebitAll() {
+    const t = this._curTontine; if (!t || !store.currentUser) return;
+    const mN = m => typeof m === 'string' ? m : (m?.name || '?');
+    const unpaidIdx = (t.members || []).reduce((acc, m, i) => {
+      if (!m.has_paid && !t.paid_by?.includes(mN(m))) acc.push(i);
+      return acc;
+    }, []);
+    if (!unpaidIdx.length) { this.toast('Tous ont déjà cotisé ce cycle', 'inf'); return; }
+    this._askConfirm(
+      `Prélever ${unpaidIdx.length} absent${unpaidIdx.length > 1 ? 's' : ''} ?`,
+      `Les membres avec solde suffisant seront débités. Les autres créeront une dette à rembourser.`,
+      'Prélever', '',
+      async () => {
+        for (const i of unpaidIdx) await this._doPayForMember(i);
+      }
+    );
+  },
+
+  // ── RAPPELER TOUS LES ABSENTS EN UN CLIC ──
+  _remindAllUnpaid() {
+    const t = this._curTontine; if (!t || !store.currentUser) return;
+    const mN = m => typeof m === 'string' ? m : (m?.name || '?');
+    const mPh = m => typeof m === 'string' ? '' : (m?.phone || '');
+    const unpaid = (t.members || []).filter(m => !m.has_paid && !t.paid_by?.includes(mN(m)));
+    if (!unpaid.length) { this.toast('Tous ont déjà cotisé', 'inf'); return; }
+    const creatorName = store.get('user', {}).name || 'La mère tontine';
+    unpaid.forEach(m => {
+      const uid = m.user_id;
+      const phone = mPh(m);
+      if (!uid && !phone) return;
+      const notifPayload = {
+        type: 'tontine_reminder',
+        title: `Rappel tontine — ${t.name}`,
+        body: `${creatorName} te rappelle de cotiser ${f(t.amount_per_cycle)} FCFA pour "${t.name}".`,
+        read: false
+      };
+      if (uid) {
+        db.from('notifications').insert({ user_id: uid, ...notifPayload }).catch(() => {});
+      } else {
+        db.from('users').select('id').eq('phone', phone).maybeSingle().then(({ data: u }) => {
+          if (u) db.from('notifications').insert({ user_id: u.id, ...notifPayload }).catch(() => {});
+        });
+      }
+    });
+    this.toast(`Rappel envoyé à ${unpaid.length} membre${unpaid.length > 1 ? 's' : ''}`, 'ok');
   },
 
   // ── PARTAGE LIEN TONTINE ──
