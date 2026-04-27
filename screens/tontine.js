@@ -747,7 +747,7 @@ export const tontineScreen = {
 
       ${manageHTML}
 
-      ${!isCreator ? `<button onclick="G.deleteTontine('${t.id}','${t.name}')" style="width:100%;padding:11px;border:1px solid rgba(220,38,38,.25);border-radius:12px;background:rgba(220,38,38,.07);color:#dc2626;font-size:.8rem;font-weight:700;cursor:pointer">Quitter cette tontine</button>` : ''}
+      ${!isCreator ? `<button data-tid="${esc(String(t.id))}" data-tname="${esc(t.name)}" onclick="G.deleteTontine(this.dataset.tid,this.dataset.tname)" style="width:100%;padding:11px;border:1px solid rgba(220,38,38,.25);border-radius:12px;background:rgba(220,38,38,.07);color:#dc2626;font-size:.8rem;font-weight:700;cursor:pointer">Quitter cette tontine</button>` : ''}
 
       <!-- CALENDRIER MENSUEL -->
       <div style="background:var(--card);border-radius:16px;padding:16px">

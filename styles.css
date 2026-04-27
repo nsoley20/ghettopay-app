@@ -625,6 +625,10 @@ textarea.inp{resize:none;height:70px;line-height:1.6}
 .coffre-new svg{width:17px;height:17px;stroke:var(--txt3);stroke-width:2;fill:none}
 .coffre-new span{font-size:.78rem;font-weight:700;color:var(--txt3)}
 
+/* ── TRANSFERT MOBILE MONEY ─────────── */
+.tr-tab{padding:8px 16px;border-radius:100px;border:1.5px solid var(--border);background:none;color:var(--txt2);font-size:.72rem;font-weight:700;cursor:pointer;font-family:var(--f);transition:.15s;white-space:nowrap}
+.tr-tab.on{background:var(--forest);color:#fff;border-color:var(--forest)}
+
 /* ── BUDGET ─────────────────────────── */
 .bud-tabs{display:flex;gap:5px;background:var(--bg2);border-radius:12px;padding:4px}
 .btab{flex:1;padding:9px 6px;border-radius:9px;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;transition:.15s;border:none;background:none;font-family:var(--f);color:var(--txt3)}

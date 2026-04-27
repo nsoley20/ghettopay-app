@@ -388,17 +388,17 @@
 
     <!-- Rangée 2 : SCANNER / PAYER / TONTINE — actions secondaires -->
     <div class="qa-secondary">
-<div class="qa-sec-btn" onclick="G.go('qrhub')">
+<div class="qa-sec-btn" onclick="G.go('scan')">
         <div class="qa-sec-ic" style="background:rgba(99,102,241,.12)">
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.9"><use href="#qric"/></svg>
         </div>
         <div class="qa-sec-lbl">Scanner</div>
       </div>
-      <div class="qa-sec-btn" onclick="G.go('factures')">
+      <div class="qa-sec-btn" onclick="G.go('transfert')">
         <div class="qa-sec-ic" style="background:rgba(59,130,246,.12)">
-          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.9"><use href="#pay"/></svg>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.9"><use href="#send"/></svg>
         </div>
-        <div class="qa-sec-lbl">Payer</div>
+        <div class="qa-sec-lbl">Transférer</div>
       </div>
       <div class="qa-sec-btn" onclick="G.go('tontine')">
         <div class="qa-sec-ic" style="background:rgba(168,85,247,.12)">
@@ -423,7 +423,7 @@
   <div class="bnav">
     <div class="bt on" onclick="G.go('home')"><svg><use href="#home"/></svg><span class="bt-lbl">Accueil</span></div>
     <div class="bt" onclick="G.go('budget')"><svg><use href="#chart"/></svg><span class="bt-lbl">Budget</span></div>
-    <div class="bt-qr" onclick="G.go('qrhub')"><svg><use href="#qric"/></svg></div>
+    <div class="bt-qr" onclick="G.go('scan')"><svg><use href="#qric"/></svg></div>
     <div class="bt" onclick="G.go('coffre')"><svg><use href="#lock"/></svg><span class="bt-lbl">Coffre</span></div>
     <div class="bt" onclick="G.go('profil')"><svg><use href="#user"/></svg><span class="bt-lbl">Profil</span></div>
   </div>
@@ -614,7 +614,7 @@
   <div class="bnav">
     <div class="bt" onclick="G.go('home')"><svg><use href="#home"/></svg><span class="bt-lbl">Accueil</span></div>
     <div class="bt on" onclick="G.go('budget')"><svg><use href="#chart"/></svg><span class="bt-lbl">Budget</span></div>
-    <div class="bt-qr" onclick="G.go('qrhub')"><svg><use href="#qric"/></svg></div>
+    <div class="bt-qr" onclick="G.go('scan')"><svg><use href="#qric"/></svg></div>
     <div class="bt" onclick="G.go('coffre')"><svg><use href="#lock"/></svg><span class="bt-lbl">Coffre</span></div>
     <div class="bt" onclick="G.go('profil')"><svg><use href="#user"/></svg><span class="bt-lbl">Profil</span></div>
   </div>
@@ -756,9 +756,31 @@
   <div class="bnav">
     <div class="bt" onclick="G.go('home')"><svg><use href="#home"/></svg><span class="bt-lbl">Accueil</span></div>
     <div class="bt" onclick="G.go('budget')"><svg><use href="#chart"/></svg><span class="bt-lbl">Budget</span></div>
-    <div class="bt-qr" onclick="G.go('qrhub')"><svg><use href="#qric"/></svg></div>
+    <div class="bt-qr" onclick="G.go('scan')"><svg><use href="#qric"/></svg></div>
     <div class="bt" onclick="G.go('coffre')"><svg><use href="#lock"/></svg><span class="bt-lbl">Coffre</span></div>
     <div class="bt on" onclick="G.go('profil')"><svg><use href="#user"/></svg><span class="bt-lbl">Profil</span></div>
+  </div>
+</div>
+
+<!-- TRANSFERT MOBILE MONEY -->
+<div class="sc" id="sc-transfert">
+  <div style="background:var(--card);flex-shrink:0">
+    <div class="sbar"><span class="sbar-t" id="clkTR">09:41</span></div>
+    <div class="snav" style="border:none">
+      <button class="back-btn" onclick="G.back()"><svg><use href="#al"/></svg></button>
+      <span class="snav-t">Transfert Mobile Money</span>
+    </div>
+    <div style="padding:0 16px 14px;overflow-x:auto;-webkit-overflow-scrolling:touch">
+      <div style="display:flex;gap:8px;min-width:max-content">
+        <button id="tr-tab-gp_to_airtel" class="tr-tab on" onclick="G.setTransfertDir('gp_to_airtel')">GP → Airtel</button>
+        <button id="tr-tab-airtel_to_gp" class="tr-tab" onclick="G.setTransfertDir('airtel_to_gp')">Airtel → GP</button>
+        <button id="tr-tab-gp_to_moov" class="tr-tab" onclick="G.setTransfertDir('gp_to_moov')">GP → Moov</button>
+        <button id="tr-tab-moov_to_gp" class="tr-tab" onclick="G.setTransfertDir('moov_to_gp')">Moov → GP</button>
+      </div>
+    </div>
+  </div>
+  <div class="scroll">
+    <div class="p16 g14" id="tr-form-box" style="padding-bottom:40px"></div>
   </div>
 </div>
 
@@ -1122,9 +1144,9 @@
 
 </div></div>
 
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js" integrity="sha384-3zSEDfvllQohrq0PHL1fOXJuC/jSOO34H46t6UQfobFOmxE5BpjjaIJY5F2/bMnU" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js" integrity="sha384-b5Ya4Bq3qCyz39m2ISh+4DxjAIljdeFwK/BsXLuj9gugaNwAcj/ia15fxNZL9Nlx" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" integrity="sha384-ZstPgNL30sIz6Hlxmz87Qsg817okoeAfmzXv89YLICmfsKv3pEdQKOokOL2IpVAS" crossorigin="anonymous"></script>
 <script type="module" src="main.js"></script>
 
 </body>

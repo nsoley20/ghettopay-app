@@ -3,6 +3,12 @@ import { describe, it, expect } from 'vitest';
 // ── utils pure functions (inlined for node env, no DOM needed) ──
 const f = n => new Intl.NumberFormat('fr-FR').format(Math.round(n));
 const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const validatePhone = phone => {
+  if (!phone) return 'Numéro requis';
+  const clean = phone.replace(/[\s\-().]/g, '');
+  if (!/^(\+241)?0[67]\d{7}$/.test(clean)) return 'Numéro gabonais invalide (ex: 077 12 34 56)';
+  return null;
+};
 
 // ── S (localStorage mock) ──
 const store = {};
@@ -33,6 +39,17 @@ describe('esc() — échappement XSS', () => {
     expect(result).not.toContain('"');
   });
   it('chaîne normale inchangée', () => expect(esc('Jean Dupont')).toBe('Jean Dupont'));
+});
+
+describe('validatePhone() — numéros gabonais', () => {
+  it('accepte 077XXXXXXX', () => expect(validatePhone('077123456')).toBeNull());
+  it('accepte 066XXXXXXX', () => expect(validatePhone('066123456')).toBeNull());
+  it('accepte +241077XXXXXXX', () => expect(validatePhone('+241077123456')).toBeNull());
+  it('accepte avec espaces', () => expect(validatePhone('077 12 34 56')).toBeNull());
+  it('rejette trop court', () => expect(validatePhone('0771234')).toBeTruthy());
+  it('rejette préfixe invalide (05)', () => expect(validatePhone('055123456')).toBeTruthy());
+  it('rejette null', () => expect(validatePhone(null)).toBeTruthy());
+  it('rejette chaîne vide', () => expect(validatePhone('')).toBeTruthy());
 });
 
 describe('S — cache localStorage', () => {

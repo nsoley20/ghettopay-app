@@ -1399,7 +1399,7 @@ $('adm-clock').textContent = _now.toLocaleDateString('fr-FR',{weekday:'short',da
 // Auto-login if session active
 (async () => {
   const { data: { session } } = await db.auth.getSession();
-  if (session?.user?.email === ADMIN_EMAIL) {
+  if (session?.user) {
     $('login-screen').style.display = 'none';
     $('app').style.display = 'flex';
     $('adm-name-sidebar').textContent = session.user.email;
