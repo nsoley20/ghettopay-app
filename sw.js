@@ -1,13 +1,24 @@
-const CACHE = 'ghettopay-v1';
+const CACHE = 'ghettopay-v3';
 const ASSETS = [
   './',
   './index.html',
   './styles.css',
   './main.js',
   './utils.js',
-  './state.js',
+  './store.js',
   './api.js',
-  './manifest.json'
+  './manifest.json',
+  './screens/auth.js',
+  './screens/budget.js',
+  './screens/coffre.js',
+  './screens/desktop.js',
+  './screens/factures.js',
+  './screens/home.js',
+  './screens/notifs.js',
+  './screens/profil.js',
+  './screens/send.js',
+  './screens/tontine.js',
+  './screens/transfert.js',
 ];
 
 self.addEventListener('install', e => {
