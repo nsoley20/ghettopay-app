@@ -7,36 +7,89 @@ export const desktopScreen = {
   _gpAmt: 0, _gpContact: null,
 
   desktopNav(section) {
-    if (window.innerWidth < 1280) { this.go(section); return; }
+    const AUTH = ['pin','login','onboard'];
+    if (AUTH.includes(section)) {
+      document.body.classList.add('gp-auth');
+      const pinForm = $('gp-auth-pin-form');
+      const authForms = $('gp-auth-forms');
+      if (section === 'pin') {
+        if (pinForm) pinForm.style.display = 'flex';
+        if (authForms) authForms.style.display = 'none';
+        store.cur = section;
+        this.r_pin?.();
+      } else {
+        if (pinForm) pinForm.style.display = 'none';
+        if (authForms) authForms.style.display = 'flex';
+        store.cur = section;
+        this._gpAuthTab(section === 'login' ? 'login' : 'reg');
+      }
+      return;
+    }
+    // Écrans desktop : panneaux larges
+    document.body.classList.remove('gp-auth');
     document.querySelectorAll('.gp-nav-item').forEach(el => el.classList.remove('gp-active'));
     const btn = document.querySelector(`[data-gp="${section}"]`);
     if (btn) btn.classList.add('gp-active');
-    const titles = { home:'Tableau de bord', send:'Envoyer de l\'argent', coffre:'Coffre épargne', budget:'Budget', tontine:'Tontines', notifs:'Notifications', profil:'Profil' };
+    const titles = { home:'Tableau de bord', send:'Envoyer de l\'argent', coffre:'Coffre épargne', budget:'Budget', tontine:'Tontines', notifs:'Notifications', profil:'Profil', transfert:'Mobile Money', factures:'Factures' };
     const t = $('gp-title'); if (t) t.textContent = titles[section] || section;
-    ['home','send','coffre','budget','tontine','notifs','profil'].forEach(p => {
+    ['home','send','coffre','budget','tontine','notifs','profil','transfert','factures'].forEach(p => {
       const el = $(`gp-${p}-panel`); if (el) el.style.display = 'none';
     });
     const panel = $(`gp-${section}-panel`);
     if (panel) panel.style.display = 'flex';
-    const renders = { home: this.renderDesktopHome, send: this.gp_renderSend, coffre: this.gp_renderCoffre, budget: this.gp_renderBudget, tontine: this.gp_renderTontine, notifs: this.gp_renderNotifs, profil: this.gp_renderProfil };
+    const renders = { home: this.renderDesktopHome, send: this.gp_renderSend, coffre: this.gp_renderCoffre, budget: this.gp_renderBudget, tontine: this.gp_renderTontine, notifs: this.gp_renderNotifs, profil: this.gp_renderProfil, transfert: this.gp_renderTransfert, factures: this.gp_renderFactures };
     if (renders[section]) renders[section].call(this);
+  },
+
+  _gpAuthTab(tab) {
+    const loginForm = $('gp-auth-login-form');
+    const regForm = $('gp-auth-reg-form');
+    const tabLogin = $('gp-tab-login');
+    const tabReg = $('gp-tab-reg');
+    const title = $('gp-auth-form-title');
+    const sub = $('gp-auth-form-sub');
+    if (tab === 'login') {
+      if (loginForm) loginForm.style.display = 'flex';
+      if (regForm) regForm.style.display = 'none';
+      if (tabLogin) { tabLogin.style.background = '#fff'; tabLogin.style.color = '#1A1A1A'; tabLogin.style.boxShadow = '0 1px 6px rgba(0,0,0,.1)'; }
+      if (tabReg) { tabReg.style.background = 'transparent'; tabReg.style.color = 'var(--txt3)'; tabReg.style.boxShadow = 'none'; }
+      if (title) title.textContent = 'Bon retour !';
+      if (sub) sub.textContent = 'Entre ton email et ton code PIN';
+      setTimeout(() => $('gp-login-email')?.focus(), 80);
+    } else {
+      if (loginForm) loginForm.style.display = 'none';
+      if (regForm) regForm.style.display = 'flex';
+      if (tabReg) { tabReg.style.background = '#fff'; tabReg.style.color = '#1A1A1A'; tabReg.style.boxShadow = '0 1px 6px rgba(0,0,0,.1)'; }
+      if (tabLogin) { tabLogin.style.background = 'transparent'; tabLogin.style.color = 'var(--txt3)'; tabLogin.style.boxShadow = 'none'; }
+      if (title) title.textContent = 'Créer mon compte';
+      if (sub) sub.textContent = 'Rejoins des milliers de Gabonais sur GhettoPay';
+      setTimeout(() => $('gp-reg-name')?.focus(), 80);
+    }
   },
 
   gp_renderSend() {
     this._gpAmt = 0; this._gpContact = null;
-    const disp = $('gp-amt-disp'); if (disp) disp.textContent = '0';
-    const fee = $('gp-fee-disp'); if (fee) fee.textContent = '0 FCFA';
+    const disp = $('gp-amt-disp'); if (disp) { disp.textContent = '0'; disp.style.display = 'none'; }
+    const feeEl = $('gp-fee-disp'); if (feeEl) feeEl.textContent = 'Sans frais';
     const recRow = $('gp-rec-row'); if (recRow) recRow.style.display = 'none';
     const np = $('gp-numpad');
     if (np) {
-      const keys = ['1','2','3','4','5','6','7','8','9','←','0','OK'];
-      np.innerHTML = keys.map(k => {
-        const bg = k==='OK' ? 'background:linear-gradient(135deg,#C8960A,#D4A820);color:#3A2000;' : k==='←' ? 'background:#F5F2EA;color:#1A1A1A;' : 'background:#FAFAF8;color:#1A1A1A;border:1px solid rgba(0,0,0,.06);';
-        return `<button onclick="G.gp_kp('${k}')" style="${bg}padding:14px;border-radius:12px;font-size:1rem;font-weight:800;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:opacity .15s" onmousedown="this.style.opacity='.6'" onmouseup="this.style.opacity='1'">${k}</button>`;
-      }).join('');
+      np.innerHTML = `<input id="gp-amt-input" type="number" inputmode="numeric" min="1" max="9999999"
+        style="width:100%;border:none;border-bottom:2px solid rgba(10,74,46,.2);background:none;font-size:2.4rem;font-weight:900;color:#1A1A1A;text-align:center;padding:8px 0;outline:none;font-family:'DM Sans',sans-serif;letter-spacing:-.03em;box-sizing:border-box;appearance:textfield;-moz-appearance:textfield"
+        placeholder="0" oninput="G._gpUpdateAmt(this.value)">`;
+      setTimeout(() => $('gp-amt-input')?.focus(), 60);
     }
     this.gp_loadContacts();
   },
+
+  _gpUpdateAmt(val) {
+    this._gpAmt = Math.max(0, Math.min(9999999, parseInt(val) || 0));
+    const isInternal = this._gpContact && !this._gpContact.id?.startsWith('manual_');
+    const fee = (isInternal || !this._gpAmt) ? 0 : Math.round(this._gpAmt * 0.015);
+    const feeEl = $('gp-fee-disp');
+    if (feeEl) feeEl.textContent = isInternal ? 'Sans frais' : (fee ? f(fee) + ' FCFA (1,5%)' : '0 FCFA');
+  },
+
   gp_loadContacts() {
     const grid = $('gp-contact-grid'); if (!grid) return;
     const users = store.get('contacts', []);
@@ -74,35 +127,86 @@ export const desktopScreen = {
     }
     this.gp_filterContacts($('gp-send-search')?.value || '');
   },
-  gp_kp(k) {
-    if (k === '←') { this._gpAmt = Math.floor(this._gpAmt / 10); }
-    else if (k === 'OK') { this.gp_send(); return; }
-    else { if (this._gpAmt > 999999) return; this._gpAmt = this._gpAmt * 10 + parseInt(k); }
-    const disp = $('gp-amt-disp'); if (disp) disp.textContent = this._gpAmt ? f(this._gpAmt) : '0';
-    const fee = $('gp-fee-disp'); if (fee) fee.textContent = this._gpAmt ? f(Math.round(this._gpAmt * 0.015)) + ' FCFA' : '0 FCFA';
-  },
   async gp_send() {
     if (!this._gpContact) { this.toast('Choisir un destinataire', 'err'); return; }
+    const amt = this._gpAmt || 0;
+    const isInternal = !this._gpContact.id?.startsWith('manual_');
     const bal = store.get('bal', 0);
-    const gpAmtErr = validateAmount(this._gpAmt || 0, bal, { withFee: true, min: 100 });
+    const gpAmtErr = validateAmount(amt, bal, { withFee: !isInternal, min: 100 });
     if (gpAmtErr) { this.toast(gpAmtErr, 'err'); return; }
-    const total = this._gpAmt + Math.round(this._gpAmt * 0.015);
+    const fee = isInternal ? 0 : Math.round(amt * 0.015);
+    const total = amt + fee;
+    const PIN_THRESHOLD = 100000;
+    if (amt >= PIN_THRESHOLD && store.get('user', {}).pin) {
+      this._gpShowPinModal(
+        `Transfert de ${f(amt)} FCFA à ${this._gpContact.name}${fee ? ` · Frais ${f(fee)} FCFA` : ' · Sans frais'}`,
+        () => this._gpDoSend(amt, fee, total)
+      );
+      return;
+    }
+    await this._gpDoSend(amt, fee, total);
+  },
+
+  async _gpDoSend(amt, fee, total) {
     if (!store.currentUser) { this.toast('Non connecté', 'err'); return; }
+    const bal = store.get('bal', 0);
     const btn = document.querySelector('#gp-send-panel button[onclick="G.gp_send()"]');
     if (btn) { btn.textContent = 'Envoi…'; btn.disabled = true; }
     try {
-      const {error} = await db.from('transactions').insert({ from_user_id: store.currentUser.id, to_user_id: this._gpContact.id, amount: this._gpAmt, type: 'transfer', status: 'completed' });
-      if (error) throw error;
+      const { data, error } = await db.rpc('transfer_money', {
+        p_from_user_id: store.currentUser.id, p_to_user_id: this._gpContact.id, p_amount: amt, p_note: ''
+      });
+      if (error || !data?.success) throw new Error(data?.error || 'Erreur de transfert');
       const newBal = bal - total;
       store.set('bal', newBal);
-      await db.from('wallets').update({ balance: newBal }).eq('user_id', store.currentUser.id).catch(()=>{});
-      this.toast(`${f(this._gpAmt)} FCFA envoyés à ${this._gpContact.name}`, 'ok');
+      if (store.currentUser.wallet) store.currentUser.wallet.balance = newBal;
+      this.toast(`${f(amt)} FCFA envoyés à ${this._gpContact.name}${fee ? ` · Frais ${f(fee)} FCFA` : ''}`, 'ok');
       this._gpAmt = 0; this._gpContact = null;
-      const disp = $('gp-amt-disp'); if (disp) disp.textContent = '0';
-      const rr = $('gp-rec-row'); if (rr) rr.style.display = 'none';
-      this.renderDesktopHome();
-    } catch(e) { this.toast('Erreur: ' + (e.message||'inconnue'), 'err'); }
+      this.desktopNav('home');
+    } catch(e) { this.toast('Erreur : ' + (e.message || 'inconnue'), 'err'); }
     finally { if (btn) { btn.textContent = 'Envoyer →'; btn.disabled = false; } }
+  },
+
+  _gpShowPinModal(desc, cb) {
+    this._gpPinCb = cb;
+    this._gpPinBuf = '';
+    this.gpModal(`
+      <div style="font-size:1.05rem;font-weight:900;color:#1A1A1A;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+        <span>Confirmer avec ton PIN</span>
+        <button onclick="G.gpCloseModal()" style="border:none;background:rgba(0,0,0,.06);border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center">✕</button>
+      </div>
+      <div style="font-size:.72rem;color:#9A9A9A;margin-bottom:24px">${esc(desc)}</div>
+      <div style="display:flex;justify-content:center;gap:14px;margin-bottom:28px">
+        ${[0,1,2,3].map(i=>`<div id="gpd${i}" style="width:14px;height:14px;border-radius:50%;background:rgba(0,0,0,.1);transition:background .15s"></div>`).join('')}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+        ${['1','2','3','4','5','6','7','8','9','','0','←'].map(k=>
+          k==='' ? '<div></div>' :
+          `<button onclick="G._gpPinKey('${k}')" style="padding:15px;border:1px solid rgba(0,0,0,.08);border-radius:12px;background:#F5F2EA;color:#1A1A1A;font-size:1rem;font-weight:800;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .12s" onmousedown="this.style.opacity='.6'" onmouseup="this.style.opacity='1'">${k}</button>`
+        ).join('')}
+      </div>`);
+  },
+
+  _gpPinKey(k) {
+    if (k === '←') { this._gpPinBuf = (this._gpPinBuf||'').slice(0,-1); }
+    else if ((this._gpPinBuf||'').length < 4) { this._gpPinBuf = (this._gpPinBuf||'') + k; }
+    [0,1,2,3].forEach(i => {
+      const d = document.getElementById(`gpd${i}`);
+      if (d) d.style.background = i < (this._gpPinBuf||'').length ? '#0A4A2E' : 'rgba(0,0,0,.1)';
+    });
+    if ((this._gpPinBuf||'').length === 4) {
+      const pin = String(store.get('user', {}).pin || '');
+      if (this._gpPinBuf === pin) {
+        this.gpCloseModal();
+        const cb = this._gpPinCb; this._gpPinCb = null; this._gpPinBuf = '';
+        if (cb) cb();
+      } else {
+        this._gpPinBuf = '';
+        [0,1,2,3].forEach(i => { const d = document.getElementById(`gpd${i}`); if (d) d.style.background='rgba(220,38,38,.4)'; });
+        setTimeout(() => [0,1,2,3].forEach(i => { const d = document.getElementById(`gpd${i}`); if (d) d.style.background='rgba(0,0,0,.1)'; }), 600);
+        this.toast('PIN incorrect', 'err');
+      }
+    }
   },
 
   gp_renderCoffre() {
@@ -280,16 +384,13 @@ export const desktopScreen = {
     const bal = store.get('bal', 0), cbal = store.get('coffre', 0), cash = store.get('cash', 0);
     const u = store.get('user', {});
     const tontines = this._tontinesList || [];
-    const av = u.avatar || (u.name || '?')[0].toUpperCase();
+    const av = (u.name || '?')[0].toUpperCase();
     const firstName = (u.name || 'Utilisateur').split(' ')[0];
-
     const greet = $('gp-greet'); if (greet) greet.textContent = `Bonjour, ${firstName}`;
     const sbAv = $('gp-sb-av'); if (sbAv) sbAv.textContent = av;
     const topAv = $('gp-top-av'); if (topAv) topAv.textContent = av;
-
     const unread = store.get('notifs', []).filter(n => !n.read).length;
     const badge = $('gp-notif-badge'); if (badge) badge.style.display = unread ? 'block' : 'none';
-
     const cards = $('gp-cards-row');
     if (cards) cards.innerHTML = `
       <div class="gp-card gp-card-gold">
@@ -312,7 +413,6 @@ export const desktopScreen = {
         <span class="gp-card-value">${tontines.length}</span>
         <span class="gp-card-sub">${tontines.length === 1 ? 'tontine' : 'tontines'}</span>
       </div>`;
-
     this._renderDesktopChart();
     this._renderDesktopActivity();
   },
@@ -484,6 +584,131 @@ export const desktopScreen = {
       store.set('txs', txs);
     }
     this.ok(`${f(n)} FCFA envoyés`, `À ${sc.name} · Frais ${f(fee)} FCFA · Confirmé ✓`, () => this.go('home'));
+  },
+
+  gp_renderTransfert() {
+    this._gpTransfertDir = this._gpTransfertDir || 'gp_to_airtel';
+    this.gp_setTransfertDir(this._gpTransfertDir);
+  },
+
+  gp_setTransfertDir(dir) {
+    this._gpTransfertDir = dir;
+    const DIR = {
+      gp_to_airtel: { from:'GhettoPay', to:'Airtel Money', color:'#E8252A', ph:'+241 06/07 XX XX XX', fromGp:true },
+      airtel_to_gp: { from:'Airtel Money', to:'GhettoPay', color:'#E8252A', ph:'+241 06/07 XX XX XX', fromGp:false },
+      gp_to_moov:   { from:'GhettoPay', to:'Moov Money',  color:'#00A651', ph:'+241 07 XX XX XX',    fromGp:true  },
+      moov_to_gp:   { from:'Moov Money', to:'GhettoPay',  color:'#00A651', ph:'+241 07 XX XX XX',    fromGp:false },
+    };
+    const d = DIR[dir]; if (!d) return;
+    // Tabs
+    Object.keys(DIR).forEach(k => {
+      const tab = $(`gp-tr-tab-${k}`); if (!tab) return;
+      const active = k === dir;
+      tab.style.background = active ? DIR[k].color : 'none';
+      tab.style.color = active ? '#fff' : DIR[k].color;
+      tab.style.fontWeight = active ? '800' : '700';
+    });
+    const bal = store.get('bal', 0);
+    const form = $('gp-transfert-form');
+    if (form) form.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;padding:12px;background:rgba(0,0,0,.03);border-radius:12px">
+        <span style="font-size:.88rem;font-weight:900;color:#1A1A1A">${d.from}</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${d.color}" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>
+        <span style="font-size:.88rem;font-weight:900;color:#1A1A1A">${d.to}</span>
+        ${d.fromGp ? `<span style="margin-left:auto;font-size:.65rem;color:#9A9A9A">Solde : <strong style="color:#0A4A2E">${f(bal)} F</strong></span>` : ''}
+      </div>
+      <div>
+        <div style="font-size:.6rem;font-weight:800;color:#7A7A6A;text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px">Numéro</div>
+        <input id="gp-tr-phone" class="inp" type="tel" placeholder="${d.ph}" style="width:100%;box-sizing:border-box"/>
+      </div>
+      <div>
+        <div style="font-size:.6rem;font-weight:800;color:#7A7A6A;text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px">Montant (FCFA)</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+          ${[1000,5000,10000,25000,50000].map(v=>`<button onclick="document.getElementById('gp-tr-amt').value=${v};G._gpUpdateTrFee()" style="padding:7px 12px;border:1.5px solid rgba(0,0,0,.1);border-radius:9px;background:none;font-size:.72rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">${f(v)}</button>`).join('')}
+        </div>
+        <input id="gp-tr-amt" class="inp" type="number" inputmode="numeric" placeholder="Ou saisir…" oninput="G._gpUpdateTrFee()" style="width:100%;box-sizing:border-box"/>
+      </div>
+      <button onclick="G._gpDoTransfert()" style="padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,${d.color},${d.color}CC);color:#fff;font-weight:900;font-size:.88rem;cursor:pointer;font-family:'DM Sans',sans-serif">Envoyer maintenant</button>`;
+    const info = $('gp-transfert-info');
+    if (info) info.innerHTML = `
+      <div style="display:flex;justify-content:space-between;font-size:.72rem;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.06)"><span style="color:#9A9A9A">Frais GhettoPay</span><span style="font-weight:700">1%</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:.72rem;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.06)"><span style="color:#9A9A9A">Frais opérateur</span><span id="gp-tr-op-fee" style="font-weight:700">—</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:.72rem;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.06)"><span style="color:#9A9A9A">Total frais</span><span id="gp-tr-total-fee" style="font-weight:700;color:#DC2626">—</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:.72rem;padding:10px 0"><span style="color:#9A9A9A">Délai</span><span style="font-weight:700;color:#16A34A">Instantané</span></div>
+      <div style="background:rgba(10,74,46,.06);border-radius:12px;padding:12px;font-size:.68rem;color:#5A5A5A;margin-top:6px">Plafond : <strong>500 000 FCFA</strong> par opération</div>`;
+  },
+
+  _gpUpdateTrFee() {
+    const amt = parseInt($('gp-tr-amt')?.value) || 0;
+    const gpFee = Math.round(amt * 0.01);
+    const opFee = Math.round(amt * 0.03);
+    const opEl = $('gp-tr-op-fee'); if (opEl) opEl.textContent = amt ? `~${f(opFee)} FCFA` : '—';
+    const totEl = $('gp-tr-total-fee'); if (totEl) totEl.textContent = amt ? f(gpFee + opFee) + ' FCFA' : '—';
+  },
+
+  async _gpDoTransfert() {
+    const phone = $('gp-tr-phone')?.value.trim();
+    const amount = parseInt($('gp-tr-amt')?.value) || 0;
+    const dir = this._gpTransfertDir || 'gp_to_airtel';
+    const fromGp = dir === 'gp_to_airtel' || dir === 'gp_to_moov';
+    if (!phone) { this.toast('Numéro requis', 'err'); return; }
+    if (amount < 500) { this.toast('Minimum 500 FCFA', 'err'); return; }
+    if (amount > 500000) { this.toast('Maximum 500 000 FCFA', 'err'); return; }
+    const gpFee = Math.round(amount * 0.01);
+    const total = fromGp ? amount + gpFee : amount;
+    if (fromGp) {
+      const bal = store.get('bal', 0);
+      if (total > bal) { this.toast(`Solde insuffisant · Besoin de ${f(total)} FCFA`, 'err'); return; }
+    }
+    this.toast('Traitement en cours…', 'inf');
+    if (fromGp && store.currentUser) {
+      const bal = store.get('bal', 0);
+      await Promise.all([
+        db.from('transactions').insert({ from_user_id: store.currentUser.id, amount, type: 'mobile_money', merchant_name: phone, status: 'pending' }),
+        db.from('wallets').update({ balance: bal - total }).eq('user_id', store.currentUser.id)
+      ]).catch(()=>{});
+      store.set('bal', bal - total);
+    }
+    setTimeout(() => {
+      this.ok(`${f(amount)} FCFA ${fromGp ? 'envoyés' : 'en cours de réception'}`, `Frais ${f(gpFee)} FCFA · ${esc(phone)} · En cours`, () => this.renderDesktopHome());
+    }, 1000);
+  },
+
+  gp_renderFactures() {
+    const list = $('gp-bills-list'); if (!list) return;
+    if (store.currentUser) {
+      db.from('bills').select('*').eq('user_id', store.currentUser.id).eq('paid', false).order('due_date',{ascending:true})
+        .then(({data}) => {
+          if (data) { store.set('bills', data.map(b => ({ id:b.id, name:b.name||b.merchant_name||'Facture', ref:b.reference||'', amount:b.amount||0, due:b.due_date?new Date(b.due_date).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):'', paid:b.paid||false }))); this._renderGpBills(); }
+        }).catch(()=>{});
+    }
+    this._renderGpBills();
+  },
+
+  _renderGpBills() {
+    const list = $('gp-bills-list'); if (!list) return;
+    const bills = store.get('bills', []).filter(b => !b.paid);
+    if (!bills.length) {
+      list.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#9A9A9A;font-size:.78rem;background:#fff;border-radius:18px;border:1.5px dashed rgba(0,0,0,.1)">Toutes les factures sont à jour ✓</div>';
+      return;
+    }
+    list.innerHTML = bills.map(b => `
+      <div style="background:#fff;border-radius:18px;padding:20px;border:1px solid rgba(220,38,38,.12);display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:40px;height:40px;border-radius:12px;background:rgba(220,38,38,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:.85rem;font-weight:800;color:#1A1A1A">${esc(b.name)}</div>
+            <div style="font-size:.65rem;color:#9A9A9A;margin-top:2px">${esc(b.ref||'Réf: —')}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:1rem;font-weight:900;color:#DC2626">${f(b.amount)} F</div>
+            <div style="font-size:.6rem;color:#9A9A9A;margin-top:2px">${b.due||'—'}</div>
+          </div>
+        </div>
+        <button onclick="G.payBill('${b.id}');G._renderGpBills()" style="width:100%;padding:10px;border:none;border-radius:11px;background:linear-gradient(135deg,#0A4A2E,#16A34A);color:#fff;font-weight:800;font-size:.78rem;cursor:pointer;font-family:'DM Sans',sans-serif">Payer maintenant</button>
+      </div>`).join('');
   },
 
   gpModal(html) {

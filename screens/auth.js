@@ -73,31 +73,37 @@ export const authScreen = {
   _PIN_LOCKOUT_MS: 30000,
   _PIN_MAX_ATTEMPTS: 5,
 
+  _getPinDots() {
+    if (window.innerWidth >= 1280) return document.querySelectorAll('#gp-pin-dots .gp-pin-dot');
+    return document.querySelectorAll('#pin-dots .pin-dot');
+  },
+
   r_pin() {
     store.pinBuf = '';
-    document.querySelectorAll('.pin-dot').forEach(d => d.classList.remove('fill', 'err'));
+    this._getPinDots().forEach(d => d.classList.remove('fill', 'err'));
     const u = store.get('user', {});
-    if ($('pin-sub')) {
-      const name = (u.name || '').split(' ')[0];
-      $('pin-sub').textContent = name ? `Bonjour ${name} · Saisis ton PIN` : 'Entre ton code PIN';
-    }
+    const name = (u.name || '').split(' ')[0];
+    const sub = name ? `Bonjour ${name} · Saisis ton PIN` : 'Entre ton code PIN';
+    if ($('pin-sub')) $('pin-sub').textContent = sub;
+    const gpSub = document.getElementById('gp-pin-sub');
+    if (gpSub) gpSub.textContent = sub;
   },
 
   pinKey(v) {
     if (store.pinBuf.length >= 4) return;
     store.pinBuf += v;
-    document.querySelectorAll('.pin-dot').forEach((d, i) => d.classList.toggle('fill', i < store.pinBuf.length));
+    this._getPinDots().forEach((d, i) => d.classList.toggle('fill', i < store.pinBuf.length));
     if (store.pinBuf.length === 4) this._checkPin();
   },
 
   pinDel() {
     store.pinBuf = store.pinBuf.slice(0, -1);
-    document.querySelectorAll('.pin-dot').forEach((d, i) => d.classList.toggle('fill', i < store.pinBuf.length));
+    this._getPinDots().forEach((d, i) => d.classList.toggle('fill', i < store.pinBuf.length));
   },
 
   _showPinErrAnim() {
     store.pinBuf = '';
-    document.querySelectorAll('.pin-dot').forEach(d => {
+    this._getPinDots().forEach(d => {
       d.classList.remove('fill');
       d.classList.add('err');
       setTimeout(() => d.classList.remove('err'), 600);
@@ -145,10 +151,12 @@ export const authScreen = {
   },
 
   async register() {
-    const name = $('reg-name')?.value.trim();
-    const phone = $('reg-phone')?.value.trim();
-    const email = $('reg-email')?.value.trim();
-    const pin = $('reg-pin')?.value.trim();
+    const isDesktop = window.innerWidth >= 1280;
+    const pfx = isDesktop ? 'gp-reg-' : 'reg-';
+    const name = document.getElementById(pfx + 'name')?.value.trim();
+    const phone = document.getElementById(pfx + 'phone')?.value.trim();
+    const email = document.getElementById(pfx + 'email')?.value.trim();
+    const pin = document.getElementById(pfx + 'pin')?.value.trim();
 
     const regNameErr = validateName(name, { label: 'Nom complet', min: 2 });
     if (regNameErr) { this.toast(regNameErr, 'err'); return; }
@@ -232,8 +240,9 @@ export const authScreen = {
   showLogin() { this.go('login'); },
   hideLogin() {},
   _loginEmailChanged(email) {
-    const pinInput = $('login-pin');
-    const pinLabel = $('login-pin-label');
+    const isDesktop = window.innerWidth >= 1280;
+    const pinInput = document.getElementById(isDesktop ? 'gp-login-pin' : 'login-pin');
+    const pinLabel = document.getElementById(isDesktop ? 'gp-login-pin-label' : 'login-pin-label');
     if (!pinInput) return;
     const isAdmin = email.trim() === 'admin@ghettopay.ga';
     if (isAdmin) {
@@ -255,8 +264,9 @@ export const authScreen = {
   },
 
   async login() {
-    const email = document.getElementById('login-email')?.value.trim();
-    const pin = document.getElementById('login-pin')?.value.trim();
+    const isDesktop = window.innerWidth >= 1280;
+    const email = document.getElementById(isDesktop ? 'gp-login-email' : 'login-email')?.value.trim();
+    const pin = document.getElementById(isDesktop ? 'gp-login-pin' : 'login-pin')?.value.trim();
     const isAdmin = email === 'admin@ghettopay.ga';
     if (!email || !pin) { this.toast(isAdmin ? 'Email et mot de passe requis' : 'Email et PIN requis', 'err'); return; }
 

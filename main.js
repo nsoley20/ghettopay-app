@@ -17,7 +17,6 @@ import { desktopScreen } from './screens/desktop.js';
 // ── DÉMARRAGE ──
 async function appStart() {
   try {
-    if (window.innerWidth >= 1280) G.renderDesktopHome();
     const { data: { session } } = await db.auth.getSession();
     if (session) {
       await loadUserData(session.user.id);
@@ -36,18 +35,17 @@ async function appStart() {
 // ── NAVIGATION ──
 const G = {
   go(scr) {
-    // Stopper la caméra si on quitte l'écran scan
+    // Sur PC : déléguer à desktopNav qui gère les panneaux larges
+    if (window.innerWidth >= 1280) { G.desktopNav(scr); return; }
     if (store.cur === 'scan' && scr !== 'scan') G.stopScan();
     const p = $('sc-' + store.cur), n = $('sc-' + scr);
     if (!n) return;
     if (p) p.classList.remove('on');
     n.classList.add('on');
-    // Ne pas empiler les écrans d'auth dans l'historique
     const noHist = ['onboard', 'login', 'pin'];
     if (store.cur !== scr && !noHist.includes(store.cur)) store.hist.push(store.cur);
     store.cur = scr;
     G.render(scr);
-    // Mettre à jour navbar
     document.querySelectorAll('.bt').forEach(b => b.classList.remove('on'));
     const map = { home: 0, budget: 1, coffre: 3, profil: 4 };
     if (map[scr] !== undefined) {
@@ -57,7 +55,7 @@ const G = {
 
   back() {
     const scr = store.hist.length ? store.hist.pop() : 'home';
-    // Navigation directe sans passer par go() pour ne pas re-empiler dans store.hist
+    if (window.innerWidth >= 1280) { G.desktopNav(scr); return; }
     if (store.cur === 'scan' && scr !== 'scan') G.stopScan();
     const p = $('sc-' + store.cur), n = $('sc-' + scr);
     if (!n) return;
@@ -129,6 +127,21 @@ window.G = G;
 window.setBudTab = btn => G.setBudTab(btn);
 
 appStart();
+
+// ── RESPONSIVE RESIZE ──
+let _desktopMode = window.innerWidth >= 1280;
+let _resizeTick;
+window.addEventListener('resize', () => {
+  clearTimeout(_resizeTick);
+  _resizeTick = setTimeout(() => {
+    const now = window.innerWidth >= 1280;
+    if (now !== _desktopMode) {
+      _desktopMode = now;
+      if (now) G.desktopNav(store.cur || 'home');
+      else { document.body.classList.remove('gp-auth'); G.render(store.cur); }
+    }
+  }, 150);
+});
 
 // ── HORLOGE ──
 function tick() {

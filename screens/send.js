@@ -67,18 +67,26 @@ export const sendScreen = {
     else if (store.aStr.length < 9) { store.aStr += v; }
     const n = parseInt(store.aStr) || 0;
     $('amt-disp').textContent = f(n);
-    const fee = Math.round(n * 0.015);
+    const isInternal = store.selC && !store.selC.id?.startsWith('manual_');
+    const fee = isInternal ? 0 : Math.round(n * 0.015);
     const fd = $('fee-disp');
-    if (fd) fd.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5"><use href="#chk"/></svg>Frais : ${fee > 0 ? f(fee) + ' FCFA (1,5%)' : '0 FCFA'}`;
+    if (fd) {
+      if (isInternal) {
+        fd.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5"><use href="#chk"/></svg>Transfert GhettoPay · Sans frais`;
+      } else {
+        fd.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5"><use href="#chk"/></svg>Frais : ${fee > 0 ? f(fee) + ' FCFA (1,5%)' : '0 FCFA'}`;
+      }
+    }
   },
 
   async doSend() {
     if (!store.selC) { this.toast('Choisis un destinataire', 'err'); return; }
     const n = parseInt(store.aStr) || 0;
     const bal = store.get('bal', 0);
-    const amtErr = validateAmount(n, bal, { withFee: true });
+    const isInternal = !store.selC.id?.startsWith('manual_');
+    const amtErr = validateAmount(n, bal, { withFee: !isInternal });
     if (amtErr) { this.toast(amtErr, 'err'); return; }
-    const fee = Math.round(n * 0.015);
+    const fee = isInternal ? 0 : Math.round(n * 0.015);
     const total = n + fee;
     const note = $('send-note')?.value || '';
 
@@ -317,7 +325,9 @@ export const sendScreen = {
     const merchantErr = validateName(merchant, { label: 'Nom du commerçant' });
     if (merchantErr) { this.toast(merchantErr, 'err'); return; }
     const bal = store.get('bal', 0);
-    const qrAmtErr = validateAmount(amount, bal);
+    const fee = Math.round(amount * 0.015);
+    const total = amount + fee;
+    const qrAmtErr = validateAmount(amount, bal, { withFee: true });
     if (qrAmtErr) { this.toast(qrAmtErr, 'err'); return; }
 
     if (store.currentUser) {
@@ -329,12 +339,12 @@ export const sendScreen = {
         status: 'completed'
       }).then(({ error }) => {
         if (error) { this.toast('Erreur paiement', 'err'); return; }
-        store.set('bal', bal - amount);
-        this.ok(`${f(amount)} FCFA payés`, `${merchant} · Confirmé ✓`, () => this.go('home'));
+        store.set('bal', bal - total);
+        this.ok(`${f(amount)} FCFA payés`, `${merchant} · Frais ${f(fee)} FCFA · Confirmé ✓`, () => this.go('home'));
       });
     } else {
-      store.set('bal', bal - amount);
-      this.ok(`${f(amount)} FCFA payés`, `${merchant} · Confirmé ✓`, () => this.go('home'));
+      store.set('bal', bal - total);
+      this.ok(`${f(amount)} FCFA payés`, `${merchant} · Frais ${f(fee)} FCFA · Confirmé ✓`, () => this.go('home'));
     }
   },
 };
